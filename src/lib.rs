@@ -7,3 +7,4 @@
 pub mod config;
 pub mod difflib;
 pub mod prompts;
+pub mod py;
