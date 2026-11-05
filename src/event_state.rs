@@ -154,4 +154,8 @@ impl PyRe {
     pub fn findall(&self, text: &str) -> Vec<String> {
         self.on(text).findall(text)
     }
+
+    pub fn split<'a>(&self, text: &'a str) -> Vec<&'a str> {
+        self.on(text).split(text)
+    }
 }
