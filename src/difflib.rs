@@ -13,3 +13,21 @@ struct SequenceMatcher {
     /// b2j minus the "popular" elements (autojunk); there is no junk with isjunk=None.
     b2j: HashMap<char, Vec<usize>>,
 }
+
+impl SequenceMatcher {
+    fn new(a: &str, b: &str) -> Self {
+        let a: Vec<char> = a.chars().collect();
+        let b: Vec<char> = b.chars().collect();
+        // __chain_b
+        let mut b2j: HashMap<char, Vec<usize>> = HashMap::new();
+        for (i, &elt) in b.iter().enumerate() {
+            b2j.entry(elt).or_default().push(i);
+        }
+        let n = b.len();
+        if n >= 200 {
+            let ntest = n / 100 + 1;
+            b2j.retain(|_, idxs| idxs.len() <= ntest);
+        }
+        SequenceMatcher { a, b, b2j }
+    }
+}
