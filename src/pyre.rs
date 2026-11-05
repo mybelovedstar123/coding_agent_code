@@ -128,3 +128,23 @@ impl Re {
 pub fn escape(s: &str) -> String {
     fancy_regex::escape(s).into_owned()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn python_helpers() {
+        let re = Re::new(r"(?<=[.!?;])\s+(?=[A-Z0-9])|\n+");
+        assert_eq!(re.split("One. Two\n\nthree"), vec!["One.", "Two", "three"]);
+        assert_eq!(
+            Re::new(r"\b(\w)(\w)").findall_groups("ab cd"),
+            vec![vec!["a", "b"], vec!["c", "d"]]
+        );
+        assert_eq!(Re::new(r"a(b)?").findall("a ab"), vec!["", "b"]);
+        assert_eq!(
+            Re::new(r"\d+").sub_with("a1b22", |c| format!("<{}>", &c[0])),
+            "a<1>b<22>"
+        );
+    }
+}
