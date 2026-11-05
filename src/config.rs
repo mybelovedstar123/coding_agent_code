@@ -42,3 +42,7 @@ pub fn env(name: &str, default: &str) -> String {
         value.to_string()
     }
 }
+
+pub fn model_name() -> String {
+    env("DITTOBENCH_MODEL", DEFAULT_MODEL)
+}
