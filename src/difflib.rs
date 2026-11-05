@@ -98,4 +98,13 @@ impl SequenceMatcher {
         }
         total
     }
+
+    /// `ratio()`: `2.0 * matches / length`, 1.0 for two empty sequences.
+    fn ratio(&self) -> f64 {
+        let length = self.a.len() + self.b.len();
+        if length == 0 {
+            return 1.0;
+        }
+        2.0 * self.matches() as f64 / length as f64
+    }
 }
