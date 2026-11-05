@@ -107,3 +107,8 @@ docker build -t ditto-agent .
 docker run --rm -p 8080:8080 --env-file .env ditto-agent
 ```
 
+### Configuration
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `PORT` | Listening port; `--port` overrides it | `8080` |
