@@ -82,3 +82,4 @@ Other top-level paths:
 
 - `tests/`: Rust test suites and their fixtures.
 - `tests/pyref/`: the Python scripts that generated the fixtures from the reference.
+- `tests/equiv/`: the end-to-end equivalence harness.
