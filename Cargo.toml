@@ -1,0 +1,30 @@
+[package]
+name = "ditto-agent"
+version = "0.15.0"
+edition = "2021"
+description = "Ditto SN118 memory harness: GET /health, POST /seed, POST /run on :8080."
+license = "UNLICENSED"
+publish = false
+
+[dependencies]
+anyhow = "1"
+axum = "0.7"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+fancy-regex = "0.14"
+futures = "0.3"
+indexmap = { version = "2", features = ["serde"] }
+rand = "0.8"
+regex = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+ryu = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1", features = ["v5"] }
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+opt-level = 3
