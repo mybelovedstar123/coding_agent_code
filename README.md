@@ -80,3 +80,4 @@ A malformed body gets HTTP 400. A request without `user_id` belongs to the defau
 
 Other top-level paths:
 
+- `tests/`: Rust test suites and their fixtures.
