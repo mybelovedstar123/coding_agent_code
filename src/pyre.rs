@@ -60,4 +60,17 @@ impl Re {
             .map(|m| (m.start(), m.end(), m.as_str()))
             .collect()
     }
+
+    /// `re.findall(p, s)` for a pattern with no group (whole matches) or one group (that group's text, empty when
+    /// it did not take part).
+    pub fn findall(&self, s: &str) -> Vec<String> {
+        let groups = self.0.captures_len() - 1;
+        self.captures_iter(s)
+            .iter()
+            .map(|c| {
+                let idx = if groups == 0 { 0 } else { 1 };
+                c.get(idx).map(|m| m.as_str().to_string()).unwrap_or_default()
+            })
+            .collect()
+    }
 }
