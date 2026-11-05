@@ -100,4 +100,9 @@ impl Re {
         out.push_str(&s[last..]);
         out
     }
+
+    /// `re.sub(p, literal, s)`: every match replaced by a fixed string (no group references).
+    pub fn sub(&self, s: &str, replacement: &str) -> String {
+        self.sub_with(s, |_| replacement.to_string())
+    }
 }
