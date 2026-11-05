@@ -10,3 +10,7 @@ A memory agent harness for the Ditto subnet (Bittensor SN118). It serves an HTTP
 records in memory, retrieves evidence for a request, and runs a bounded loop between a language model and tools until
 it has an answer.
 
+It began as a faithful port of a Python reference agent. The port's defining rule still shapes the code: for the same
+case, the Rust agent must send the model **byte-for-byte the same requests**. Model calls are cached by request
+content, so the two agents can be compared by replaying cached runs and counting misses.
+
