@@ -5,3 +5,4 @@
 //! `py` and `pyre` hold the Python semantics that guarantee it.
 
 pub mod config;
+pub mod difflib;
