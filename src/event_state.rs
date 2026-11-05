@@ -44,3 +44,49 @@ static DIGIT_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"^\d$"));
 
 /// Python's `\w` class body (str patterns): `str.isalnum()` (letters and every numeric category) or `_`.
 const PY_WORD: &str = r"\p{L}\p{N}_";
+
+/// A Python `re` pattern rewritten where the engines' classes differ: `\s` also takes U+001C..U+001F, `\w` (and so
+/// `\b`) is letters, numbers and `_` only (no combining marks, no joiners, no other connector punctuation).
+pub(crate) fn py_pattern(p: &str) -> String {
+    let word = format!("[{PY_WORD}]");
+    let boundary = format!("(?:(?<!{word})(?={word})|(?<={word})(?!{word}))");
+    let mut out = String::with_capacity(p.len() * 2);
+    let mut in_class = false;
+    let mut chars = p.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c == '\\' {
+            let Some(n) = chars.next() else {
+                out.push(c);
+                break;
+            };
+            match (n, in_class) {
+                ('w', false) => out.push_str(&word),
+                ('w', true) => out.push_str(PY_WORD),
+                ('s', false) => out.push_str(r"[\s\x1c-\x1f]"),
+                ('s', true) => out.push_str(r"\s\x1c-\x1f"),
+                ('b', false) => out.push_str(&boundary),
+                _ => {
+                    out.push('\\');
+                    out.push(n);
+                }
+            }
+            continue;
+        }
+        out.push(c);
+        if in_class {
+            if c == ']' {
+                in_class = false;
+            }
+        } else if c == '[' {
+            in_class = true;
+            if chars.peek() == Some(&'^') {
+                out.push(chars.next().unwrap_or('^'));
+            }
+            if chars.peek() == Some(&']') {
+                out.push_str("\\]");
+                chars.next();
+            }
+        }
+    }
+    out
+}
