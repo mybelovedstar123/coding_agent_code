@@ -11,3 +11,4 @@ pub const BATCH: usize = 32;
 /// The scored gateway forwards to a provider with a per-request token limit (observed: 120k tokens). Long records
 /// (~16k chars each) must not be packed 32 to a request; cap each request by total characters as well.
 pub const BATCH_MAX_CHARS: usize = 100_000;
+const ATTEMPTS: usize = 8;
