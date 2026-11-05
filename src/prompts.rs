@@ -15,3 +15,5 @@ pub const ROUTER_PROMPT: &str = "You are the dispatcher for Ditto, an assistant 
 /// Added once when the case budget is nearly spent (advisory; tools stay offered).
 /// Advisory note after a tool has run more than once in a request ({calls}: "search_web 3 times", ...).
 pub const REQUERY_NOTE: &str = "Calls made so far for this request: {calls}. Each call is an action taken for the user. If the results you have answer the request, reply now; call a tool again only for something those results do not contain.";
+
+pub const WRAP_UP_NOTE: &str = "Time is nearly up. Answer now using the results you already have; make another tool call only if the request cannot be completed without it.";
