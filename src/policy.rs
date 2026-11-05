@@ -13,3 +13,7 @@ fn with_wire_prompt(wire_prompt: &str, guidance: &str) -> String {
         format!("{wire_prompt}\n\n{guidance}")
     }
 }
+
+pub fn compose_memory_prompt(wire_prompt: &str) -> String {
+    with_wire_prompt(wire_prompt, MEMORY_GUIDANCE)
+}
