@@ -20,3 +20,7 @@ pub const WRAP_UP_NOTE: &str = "Time is nearly up. Answer now using the results 
 
 /// Stage 3b note with one draft.
 pub const FINAL_CHECK_NOTE: &str = "Check your draft reply above against the stored records before it is sent. If it answers the request correctly, repeat it unchanged. If the records show it is wrong or incomplete, correct it. If the records do not hold what was asked, decline, then name the closest related records you found (the person, company, place, date or identifier they are about, naming people as the records name them) and say briefly why they do not answer; say whose or what those records are about rather than quoting their contents. If the request assumes something the records do not show, say you have no record of it and state what the records do show. If a detail you need is missing, ask a question that names the missing detail and cites what you found. If your draft refuses to do something or asks the user a question, and you stand by it, keep it unchanged. Write only the final reply.";
+
+/// Stage 3a note: an independent second draft.
+pub const SECOND_DRAFT_NOTE: &str =
+    "Write your reply to the user's request now, from the stored records and tool results above. Write only the reply.";
