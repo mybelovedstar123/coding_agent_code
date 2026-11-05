@@ -41,3 +41,6 @@ static ADD_REMOVE_RE: LazyLock<PyRe> = LazyLock::new(|| {
     ))
 });
 static DIGIT_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"^\d$"));
+
+/// Python's `\w` class body (str patterns): `str.isalnum()` (letters and every numeric category) or `_`.
+const PY_WORD: &str = r"\p{L}\p{N}_";
