@@ -372,3 +372,30 @@ pub fn round(x: f64, ndigits: i32) -> f64 {
     let s = format!("{:.*}", ndigits.max(0) as usize, x);
     s.parse().unwrap_or(x)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn float_repr_matches_cpython() {
+        for (x, want) in [
+            (1.0, "1.0"),
+            (0.1, "0.1"),
+            (1.5e16, "1.5e+16"),
+            (1e16, "1e+16"),
+            (9999999999999998.0, "9999999999999998.0"),
+            (1e-4, "0.0001"),
+            (1e-5, "1e-05"),
+            (123.456, "123.456"),
+            (-2.5, "-2.5"),
+            (0.30000000000000004, "0.30000000000000004"),
+            (1e22, "1e+22"),
+            (100.0, "100.0"),
+            (0.0012, "0.0012"),
+        ] {
+            assert_eq!(float_repr(x), want, "{x}");
+        }
+    }
+}
