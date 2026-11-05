@@ -134,3 +134,42 @@ impl Embedder {
         })
     }
 }
+
+impl Embed for Embedder {
+    fn embed<'a>(
+        &'a self,
+        texts: Vec<String>,
+        deadline: Option<Instant>,
+    ) -> BoxFuture<'a, Result<Vec<Vec<f32>>, EmbedError>> {
+        Box::pin(async move {
+            if texts.is_empty() {
+                return Ok(Vec::new());
+            }
+            // Empty strings make some embedders fail; embed a placeholder instead.
+            let clean: Vec<String> = texts
+                .into_iter()
+                .map(|t| {
+                    if crate::py::strip(&t).is_empty() {
+                        "(empty)".into()
+                    } else {
+                        t
+                    }
+                })
+                .collect();
+            let batches = batches(&clean);
+            let work = futures::future::try_join_all(batches.iter().map(|b| self.embed_adaptive(b)));
+            let parts = match deadline {
+                None => work.await?,
+                Some(d) => {
+                    let left = d
+                        .saturating_duration_since(Instant::now())
+                        .max(Duration::from_millis(500));
+                    tokio::time::timeout(left, work)
+                        .await
+                        .map_err(|_| EmbedError::Failed("embedding did not finish within the case budget".into()))??
+                }
+            };
+            Ok(parts.into_iter().flatten().collect())
+        })
+    }
+}
