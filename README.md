@@ -116,3 +116,5 @@ docker run --rm -p 8080:8080 --env-file .env ditto-agent
 | `OLLAMA_BASE_URL` | Embedding endpoint (model `embeddinggemma`, 768 dimensions) | `http://localhost:11434` |
 | `DITTOBENCH_PROVIDER` | `openrouter`, `platform`, `chutes` or `ollama` | `openrouter` |
 | `DITTOBENCH_INFERENCE_BASE_URL`, `CHUTES_BASE_URL`, `CHUTES_API_KEY` | Inference relay for `platform` and `chutes` | none |
+| `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY` | Inference for local practice | OpenRouter's public URL |
+
