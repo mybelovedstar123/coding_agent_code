@@ -52,3 +52,26 @@ pub fn ollama_url() -> String {
         .trim_end_matches('/')
         .to_string()
 }
+
+/// (base_url, api_key) for chat completions.
+pub fn inference_target(case_base_url: Option<&str>) -> (String, String) {
+    if let Some(base) = case_base_url.map(str::trim).filter(|b| !b.is_empty()) {
+        return (base.trim_end_matches('/').to_string(), "ticket".into());
+    }
+    let provider = env("DITTOBENCH_PROVIDER", "openrouter").to_lowercase();
+    if provider == "platform" || provider == "chutes" {
+        let base = Some(env("DITTOBENCH_INFERENCE_BASE_URL", ""))
+            .filter(|b| !b.is_empty())
+            .unwrap_or_else(|| env("CHUTES_BASE_URL", ""));
+        if !base.is_empty() {
+            return (base.trim_end_matches('/').to_string(), env("CHUTES_API_KEY", "ticket"));
+        }
+    }
+    if provider == "ollama" {
+        return (format!("{}/v1", ollama_url()), "ollama".into());
+    }
+    let base = env("OPENROUTER_BASE_URL", OPENROUTER_URL)
+        .trim_end_matches('/')
+        .to_string();
+    (base, env("OPENROUTER_API_KEY", "ticket"))
+}
