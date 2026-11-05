@@ -142,3 +142,7 @@ The records in the fixtures are benchmark data, not information about real peopl
 - [PIPELINE.md](PIPELINE.md): model stages, limits, tool execution and context construction.
 - [PORTING.md](PORTING.md): how Python behaviour maps onto Rust, and the rules for differential tests.
 
+## License
+
+No open-source license is granted: `Cargo.toml` declares the crate `UNLICENSED`, so all rights are reserved. You can
+read this code on GitHub, but copying, modifying or redistributing it requires the author's permission.
