@@ -75,3 +75,4 @@ A malformed body gets HTTP 400. A request without `user_id` belongs to the defau
 | Memory | `store`, `memtools`, `excerpt` | Per-user records, hybrid search, the five memory tools and query-focused excerpts |
 | Evidence selectors | `ownership`, `current_statements`, `event_state`, `companions`, `contact_evidence`, `glossary`, `record_order` | Deterministic notes built from the request and the user's own records |
 | Tool guidance | `tool_hints`, `named_tool` | Advisory one-line notes about the tools a request offers |
+| Program tool | `pytool` | Validation and resource-limited execution of `run_python` |
