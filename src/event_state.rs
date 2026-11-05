@@ -171,3 +171,17 @@ pub struct PyInt {
 
 /// CPython's default `sys.int_info.default_max_str_digits`.
 const INT_MAX_STR_DIGITS: usize = 4300;
+
+impl PyInt {
+    fn new(neg: bool, digits: &str) -> PyInt {
+        let d = digits.trim_start_matches('0');
+        if d.is_empty() {
+            PyInt {
+                neg: false,
+                digits: "0".into(),
+            }
+        } else {
+            PyInt { neg, digits: d.into() }
+        }
+    }
+}
