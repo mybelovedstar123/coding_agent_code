@@ -18,3 +18,5 @@ content, so the two agents can be compared by replaying cached runs and counting
 
 - **Declared model stages.** Router, spelling reading, deciding loop, second draft, final check and recovery each have
   a stated input, role and fallback. See [PIPELINE.md](PIPELINE.md).
+- **Hybrid retrieval.** Dense embeddings and a typo-tolerant BM25 index, fused by reciprocal rank, with alias-aware
+  search and exact identifier lookup.
