@@ -362,3 +362,13 @@ pub fn float_value(x: f64) -> Value {
         .map(Value::Number)
         .unwrap_or(Value::Null)
 }
+
+/// `round(x, ndigits)` with CPython's correctly-rounded half-even semantics on the decimal value.
+pub fn round(x: f64, ndigits: i32) -> f64 {
+    if !x.is_finite() {
+        return x;
+    }
+    // CPython rounds via the exact decimal expansion; formatting with enough precision then parsing reproduces it.
+    let s = format!("{:.*}", ndigits.max(0) as usize, x);
+    s.parse().unwrap_or(x)
+}
