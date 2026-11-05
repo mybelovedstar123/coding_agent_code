@@ -280,3 +280,14 @@ fn json_number(n: &serde_json::Number) -> String {
     }
     number_text(n)
 }
+
+/// A float as `json.dumps` writes it (`float.__repr__`, with NaN/Infinity spelled the JSON way).
+pub fn json_float(x: f64) -> String {
+    if x.is_nan() {
+        return "NaN".into();
+    }
+    if x.is_infinite() {
+        return if x > 0.0 { "Infinity".into() } else { "-Infinity".into() };
+    }
+    float_repr(x)
+}
