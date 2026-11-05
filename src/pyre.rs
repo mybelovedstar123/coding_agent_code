@@ -38,4 +38,12 @@ impl Re {
     pub fn captures<'a>(&self, s: &'a str) -> Option<Captures<'a>> {
         self.0.captures(s).ok().flatten()
     }
+
+    /// `re.match(p, s)`: a match that starts at offset 0.
+    pub fn match_start<'a>(&self, s: &'a str) -> Option<Captures<'a>> {
+        self.captures_iter(s)
+            .into_iter()
+            .next()
+            .filter(|c| c.get(0).map(|m| m.start()) == Some(0))
+    }
 }
