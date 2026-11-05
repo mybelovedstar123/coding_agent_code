@@ -6,3 +6,5 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::Semaphore;
 use tokio::time::Instant;
+
+pub const BATCH: usize = 32;
