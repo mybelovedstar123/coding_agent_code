@@ -40,3 +40,4 @@ static ADD_REMOVE_RE: LazyLock<PyRe> = LazyLock::new(|| {
         r"(?i)\b(add|remove)\s+{Q}\s+(?:to|from)\s+the\s+{Q}\s+set\s+of\s+{Q}"
     ))
 });
+static DIGIT_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"^\d$"));
