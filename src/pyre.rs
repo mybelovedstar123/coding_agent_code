@@ -105,4 +105,21 @@ impl Re {
     pub fn sub(&self, s: &str, replacement: &str) -> String {
         self.sub_with(s, |_| replacement.to_string())
     }
+
+    /// `re.split(p, s)` for a pattern without groups: the pieces between matches. Python never splits on an
+    /// empty match at the very start (3.7+ splits on empty matches elsewhere); patterns ported here never match
+    /// empty, so empty matches are skipped.
+    pub fn split<'a>(&self, s: &'a str) -> Vec<&'a str> {
+        let mut out = Vec::new();
+        let mut last = 0;
+        for (start, end, _) in self.find_iter(s) {
+            if end == start {
+                continue;
+            }
+            out.push(&s[last..start]);
+            last = end;
+        }
+        out.push(&s[last..]);
+        out
+    }
 }
