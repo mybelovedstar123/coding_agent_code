@@ -46,4 +46,9 @@ impl Re {
             .next()
             .filter(|c| c.get(0).map(|m| m.start()) == Some(0))
     }
+
+    /// Every non-overlapping match, with its groups.
+    pub fn captures_iter<'a>(&self, s: &'a str) -> Vec<Captures<'a>> {
+        self.0.captures_iter(s).filter_map(|c| c.ok()).collect()
+    }
 }
