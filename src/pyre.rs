@@ -86,4 +86,18 @@ impl Re {
             })
             .collect()
     }
+
+    /// `re.sub(p, f, s)`: every match replaced by `f(match)`.
+    pub fn sub_with(&self, s: &str, mut f: impl FnMut(&Captures) -> String) -> String {
+        let mut out = String::with_capacity(s.len());
+        let mut last = 0;
+        for c in self.captures_iter(s) {
+            let m = c.get(0).expect("group 0");
+            out.push_str(&s[last..m.start()]);
+            out.push_str(&f(&c));
+            last = m.end();
+        }
+        out.push_str(&s[last..]);
+        out
+    }
 }
