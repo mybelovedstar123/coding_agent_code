@@ -207,3 +207,10 @@ fn parse_vectors(v: &serde_json::Value) -> Vec<Vec<f32>> {
         })
         .unwrap_or_default()
 }
+
+/// Unit length in float32, as numpy does (`vecs / norm`, a zero norm left at 1).
+pub fn normalize(v: Vec<f32>) -> Vec<f32> {
+    let norm = v.iter().map(|x| x * x).sum::<f32>().sqrt();
+    let norm = if norm == 0.0 { 1.0 } else { norm };
+    v.into_iter().map(|x| x / norm).collect()
+}
