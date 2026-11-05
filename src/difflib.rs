@@ -5,3 +5,11 @@
 //! occur more than `len(b) // 100 + 1` times from the match index (they still extend a match).
 
 use std::collections::HashMap;
+
+/// `difflib.SequenceMatcher(None, a, b)` over the code points of two strings (isjunk=None, autojunk=True).
+struct SequenceMatcher {
+    a: Vec<char>,
+    b: Vec<char>,
+    /// b2j minus the "popular" elements (autojunk); there is no junk with isjunk=None.
+    b2j: HashMap<char, Vec<usize>>,
+}
