@@ -53,4 +53,67 @@ impl Embedder {
             gate: Arc::new(Semaphore::new(4)),
         }
     }
+
+    async fn embed_batch(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, EmbedError> {
+        let url = format!("{}/api/embed", config::ollama_url());
+        let body = serde_json::json!({"model": config::EMBED_MODEL, "input": texts});
+        let mut delay = 1.0f64;
+        let mut last = String::new();
+        for _ in 0..ATTEMPTS {
+            let attempt = async {
+                let _permit = self.gate.acquire().await.expect("semaphore open");
+                let resp = self
+                    .http
+                    .post(&url)
+                    .json(&body)
+                    .timeout(Duration::from_secs(120))
+                    .send()
+                    .await?;
+                let status = resp.status().as_u16();
+                let retry_after = resp
+                    .headers()
+                    .get("Retry-After")
+                    .and_then(|v| v.to_str().ok())
+                    .map(String::from);
+                let text = resp.text().await?;
+                Ok::<_, reqwest::Error>((status, retry_after, text))
+            };
+            match attempt.await {
+                Ok((200, _, text)) => {
+                    let data: serde_json::Value = serde_json::from_str(&text)
+                        .map_err(|e| EmbedError::Failed(format!("bad embedding body: {e}")))?;
+                    let vecs = parse_vectors(&data["embeddings"]);
+                    if vecs.len() != texts.len() || vecs.iter().any(|v| v.len() != config::EMBED_DIM) {
+                        return Err(EmbedError::Failed(format!(
+                            "unexpected embedding shape ({}, {})",
+                            vecs.len(),
+                            vecs.first().map(|v| v.len()).unwrap_or(0)
+                        )));
+                    }
+                    return Ok(vecs.into_iter().map(normalize).collect());
+                }
+                Ok((status, retry_after, text)) => {
+                    last = format!("{status}: {}", crate::py::head(&text, 200));
+                    if status == 400 || status == 413 {
+                        return Err(EmbedError::TooLarge(last));
+                    }
+                    if !RETRY_STATUS.contains(&status) {
+                        break;
+                    }
+                    if let Some(ra) = retry_after.and_then(|v| v.trim().parse::<f64>().ok()) {
+                        delay = delay.max(ra);
+                    }
+                }
+                Err(err) => last = format!("{err:?}"),
+            }
+            tokio::time::sleep(Duration::from_secs_f64(delay)).await;
+            delay = (delay * 2.0).min(15.0);
+        }
+        // A gateway that hides the provider's size error behind a 5xx still gets one chance to succeed with smaller
+        // requests.
+        if texts.len() > 1 {
+            return Err(EmbedError::TooLarge(format!("embed failed after retries: {last}")));
+        }
+        Err(EmbedError::Failed(format!("embed failed: {last}")))
+    }
 }
