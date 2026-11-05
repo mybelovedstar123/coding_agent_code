@@ -53,3 +53,7 @@ Each request has a 270-second budget. The harness keeps a reserve for the answer
 up, and contains failures: a dependency that fails never fails the request. The complete rules are in
 [PIPELINE.md](PIPELINE.md).
 
+## HTTP API
+
+The server listens on port 8080 by default.
+
