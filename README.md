@@ -22,3 +22,5 @@ content, so the two agents can be compared by replaying cached runs and counting
   search and exact identifier lookup.
 - **Evidence selectors.** Deterministic modules surface what plain retrieval misses: who holds a project now, which
   statement superseded which, what an event history adds up to, and which notes continue a plan.
+- **Sandboxed `run_python`.** Model-written programs are validated with CPython's own `ast`, then run in a separate
+  process with CPU, memory, file and process limits and an import allowlist.
