@@ -30,3 +30,12 @@ impl std::fmt::Display for EmbedError {
 }
 
 impl std::error::Error for EmbedError {}
+
+/// Unit vectors for texts; `deadline` bounds the whole call.
+pub trait Embed: Send + Sync {
+    fn embed<'a>(
+        &'a self,
+        texts: Vec<String>,
+        deadline: Option<Instant>,
+    ) -> BoxFuture<'a, Result<Vec<Vec<f32>>, EmbedError>>;
+}
