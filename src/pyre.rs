@@ -28,4 +28,9 @@ impl Re {
     pub fn search(&self, s: &str) -> Option<(usize, usize)> {
         self.0.find(s).ok().flatten().map(|m| (m.start(), m.end()))
     }
+
+    /// `re.search(p, s)` as the matched text.
+    pub fn search_str<'a>(&self, s: &'a str) -> Option<&'a str> {
+        self.0.find(s).ok().flatten().map(|m| m.as_str())
+    }
 }
