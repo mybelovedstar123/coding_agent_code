@@ -12,3 +12,8 @@ use std::fmt::Write as _;
 pub fn is_space(c: char) -> bool {
     matches!(c, '\u{1c}'..='\u{1f}') || c.is_whitespace()
 }
+
+/// `s.strip()`.
+pub fn strip(s: &str) -> &str {
+    s.trim_matches(is_space)
+}
