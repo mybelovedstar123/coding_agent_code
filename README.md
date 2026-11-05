@@ -118,3 +118,6 @@ docker run --rm -p 8080:8080 --env-file .env ditto-agent
 | `DITTOBENCH_INFERENCE_BASE_URL`, `CHUTES_BASE_URL`, `CHUTES_API_KEY` | Inference relay for `platform` and `chutes` | none |
 | `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY` | Inference for local practice | OpenRouter's public URL |
 
+An `inference_base_url` in a `/run` request takes precedence over all of these. Keep real keys in your `.env` file and
+out of version control.
+
