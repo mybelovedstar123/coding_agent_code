@@ -121,3 +121,11 @@ docker run --rm -p 8080:8080 --env-file .env ditto-agent
 An `inference_base_url` in a `/run` request takes precedence over all of these. Keep real keys in your `.env` file and
 out of version control.
 
+## Testing
+
+```sh
+cargo test --locked --release
+cargo fmt --check
+cargo clippy --all-targets -- -D warnings
+```
+
