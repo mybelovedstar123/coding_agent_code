@@ -32,3 +32,4 @@ unverified candidate, not an answer, and can be wrong: check what you rely on ag
 where they differ, the records decide.";
 
 static TAG_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"<[^>]+>"));
+static NON_ALNUM_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[^a-z0-9]+"));
