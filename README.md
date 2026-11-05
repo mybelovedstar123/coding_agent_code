@@ -24,3 +24,5 @@ content, so the two agents can be compared by replaying cached runs and counting
   statement superseded which, what an event history adds up to, and which notes continue a plan.
 - **Sandboxed `run_python`.** Model-written programs are validated with CPython's own `ast`, then run in a separate
   process with CPU, memory, file and process limits and an import allowlist.
+- **Tool calls with accountable outcomes.** Every call gets a delivery state, and a call that may have reached the
+  endpoint is never replayed.
