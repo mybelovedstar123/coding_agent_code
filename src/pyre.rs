@@ -51,4 +51,13 @@ impl Re {
     pub fn captures_iter<'a>(&self, s: &'a str) -> Vec<Captures<'a>> {
         self.0.captures_iter(s).filter_map(|c| c.ok()).collect()
     }
+
+    /// Every non-overlapping match as (start, end, text).
+    pub fn find_iter<'a>(&self, s: &'a str) -> Vec<(usize, usize, &'a str)> {
+        self.0
+            .find_iter(s)
+            .filter_map(|m| m.ok())
+            .map(|m| (m.start(), m.end(), m.as_str()))
+            .collect()
+    }
 }
