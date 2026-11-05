@@ -1,0 +1,3 @@
+# Prompt texts must stay byte-identical: never convert line endings.
+* text=auto eol=lf
+*.json -text
