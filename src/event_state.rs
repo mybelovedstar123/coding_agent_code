@@ -33,3 +33,4 @@ where they differ, the records decide.";
 
 static TAG_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"<[^>]+>"));
 static NON_ALNUM_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[^a-z0-9]+"));
+static JSON_LIST_RE: LazyLock<PyRe> = LazyLock::new(|| PyRe::new(r"(?s)\[\s*\{.*?\}\s*\]"));
