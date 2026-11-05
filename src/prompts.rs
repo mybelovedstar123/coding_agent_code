@@ -24,3 +24,6 @@ pub const FINAL_CHECK_NOTE: &str = "Check your draft reply above against the sto
 /// Stage 3a note: an independent second draft.
 pub const SECOND_DRAFT_NOTE: &str =
     "Write your reply to the user's request now, from the stored records and tool results above. Write only the reply.";
+
+/// Stage 3b note with two drafts ({a} and {b} are filled in).
+pub const FINAL_CHECK_TWO_DRAFTS_NOTE: &str = "Two draft replies to the user's request were written independently from the same records:\nDraft A: {a}\nDraft B: {b}\nCheck both against the stored records before anything is sent and write the final reply. It may be either draft unchanged or a corrected reply. If the records do not hold what was asked, decline, then name the closest related records you found (the person, company, place, date or identifier they are about, naming people as the records name them) and say briefly why they do not answer; say whose or what those records are about rather than quoting their contents. If the request assumes something the records do not show, say you have no record of it and state what the records do show. If a detail you need is missing, ask a question that names the missing detail and cites what you found. If a draft refuses to do something or asks the user a question and that is right, keep it. Write only the final reply.";
