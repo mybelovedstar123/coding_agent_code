@@ -116,4 +116,21 @@ impl Embedder {
         }
         Err(EmbedError::Failed(format!("embed failed: {last}")))
     }
+
+    fn embed_adaptive<'a>(&'a self, texts: &'a [String]) -> BoxFuture<'a, Result<Vec<Vec<f32>>, EmbedError>> {
+        Box::pin(async move {
+            match self.embed_batch(texts).await {
+                Err(EmbedError::TooLarge(m)) => {
+                    if texts.len() == 1 {
+                        return Err(EmbedError::TooLarge(m));
+                    }
+                    let mid = texts.len() / 2;
+                    let (left, right) =
+                        futures::try_join!(self.embed_adaptive(&texts[..mid]), self.embed_adaptive(&texts[mid..]))?;
+                    Ok(left.into_iter().chain(right).collect())
+                }
+                other => other,
+            }
+        })
+    }
 }
