@@ -9,3 +9,7 @@ pub const DEFAULT_OLLAMA_URL: &str = "http://localhost:11434";
 pub const OPENROUTER_URL: &str = "https://openrouter.ai/api/v1";
 pub const EMBED_MODEL: &str = "embeddinggemma";
 pub const EMBED_DIM: usize = 768;
+/// PROTOCOL.md (/run and /seed): user_id is optional and the documented default memory graph is "miner". A request
+/// without user_id therefore belongs to that single default principal (policy v13 W15: "a documented default user
+/// represents one default principal"); requests that carry a user_id are always scoped to it.
+pub const DEFAULT_USER: &str = "miner";
