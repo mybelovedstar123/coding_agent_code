@@ -20,3 +20,5 @@ content, so the two agents can be compared by replaying cached runs and counting
   a stated input, role and fallback. See [PIPELINE.md](PIPELINE.md).
 - **Hybrid retrieval.** Dense embeddings and a typo-tolerant BM25 index, fused by reciprocal rank, with alias-aware
   search and exact identifier lookup.
+- **Evidence selectors.** Deterministic modules surface what plain retrieval misses: who holds a project now, which
+  statement superseded which, what an event history adds up to, and which notes continue a plan.
