@@ -13,3 +13,4 @@ pub const EMBED_DIM: usize = 768;
 /// without user_id therefore belongs to that single default principal (policy v13 W15: "a documented default user
 /// represents one default principal"); requests that carry a user_id are always scoped to it.
 pub const DEFAULT_USER: &str = "miner";
+pub const MEMORY_CONTEXT_PREFIX: &str = "Relevant memory context for this turn:";
