@@ -21,3 +21,4 @@ use std::fmt;
 use std::sync::LazyLock;
 
 pub const Q: &str = r#""([^"]+)""#;
+pub static STEP_RE: LazyLock<PyRe> = LazyLock::new(|| PyRe::new(r"(?i)\bstep\s+(\d+)\b"));
