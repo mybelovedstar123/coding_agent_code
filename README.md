@@ -129,3 +129,7 @@ cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 ```
 
+The tests are mainly differential: each suite in `tests/` checks a module against expected outputs generated from the
+Python reference and stored in `tests/fixtures/`, so they need nothing beyond this repository. Use `--release`: the
+fixtures are large, and the `glossary` suite alone takes minutes in release mode and far longer in a debug build.
+
