@@ -65,3 +65,8 @@ The server listens on port 8080 by default.
 
 A malformed body gets HTTP 400. A request without `user_id` belongs to the default user, `miner`.
 
+## Project layout
+
+| Area | Modules | Role |
+|---|---|---|
+| Service | `main`, `server`, `config` | Command line, HTTP routes and environment |
