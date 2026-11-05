@@ -45,3 +45,12 @@ pub struct Embedder {
     /// Bound concurrent embedding requests so a large seed wave cannot starve /run queries of gateway capacity.
     gate: Arc<Semaphore>,
 }
+
+impl Embedder {
+    pub fn new(http: reqwest::Client) -> Self {
+        Embedder {
+            http,
+            gate: Arc::new(Semaphore::new(4)),
+        }
+    }
+}
