@@ -7,3 +7,8 @@
 
 use serde_json::Value;
 use std::fmt::Write as _;
+
+/// `str.isspace()` for one character: Unicode White_Space plus the C0 separators U+001C..U+001F.
+pub fn is_space(c: char) -> bool {
+    matches!(c, '\u{1c}'..='\u{1f}') || c.is_whitespace()
+}
