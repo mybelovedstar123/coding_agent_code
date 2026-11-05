@@ -5,3 +5,6 @@
 //! Rust it is written `(?=\n?\z)`.
 
 use fancy_regex::{Captures, Regex};
+
+/// A compiled pattern with Python-style helpers. A match that hits the backtracking limit counts as no match.
+pub struct Re(Regex);
