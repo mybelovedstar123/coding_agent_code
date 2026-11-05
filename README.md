@@ -140,3 +140,5 @@ The records in the fixtures are benchmark data, not information about real peopl
 ## Further reading
 
 - [PIPELINE.md](PIPELINE.md): model stages, limits, tool execution and context construction.
+- [PORTING.md](PORTING.md): how Python behaviour maps onto Rust, and the rules for differential tests.
+
