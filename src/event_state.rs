@@ -159,3 +159,12 @@ impl PyRe {
         self.on(text).split(text)
     }
 }
+
+// ------------------------------------------------------------------------------------------- Python value semantics
+
+/// A Python int (arbitrary precision): sign and decimal digits without leading zeros ("0" for zero).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PyInt {
+    neg: bool,
+    digits: String,
+}
