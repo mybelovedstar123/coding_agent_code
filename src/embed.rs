@@ -28,3 +28,5 @@ impl std::fmt::Display for EmbedError {
         }
     }
 }
+
+impl std::error::Error for EmbedError {}
