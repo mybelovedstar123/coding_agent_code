@@ -271,3 +271,12 @@ pub fn number_text(n: &serde_json::Number) -> String {
     }
     raw
 }
+
+/// A JSON number as `json.dumps(json.loads(text))` writes it: an overflowing float is `Infinity`.
+fn json_number(n: &serde_json::Number) -> String {
+    let raw = n.to_string();
+    if raw.contains(['.', 'e', 'E']) {
+        return json_float(raw.parse::<f64>().unwrap_or(f64::NAN));
+    }
+    number_text(n)
+}
