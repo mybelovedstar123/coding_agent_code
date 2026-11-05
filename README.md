@@ -112,3 +112,4 @@ docker run --rm -p 8080:8080 --env-file .env ditto-agent
 | Variable | Purpose | Default |
 |---|---|---|
 | `PORT` | Listening port; `--port` overrides it | `8080` |
+| `DITTOBENCH_MODEL` | Chat model name | `openai/gpt-oss-20b` |
