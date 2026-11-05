@@ -73,4 +73,17 @@ impl Re {
             })
             .collect()
     }
+
+    /// `re.findall(p, s)` for a pattern with several groups: one tuple of group texts per match.
+    pub fn findall_groups(&self, s: &str) -> Vec<Vec<String>> {
+        let groups = self.0.captures_len() - 1;
+        self.captures_iter(s)
+            .iter()
+            .map(|c| {
+                (1..=groups)
+                    .map(|g| c.get(g).map(|m| m.as_str().to_string()).unwrap_or_default())
+                    .collect()
+            })
+            .collect()
+    }
 }
