@@ -348,3 +348,10 @@ fn json_value(out: &mut String, v: &Value, ensure_ascii: bool) {
         }
     }
 }
+
+/// `json.dumps(v)` (ensure_ascii=True) or `json.dumps(v, ensure_ascii=False)`: CPython's default separators.
+pub fn dumps(v: &Value, ensure_ascii: bool) -> String {
+    let mut out = String::new();
+    json_value(&mut out, v, ensure_ascii);
+    out
+}
