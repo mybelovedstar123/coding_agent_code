@@ -37,3 +37,8 @@ pub fn split_ws(s: &str) -> Vec<&str> {
 pub fn squash_ws(s: &str) -> String {
     split_ws(s).join(" ")
 }
+
+/// `s.strip(chars)`.
+pub fn strip_chars<'a>(s: &'a str, chars: &str) -> &'a str {
+    s.trim_matches(|c| chars.contains(c))
+}
