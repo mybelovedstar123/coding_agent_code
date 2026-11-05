@@ -214,3 +214,8 @@ pub fn normalize(v: Vec<f32>) -> Vec<f32> {
     let norm = if norm == 0.0 { 1.0 } else { norm };
     v.into_iter().map(|x| x / norm).collect()
 }
+
+/// Float32 dot product of two unit vectors.
+pub fn dot(a: &[f32], b: &[f32]) -> f32 {
+    a.iter().zip(b).map(|(x, y)| x * y).sum()
+}
