@@ -52,3 +52,8 @@ pub fn rstrip_chars<'a>(s: &'a str, chars: &str) -> &'a str {
 pub fn len(s: &str) -> usize {
     s.chars().count()
 }
+
+/// Byte offset of code point `i` (clamped to the end).
+fn byte_at(s: &str, i: usize) -> usize {
+    s.char_indices().nth(i).map(|(b, _)| b).unwrap_or(s.len())
+}
