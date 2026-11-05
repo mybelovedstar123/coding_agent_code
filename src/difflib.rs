@@ -79,4 +79,23 @@ impl SequenceMatcher {
         }
         (besti, bestj, bestsize)
     }
+
+    /// The sum of the sizes of `get_matching_blocks()` (merging adjacent blocks does not change it).
+    fn matches(&self) -> usize {
+        let mut queue = vec![(0, self.a.len(), 0, self.b.len())];
+        let mut total = 0;
+        while let Some((alo, ahi, blo, bhi)) = queue.pop() {
+            let (i, j, k) = self.find_longest_match(alo, ahi, blo, bhi);
+            if k > 0 {
+                total += k;
+                if alo < i && blo < j {
+                    queue.push((alo, i, blo, j));
+                }
+                if i + k < ahi && j + k < bhi {
+                    queue.push((i + k, ahi, j + k, bhi));
+                }
+            }
+        }
+        total
+    }
 }
