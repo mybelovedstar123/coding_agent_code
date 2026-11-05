@@ -81,3 +81,8 @@ pub fn tail(s: &str, n: usize) -> &str {
     }
     &s[byte_at(s, total - n)..]
 }
+
+/// `s.lower()`.
+pub fn lower(s: &str) -> String {
+    s.to_lowercase()
+}
