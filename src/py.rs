@@ -412,4 +412,13 @@ mod tests {
         );
         assert_eq!(dumps(&json!({"x": "\u{1F600}"}), true), "{\"x\": \"\\ud83d\\ude00\"}");
     }
+
+    #[test]
+    fn repr_matches_cpython() {
+        assert_eq!(repr_str("abc"), "'abc'");
+        assert_eq!(repr_str("it's"), "\"it's\"");
+        assert_eq!(repr_str("a'b\"c"), "'a\\'b\"c'");
+        assert_eq!(repr_str("a\u{a0}b\u{202f}c\n"), "'a\\xa0b\\u202fc\\n'");
+        assert_eq!(repr_value(&json!(["x", 1, null])), "['x', 1, None]");
+    }
 }
