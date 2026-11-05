@@ -11,3 +11,11 @@
 //! ints, the 4300-digit int limit), `int()` of a str/float, `str.splitlines()`, the `csv` module's reader state machine
 //! with `DictReader`, and Python's `\s`/`\w`/`\b` classes in patterns (`py_pattern`).
 
+use crate::py;
+use crate::pyre::Re;
+use indexmap::IndexMap;
+use serde_json::{json, Map, Value};
+use std::cmp::Ordering;
+use std::collections::BTreeSet;
+use std::fmt;
+use std::sync::LazyLock;
