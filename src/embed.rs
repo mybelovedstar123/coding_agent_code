@@ -13,3 +13,10 @@ pub const BATCH: usize = 32;
 pub const BATCH_MAX_CHARS: usize = 100_000;
 const ATTEMPTS: usize = 8;
 const RETRY_STATUS: [u16; 6] = [408, 429, 500, 502, 503, 504];
+
+#[derive(Debug, Clone)]
+pub enum EmbedError {
+    /// The gateway rejected the request's size (or failed for a multi-text batch): retry with smaller batches.
+    TooLarge(String),
+    Failed(String),
+}
