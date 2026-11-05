@@ -355,3 +355,10 @@ pub fn dumps(v: &Value, ensure_ascii: bool) -> String {
     json_value(&mut out, v, ensure_ascii);
     out
 }
+
+/// A float as a JSON number value (non-finite floats have no JSON number; they become null).
+pub fn float_value(x: f64) -> Value {
+    serde_json::Number::from_f64(x)
+        .map(Value::Number)
+        .unwrap_or(Value::Null)
+}
