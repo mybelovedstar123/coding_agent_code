@@ -121,4 +121,13 @@ impl PyRe {
             exact: Re::new(&py_pattern(pattern)),
         }
     }
+
+    /// The compiled pattern to run on `text`.
+    pub fn on(&self, text: &str) -> &Re {
+        if text.chars().all(classes_agree) {
+            &self.fast
+        } else {
+            &self.exact
+        }
+    }
 }
