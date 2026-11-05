@@ -35,3 +35,8 @@ static TAG_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"<[^>]+>"));
 static NON_ALNUM_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[^a-z0-9]+"));
 static JSON_LIST_RE: LazyLock<PyRe> = LazyLock::new(|| PyRe::new(r"(?s)\[\s*\{.*?\}\s*\]"));
 static QUOTED_RE: LazyLock<Re> = LazyLock::new(|| Re::new(Q));
+static ADD_REMOVE_RE: LazyLock<PyRe> = LazyLock::new(|| {
+    PyRe::new(&format!(
+        r"(?i)\b(add|remove)\s+{Q}\s+(?:to|from)\s+the\s+{Q}\s+set\s+of\s+{Q}"
+    ))
+});
