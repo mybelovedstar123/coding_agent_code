@@ -67,3 +67,8 @@ pub fn slice(s: &str, start: usize, end: usize) -> &str {
     let b1 = byte_at(s, end);
     &s[b0..b1.max(b0)]
 }
+
+/// `s[:n]`.
+pub fn head(s: &str, n: usize) -> &str {
+    &s[..byte_at(s, n)]
+}
