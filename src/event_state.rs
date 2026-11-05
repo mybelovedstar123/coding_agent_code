@@ -146,4 +146,8 @@ impl PyRe {
     pub fn match_start<'a>(&self, text: &'a str) -> Option<fancy_regex::Captures<'a>> {
         self.on(text).match_start(text)
     }
+
+    pub fn find_iter<'a>(&self, text: &'a str) -> Vec<(usize, usize, &'a str)> {
+        self.on(text).find_iter(text)
+    }
 }
