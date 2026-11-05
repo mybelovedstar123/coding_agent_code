@@ -130,4 +130,8 @@ impl PyRe {
             &self.exact
         }
     }
+
+    pub fn is_match(&self, text: &str) -> bool {
+        self.on(text).is_match(text)
+    }
 }
