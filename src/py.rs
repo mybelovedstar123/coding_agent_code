@@ -32,3 +32,8 @@ pub fn rstrip(s: &str) -> &str {
 pub fn split_ws(s: &str) -> Vec<&str> {
     s.split(is_space).filter(|p| !p.is_empty()).collect()
 }
+
+/// `" ".join(s.split())`.
+pub fn squash_ws(s: &str) -> String {
+    split_ws(s).join(" ")
+}
