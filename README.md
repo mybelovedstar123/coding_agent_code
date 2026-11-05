@@ -137,3 +137,6 @@ The Python reference and its datasets are **not** in this repository. To regener
 `tests/equiv/equiv.py`, you need your own copy of the reference and must change the absolute paths in those scripts.
 The records in the fixtures are benchmark data, not information about real people.
 
+## Further reading
+
+- [PIPELINE.md](PIPELINE.md): model stages, limits, tool execution and context construction.
