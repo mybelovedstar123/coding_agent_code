@@ -22,3 +22,8 @@ pub fn strip(s: &str) -> &str {
 pub fn lstrip(s: &str) -> &str {
     s.trim_start_matches(is_space)
 }
+
+/// `s.rstrip()`.
+pub fn rstrip(s: &str) -> &str {
+    s.trim_end_matches(is_space)
+}
