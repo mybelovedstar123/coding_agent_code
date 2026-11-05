@@ -100,3 +100,5 @@ cargo build --release
 curl http://localhost:8080/health
 ```
 
+Or use the container, which needs the embedding and model endpoints to be reachable from inside it:
+
