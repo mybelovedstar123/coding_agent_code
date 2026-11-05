@@ -86,3 +86,16 @@ pub fn tail(s: &str, n: usize) -> &str {
 pub fn lower(s: &str) -> String {
     s.to_lowercase()
 }
+
+/// `s.capitalize()`: the first character upper-cased (title case), the rest lower-cased.
+pub fn capitalize(s: &str) -> String {
+    let mut chars = s.chars();
+    match chars.next() {
+        None => String::new(),
+        Some(first) => {
+            let mut out: String = first.to_uppercase().collect();
+            out.push_str(&chars.as_str().to_lowercase());
+            out
+        }
+    }
+}
