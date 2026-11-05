@@ -63,3 +63,5 @@ The server listens on port 8080 by default.
 | `POST /seed` | Load a user's records | `user_id`, `pairs`, `subjects`, `links` | The count of each collection |
 | `POST /run` | Answer one request | `case_id`, `user_id`, `user_input`, `system_prompt`, `tools`, `tool_endpoint`, `inference_base_url` | `final_text`, `tool_calls`, `blocked_tool_calls` (when any), `prompt_tokens`, `output_tokens`, `latency_ms` |
 
+A malformed body gets HTTP 400. A request without `user_id` belongs to the default user, `miner`.
+
