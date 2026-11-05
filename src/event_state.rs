@@ -19,3 +19,5 @@ use std::cmp::Ordering;
 use std::collections::BTreeSet;
 use std::fmt;
 use std::sync::LazyLock;
+
+pub const Q: &str = r#""([^"]+)""#;
