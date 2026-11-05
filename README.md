@@ -26,3 +26,6 @@ content, so the two agents can be compared by replaying cached runs and counting
   process with CPU, memory, file and process limits and an import allowlist.
 - **Tool calls with accountable outcomes.** Every call gets a delivery state, and a call that may have reached the
   endpoint is never replayed.
+- **Python semantics in Rust.** Code-point string lengths, CPython `repr`, `json.dumps` output, float text and `re`
+  behaviour are reproduced so that prompts stay identical.
+
