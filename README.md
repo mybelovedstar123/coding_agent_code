@@ -84,3 +84,5 @@ Other top-level paths:
 - `tests/pyref/`: the Python scripts that generated the fixtures from the reference.
 - `tests/equiv/`: the end-to-end equivalence harness.
 - `PIPELINE.md`: the declaration of every model stage, limit and recovery rule.
+- `PORTING.md`: the contract the port follows.
+
