@@ -14,3 +14,4 @@ fancy-regex = "0.14"
 futures = "0.3"
 indexmap = { version = "2", features = ["serde"] }
 rand = "0.8"
+regex = "1"
