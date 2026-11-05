@@ -102,3 +102,8 @@ curl http://localhost:8080/health
 
 Or use the container, which needs the embedding and model endpoints to be reachable from inside it:
 
+```sh
+docker build -t ditto-agent .
+docker run --rm -p 8080:8080 --env-file .env ditto-agent
+```
+
