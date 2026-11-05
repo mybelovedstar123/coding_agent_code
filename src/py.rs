@@ -176,3 +176,21 @@ pub fn repr_str(s: &str) -> String {
     out.push(quote);
     out
 }
+
+/// `repr(value)` for a JSON-decoded value (str, int, float, bool, None, list, dict), as Python prints it.
+pub fn repr_value(v: &Value) -> String {
+    match v {
+        Value::Null => "None".into(),
+        Value::Bool(b) => if *b { "True" } else { "False" }.into(),
+        Value::Number(n) => number_text(n),
+        Value::String(s) => repr_str(s),
+        Value::Array(items) => format!("[{}]", items.iter().map(repr_value).collect::<Vec<_>>().join(", ")),
+        Value::Object(map) => format!(
+            "{{{}}}",
+            map.iter()
+                .map(|(k, v)| format!("{}: {}", repr_str(k), repr_value(v)))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
+    }
+}
