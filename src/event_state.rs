@@ -23,3 +23,4 @@ use std::sync::LazyLock;
 pub const Q: &str = r#""([^"]+)""#;
 pub static STEP_RE: LazyLock<PyRe> = LazyLock::new(|| PyRe::new(r"(?i)\bstep\s+(\d+)\b"));
 pub static SENT_SPLIT: LazyLock<PyRe> = LazyLock::new(|| PyRe::new(r"(?<=[.;])\s+(?=[A-Z\[])|\n+"));
+pub const MIN_EVENTS: usize = 10;
