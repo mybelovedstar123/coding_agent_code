@@ -57,3 +57,6 @@ up, and contains failures: a dependency that fails never fails the request. The 
 
 The server listens on port 8080 by default.
 
+| Endpoint | Purpose | Body fields | Response |
+|---|---|---|---|
+| `GET /health` | Liveness | none | `{"status": "ok"}` |
