@@ -14,3 +14,21 @@ pub const EMBED_DIM: usize = 768;
 /// represents one default principal"); requests that carry a user_id are always scoped to it.
 pub const DEFAULT_USER: &str = "miner";
 pub const MEMORY_CONTEXT_PREFIX: &str = "Relevant memory context for this turn:";
+
+/// Minimal .env loader for local practice; never overrides the real environment.
+pub fn load_dotenv(path: &std::path::Path) {
+    let Ok(text) = std::fs::read_to_string(path) else {
+        return;
+    };
+    for line in text.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') || !line.contains('=') {
+            continue;
+        }
+        let (key, value) = line.split_once('=').expect("contains '='");
+        let key = key.trim();
+        if std::env::var_os(key).is_none() {
+            std::env::set_var(key, value.trim());
+        }
+    }
+}
