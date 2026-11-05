@@ -194,3 +194,11 @@ pub fn repr_value(v: &Value) -> String {
         ),
     }
 }
+
+/// `str(value)` for a JSON-decoded value: strings as they are, everything else as `repr`.
+pub fn str_value(v: &Value) -> String {
+    match v {
+        Value::String(s) => s.clone(),
+        other => repr_value(other),
+    }
+}
