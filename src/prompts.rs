@@ -30,3 +30,6 @@ pub const FINAL_CHECK_TWO_DRAFTS_NOTE: &str = "Two draft replies to the user's r
 
 /// The last resort's note (4c).
 pub const FINAL_ANSWER_NOTE: &str = "Time is up for further tool calls. Answer now using the results you already have.";
+
+/// After a failed model call (4d).
+pub const MODEL_FAILURE_NOTE: &str = "The previous model call failed. Continue from the results you already have: answer now, or make the next tool call if the request still needs it.";
