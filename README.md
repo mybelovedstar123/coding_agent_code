@@ -133,3 +133,7 @@ The tests are mainly differential: each suite in `tests/` checks a module agains
 Python reference and stored in `tests/fixtures/`, so they need nothing beyond this repository. Use `--release`: the
 fixtures are large, and the `glossary` suite alone takes minutes in release mode and far longer in a debug build.
 
+The Python reference and its datasets are **not** in this repository. To regenerate fixtures with `tests/pyref/` or run
+`tests/equiv/equiv.py`, you need your own copy of the reference and must change the absolute paths in those scripts.
+The records in the fixtures are benchmark data, not information about real people.
+
