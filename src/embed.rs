@@ -39,3 +39,9 @@ pub trait Embed: Send + Sync {
         deadline: Option<Instant>,
     ) -> BoxFuture<'a, Result<Vec<Vec<f32>>, EmbedError>>;
 }
+
+pub struct Embedder {
+    http: reqwest::Client,
+    /// Bound concurrent embedding requests so a large seed wave cannot starve /run queries of gateway capacity.
+    gate: Arc<Semaphore>,
+}
