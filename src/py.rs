@@ -99,3 +99,44 @@ pub fn capitalize(s: &str) -> String {
         }
     }
 }
+
+/// Whether CPython's `str.isprintable()` holds for a character (the categories repr() escapes: Cc, Cf, Cs, Co, Cn,
+/// Zl, Zp, and Zs other than the ASCII space). The tables cover the assigned format, separator and private-use
+/// ranges; unassigned code points are treated as printable.
+fn is_printable(c: char) -> bool {
+    let u = c as u32;
+    if c == ' ' {
+        return true;
+    }
+    if u < 0x20 || (0x7f..=0xa0).contains(&u) {
+        return false;
+    }
+    !matches!(
+        u,
+        0xad | 0x600..=0x605
+            | 0x61c
+            | 0x6dd
+            | 0x70f
+            | 0x890..=0x891
+            | 0x8e2
+            | 0x1680
+            | 0x180e
+            | 0x2000..=0x200f
+            | 0x2028..=0x202f
+            | 0x205f..=0x2064
+            | 0x2066..=0x206f
+            | 0x3000
+            | 0xd800..=0xdfff
+            | 0xe000..=0xf8ff
+            | 0xfeff
+            | 0xfff9..=0xfffb
+            | 0x110bd
+            | 0x110cd
+            | 0x13430..=0x1343f
+            | 0x1bca0..=0x1bca3
+            | 0x1d173..=0x1d17a
+            | 0xe0001
+            | 0xe0020..=0xe007f
+            | 0xf0000..=0x10ffff
+    )
+}
