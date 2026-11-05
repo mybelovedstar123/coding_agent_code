@@ -257,3 +257,17 @@ pub fn float_repr(x: f64) -> String {
     }
     format!("{sign}{}.{}", &digits[..decpt as usize], &digits[decpt as usize..])
 }
+
+/// A JSON number as Python prints the value `json.loads` makes of it: ints exactly, floats by `float_repr`.
+pub fn number_text(n: &serde_json::Number) -> String {
+    let raw = n.to_string();
+    if raw.contains(['.', 'e', 'E']) {
+        return float_repr(raw.parse::<f64>().unwrap_or(f64::NAN));
+    }
+    // An int: drop a sign on zero ("-0" is int 0), keep every digit otherwise.
+    let digits = raw.trim_start_matches('-');
+    if digits.chars().all(|c| c == '0') {
+        return "0".into();
+    }
+    raw
+}
