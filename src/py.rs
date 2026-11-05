@@ -317,3 +317,34 @@ fn json_string(out: &mut String, s: &str, ensure_ascii: bool) {
     }
     out.push('"');
 }
+
+fn json_value(out: &mut String, v: &Value, ensure_ascii: bool) {
+    match v {
+        Value::Null => out.push_str("null"),
+        Value::Bool(b) => out.push_str(if *b { "true" } else { "false" }),
+        Value::Number(n) => out.push_str(&json_number(n)),
+        Value::String(s) => json_string(out, s, ensure_ascii),
+        Value::Array(items) => {
+            out.push('[');
+            for (i, item) in items.iter().enumerate() {
+                if i > 0 {
+                    out.push_str(", ");
+                }
+                json_value(out, item, ensure_ascii);
+            }
+            out.push(']');
+        }
+        Value::Object(map) => {
+            out.push('{');
+            for (i, (k, item)) in map.iter().enumerate() {
+                if i > 0 {
+                    out.push_str(", ");
+                }
+                json_string(out, k, ensure_ascii);
+                out.push_str(": ");
+                json_value(out, item, ensure_ascii);
+            }
+            out.push('}');
+        }
+    }
+}
