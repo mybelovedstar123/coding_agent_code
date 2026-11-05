@@ -173,3 +173,23 @@ impl Embed for Embedder {
         })
     }
 }
+
+/// Group texts in order: at most BATCH texts and BATCH_MAX_CHARS characters each.
+pub fn batches(texts: &[String]) -> Vec<Vec<String>> {
+    let mut out = Vec::new();
+    let mut cur: Vec<String> = Vec::new();
+    let mut size = 0usize;
+    for t in texts {
+        let tl = crate::py::len(t);
+        if !cur.is_empty() && (cur.len() >= BATCH || size + tl > BATCH_MAX_CHARS) {
+            out.push(std::mem::take(&mut cur));
+            size = 0;
+        }
+        cur.push(t.clone());
+        size += tl;
+    }
+    if !cur.is_empty() {
+        out.push(cur);
+    }
+    out
+}
