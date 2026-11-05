@@ -1,0 +1,8 @@
+[package]
+name = "ditto-agent"
+version = "0.15.0"
+edition = "2021"
+description = "Ditto SN118 memory harness: GET /health, POST /seed, POST /run on :8080."
+license = "UNLICENSED"
+publish = false
+
