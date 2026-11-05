@@ -18,4 +18,9 @@ impl Re {
     pub fn inner(&self) -> &Regex {
         &self.0
     }
+
+    /// `re.search(p, s) is not None`.
+    pub fn is_match(&self, s: &str) -> bool {
+        self.0.is_match(s).unwrap_or(false)
+    }
 }
