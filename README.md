@@ -91,3 +91,12 @@ Other top-level paths:
 You need a stable Rust toolchain with support for edition 2021, and Python 3 on the `PATH` if the model may use
 `run_python`. The container image uses CPython 3.12.
 
+```sh
+cargo build --release
+
+# Serve on port 8080, reading local settings from an env file.
+./target/release/ditto-agent --port 8080 --env-file .env
+
+curl http://localhost:8080/health
+```
+
