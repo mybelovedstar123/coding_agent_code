@@ -10,3 +10,4 @@ pub mod embed;
 pub mod policy;
 pub mod prompts;
 pub mod py;
+pub mod pyre;
