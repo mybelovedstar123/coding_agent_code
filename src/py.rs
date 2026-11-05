@@ -27,3 +27,8 @@ pub fn lstrip(s: &str) -> &str {
 pub fn rstrip(s: &str) -> &str {
     s.trim_end_matches(is_space)
 }
+
+/// `s.split()` with no separator: runs of whitespace separate, empty parts dropped.
+pub fn split_ws(s: &str) -> Vec<&str> {
+    s.split(is_space).filter(|p| !p.is_empty()).collect()
+}
