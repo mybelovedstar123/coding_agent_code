@@ -193,3 +193,17 @@ pub fn batches(texts: &[String]) -> Vec<Vec<String>> {
     }
     out
 }
+
+fn parse_vectors(v: &serde_json::Value) -> Vec<Vec<f32>> {
+    v.as_array()
+        .map(|rows| {
+            rows.iter()
+                .map(|r| {
+                    r.as_array()
+                        .map(|xs| xs.iter().map(|x| x.as_f64().unwrap_or(0.0) as f32).collect())
+                        .unwrap_or_default()
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
