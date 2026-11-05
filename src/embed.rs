@@ -12,3 +12,4 @@ pub const BATCH: usize = 32;
 /// (~16k chars each) must not be packed 32 to a request; cap each request by total characters as well.
 pub const BATCH_MAX_CHARS: usize = 100_000;
 const ATTEMPTS: usize = 8;
+const RETRY_STATUS: [u16; 6] = [408, 429, 500, 502, 503, 504];
