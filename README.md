@@ -49,3 +49,7 @@ flowchart TD
     I --> K["final_text, tool_calls, usage"]
 ```
 
+Each request has a 270-second budget. The harness keeps a reserve for the answer, tells the model when time is nearly
+up, and contains failures: a dependency that fails never fails the request. The complete rules are in
+[PIPELINE.md](PIPELINE.md).
+
