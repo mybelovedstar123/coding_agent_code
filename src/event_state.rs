@@ -113,3 +113,12 @@ pub struct PyRe {
     fast: Re,
     exact: Re,
 }
+
+impl PyRe {
+    pub fn new(pattern: &str) -> Self {
+        PyRe {
+            fast: Re::new(pattern),
+            exact: Re::new(&py_pattern(pattern)),
+        }
+    }
+}
