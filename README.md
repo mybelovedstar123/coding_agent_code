@@ -14,3 +14,7 @@ It began as a faithful port of a Python reference agent. The port's defining rul
 case, the Rust agent must send the model **byte-for-byte the same requests**. Model calls are cached by request
 content, so the two agents can be compared by replaying cached runs and counting misses.
 
+## Highlights
+
+- **Declared model stages.** Router, spelling reading, deciding loop, second draft, final check and recovery each have
+  a stated input, role and fallback. See [PIPELINE.md](PIPELINE.md).
