@@ -17,3 +17,8 @@ pub fn is_space(c: char) -> bool {
 pub fn strip(s: &str) -> &str {
     s.trim_matches(is_space)
 }
+
+/// `s.lstrip()`.
+pub fn lstrip(s: &str) -> &str {
+    s.trim_start_matches(is_space)
+}
