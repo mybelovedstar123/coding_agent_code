@@ -33,4 +33,9 @@ impl Re {
     pub fn search_str<'a>(&self, s: &'a str) -> Option<&'a str> {
         self.0.find(s).ok().flatten().map(|m| m.as_str())
     }
+
+    /// `re.search(p, s)` with its groups.
+    pub fn captures<'a>(&self, s: &'a str) -> Option<Captures<'a>> {
+        self.0.captures(s).ok().flatten()
+    }
 }
