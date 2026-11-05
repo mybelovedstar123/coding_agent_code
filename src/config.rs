@@ -8,3 +8,4 @@ pub const DEFAULT_MODEL: &str = "openai/gpt-oss-20b";
 pub const DEFAULT_OLLAMA_URL: &str = "http://localhost:11434";
 pub const OPENROUTER_URL: &str = "https://openrouter.ai/api/v1";
 pub const EMBED_MODEL: &str = "embeddinggemma";
+pub const EMBED_DIM: usize = 768;
