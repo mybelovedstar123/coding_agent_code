@@ -105,3 +105,11 @@ fn classes_agree(c: char) -> bool {
         _ => false,
     }
 }
+
+/// A Python pattern compiled twice: as written (Rust's classes) and through `py_pattern` (Python's classes). Text
+/// whose every character the two class sets treat alike runs on the first, which has no lookaround for `` and so
+/// stays on the fast engine; any other text runs on the second. Both give Python's result.
+pub struct PyRe {
+    fast: Re,
+    exact: Re,
+}
