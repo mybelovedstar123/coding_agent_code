@@ -140,3 +140,39 @@ fn is_printable(c: char) -> bool {
             | 0xf0000..=0x10ffff
     )
 }
+
+/// `repr(s)` for a str.
+pub fn repr_str(s: &str) -> String {
+    let quote = if s.contains('\'') && !s.contains('"') {
+        '"'
+    } else {
+        '\''
+    };
+    let mut out = String::with_capacity(s.len() + 2);
+    out.push(quote);
+    for c in s.chars() {
+        match c {
+            '\\' => out.push_str("\\\\"),
+            '\t' => out.push_str("\\t"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            c if c == quote => {
+                out.push('\\');
+                out.push(c);
+            }
+            c if is_printable(c) => out.push(c),
+            c => {
+                let u = c as u32;
+                if u < 0x100 {
+                    let _ = write!(out, "\\x{u:02x}");
+                } else if u < 0x10000 {
+                    let _ = write!(out, "\\u{u:04x}");
+                } else {
+                    let _ = write!(out, "\\U{u:08x}");
+                }
+            }
+        }
+    }
+    out.push(quote);
+    out
+}
