@@ -90,3 +90,18 @@ pub(crate) fn py_pattern(p: &str) -> String {
     }
     out
 }
+
+/// Whether Rust's and Python's `\w` and `\s` agree on a character: ASCII other than U+001C..U+001F, Latin-1 other
+/// than the superscripts and fractions (category No), Latin Extended-A/B, and General Punctuation other than the
+/// joiners and the connector punctuation.
+fn classes_agree(c: char) -> bool {
+    match c as u32 {
+        0x1c..=0x1f => false,
+        0..=0x7f => true,
+        0xb2 | 0xb3 | 0xb9 | 0xbc..=0xbe => false,
+        0xa0..=0x24f => true,
+        0x200c | 0x200d | 0x203f | 0x2040 | 0x2054 => false,
+        0x2000..=0x206f => true,
+        _ => false,
+    }
+}
