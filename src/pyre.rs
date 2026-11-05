@@ -23,4 +23,9 @@ impl Re {
     pub fn is_match(&self, s: &str) -> bool {
         self.0.is_match(s).unwrap_or(false)
     }
+
+    /// `re.search(p, s)` as (start, end) byte offsets.
+    pub fn search(&self, s: &str) -> Option<(usize, usize)> {
+        self.0.find(s).ok().flatten().map(|m| (m.start(), m.end()))
+    }
 }
