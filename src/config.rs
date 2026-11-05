@@ -32,3 +32,13 @@ pub fn load_dotenv(path: &std::path::Path) {
         }
     }
 }
+
+pub fn env(name: &str, default: &str) -> String {
+    let value = std::env::var(name).unwrap_or_default();
+    let value = value.trim();
+    if value.is_empty() {
+        default.to_string()
+    } else {
+        value.to_string()
+    }
+}
