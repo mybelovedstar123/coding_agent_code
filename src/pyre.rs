@@ -123,3 +123,8 @@ impl Re {
         out
     }
 }
+
+/// `re.escape(s)` for use inside a pattern.
+pub fn escape(s: &str) -> String {
+    fancy_regex::escape(s).into_owned()
+}
