@@ -78,3 +78,5 @@ A malformed body gets HTTP 400. A request without `user_id` belongs to the defau
 | Program tool | `pytool` | Validation and resource-limited execution of `run_python` |
 | Python parity | `py`, `pyre`, `difflib`, `text`, `typography` | Python string, JSON, float and regex behaviour; shared text helpers; output normalization |
 
+Other top-level paths:
+
