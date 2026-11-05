@@ -138,4 +138,8 @@ impl PyRe {
     pub fn captures<'a>(&self, text: &'a str) -> Option<fancy_regex::Captures<'a>> {
         self.on(text).captures(text)
     }
+
+    pub fn captures_iter<'a>(&self, text: &'a str) -> Vec<fancy_regex::Captures<'a>> {
+        self.on(text).captures_iter(text)
+    }
 }
