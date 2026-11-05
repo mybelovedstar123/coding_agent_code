@@ -4,3 +4,4 @@
 //! pattern and says so beside it. The usual case is Python's `$`, which also matches before a final newline; in
 //! Rust it is written `(?=\n?\z)`.
 
+use fancy_regex::{Captures, Regex};
