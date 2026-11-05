@@ -17,3 +17,7 @@ fn with_wire_prompt(wire_prompt: &str, guidance: &str) -> String {
 pub fn compose_memory_prompt(wire_prompt: &str) -> String {
     with_wire_prompt(wire_prompt, MEMORY_GUIDANCE)
 }
+
+pub fn compose_tool_prompt(wire_prompt: &str) -> String {
+    with_wire_prompt(wire_prompt, TOOL_GUIDANCE)
+}
