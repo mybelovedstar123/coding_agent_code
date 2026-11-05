@@ -72,3 +72,12 @@ pub fn slice(s: &str, start: usize, end: usize) -> &str {
 pub fn head(s: &str, n: usize) -> &str {
     &s[..byte_at(s, n)]
 }
+
+/// `s[-n:]` for n >= 0 (n == 0 gives the whole string, as in Python).
+pub fn tail(s: &str, n: usize) -> &str {
+    let total = len(s);
+    if n == 0 || n >= total {
+        return s;
+    }
+    &s[byte_at(s, total - n)..]
+}
