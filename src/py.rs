@@ -5,3 +5,5 @@
 //! points, `strip`/`split` use Python's whitespace set, `repr` quotes and escapes like CPython, floats print with
 //! CPython's shortest-repr rules, and `json.dumps` reproduces CPython's separators and escaping.
 
+use serde_json::Value;
+use std::fmt::Write as _;
