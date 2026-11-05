@@ -113,3 +113,4 @@ docker run --rm -p 8080:8080 --env-file .env ditto-agent
 |---|---|---|
 | `PORT` | Listening port; `--port` overrides it | `8080` |
 | `DITTOBENCH_MODEL` | Chat model name | `openai/gpt-oss-20b` |
+| `OLLAMA_BASE_URL` | Embedding endpoint (model `embeddinggemma`, 768 dimensions) | `http://localhost:11434` |
