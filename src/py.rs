@@ -47,3 +47,8 @@ pub fn strip_chars<'a>(s: &'a str, chars: &str) -> &'a str {
 pub fn rstrip_chars<'a>(s: &'a str, chars: &str) -> &'a str {
     s.trim_end_matches(|c| chars.contains(c))
 }
+
+/// `len(s)`: code points.
+pub fn len(s: &str) -> usize {
+    s.chars().count()
+}
