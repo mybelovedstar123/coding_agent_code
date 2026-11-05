@@ -4,3 +4,4 @@
 //! isjunk is None and autojunk is on, as in the Python reference: a `b` of 200+ elements drops the elements that
 //! occur more than `len(b) // 100 + 1` times from the match index (they still extend a match).
 
+use std::collections::HashMap;
