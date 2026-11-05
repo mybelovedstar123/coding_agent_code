@@ -6,3 +6,5 @@ description = "Ditto SN118 memory harness: GET /health, POST /seed, POST /run on
 license = "UNLICENSED"
 publish = false
 
+[dependencies]
+anyhow = "1"
