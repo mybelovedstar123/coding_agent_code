@@ -202,3 +202,58 @@ pub fn str_value(v: &Value) -> String {
         other => repr_value(other),
     }
 }
+
+/// `repr(x)` / `str(x)` for a Python float.
+pub fn float_repr(x: f64) -> String {
+    if x.is_nan() {
+        return "nan".into();
+    }
+    if x.is_infinite() {
+        return if x > 0.0 { "inf".into() } else { "-inf".into() };
+    }
+    if x == 0.0 {
+        return if x.is_sign_negative() {
+            "-0.0".into()
+        } else {
+            "0.0".into()
+        };
+    }
+    // Shortest round-trip digits and the decimal exponent, from ryu.
+    let mut buf = ryu::Buffer::new();
+    let text = buf.format_finite(x.abs());
+    let (mantissa, exp) = match text.find(['e', 'E']) {
+        Some(i) => (&text[..i], text[i + 1..].parse::<i32>().unwrap_or(0)),
+        None => (text, 0),
+    };
+    let (int_part, frac_part) = match mantissa.find('.') {
+        Some(i) => (&mantissa[..i], &mantissa[i + 1..]),
+        None => (mantissa, ""),
+    };
+    let mut digits: String = format!("{int_part}{frac_part}");
+    // decpt: position of the decimal point relative to the start of `digits`.
+    let mut decpt = int_part.len() as i32 + exp;
+    let lead = digits.len() - digits.trim_start_matches('0').len();
+    digits.drain(..lead);
+    decpt -= lead as i32;
+    let digits = digits.trim_end_matches('0').to_string();
+    let digits = if digits.is_empty() { "0".to_string() } else { digits };
+    let sign = if x < 0.0 { "-" } else { "" };
+    let n = digits.len() as i32;
+    if decpt <= -4 || decpt > 16 {
+        let e = decpt - 1;
+        let mant = if n == 1 {
+            digits.clone()
+        } else {
+            format!("{}.{}", &digits[..1], &digits[1..])
+        };
+        let esign = if e < 0 { '-' } else { '+' };
+        return format!("{sign}{mant}e{esign}{:02}", e.abs());
+    }
+    if decpt <= 0 {
+        return format!("{sign}0.{}{digits}", "0".repeat((-decpt) as usize));
+    }
+    if decpt >= n {
+        return format!("{sign}{digits}{}.0", "0".repeat((decpt - n) as usize));
+    }
+    format!("{sign}{}.{}", &digits[..decpt as usize], &digits[decpt as usize..])
+}
