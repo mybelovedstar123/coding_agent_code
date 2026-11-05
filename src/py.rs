@@ -398,4 +398,18 @@ mod tests {
             assert_eq!(float_repr(x), want, "{x}");
         }
     }
+
+    #[test]
+    fn dumps_matches_cpython() {
+        let v = json!({"a": "é\u{2014}\"x\"\n", "b": [1, 2.5, true, null], "c": {}});
+        assert_eq!(
+            dumps(&v, false),
+            "{\"a\": \"é—\\\"x\\\"\\n\", \"b\": [1, 2.5, true, null], \"c\": {}}"
+        );
+        assert_eq!(
+            dumps(&v, true),
+            "{\"a\": \"\\u00e9\\u2014\\\"x\\\"\\n\", \"b\": [1, 2.5, true, null], \"c\": {}}"
+        );
+        assert_eq!(dumps(&json!({"x": "\u{1F600}"}), true), "{\"x\": \"\\ud83d\\ude00\"}");
+    }
 }
