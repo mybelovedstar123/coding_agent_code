@@ -421,4 +421,15 @@ mod tests {
         assert_eq!(repr_str("a\u{a0}b\u{202f}c\n"), "'a\\xa0b\\u202fc\\n'");
         assert_eq!(repr_value(&json!(["x", 1, null])), "['x', 1, None]");
     }
+
+    #[test]
+    fn strings_count_code_points() {
+        assert_eq!(len("é—x"), 3);
+        assert_eq!(head("é—x", 2), "é—");
+        assert_eq!(tail("é—x", 2), "—x");
+        assert_eq!(slice("abcdef", 2, 4), "cd");
+        assert_eq!(strip("\u{1c} a \u{a0}"), "a");
+        assert_eq!(split_ws(" a \u{1f}b  c"), vec!["a", "b", "c"]);
+        assert_eq!(capitalize("lALABI"), "Lalabi");
+    }
 }
