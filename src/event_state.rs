@@ -134,4 +134,8 @@ impl PyRe {
     pub fn is_match(&self, text: &str) -> bool {
         self.on(text).is_match(text)
     }
+
+    pub fn captures<'a>(&self, text: &'a str) -> Option<fancy_regex::Captures<'a>> {
+        self.on(text).captures(text)
+    }
 }
