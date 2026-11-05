@@ -33,3 +33,6 @@ pub const FINAL_ANSWER_NOTE: &str = "Time is up for further tool calls. Answer n
 
 /// After a failed model call (4d).
 pub const MODEL_FAILURE_NOTE: &str = "The previous model call failed. Continue from the results you already have: answer now, or make the next tool call if the request still needs it.";
+
+/// Long identifier event histories: how to read them with run_python.
+pub const PROGRAM_RECORDS_NOTE: &str = "The records for the identifier in the request are long event histories. To work out the answer, use run_python: load them inside the program with records([...their pairIDs]) \u{2014} never paste record text into the program. A record that holds a table also has 'rows': its table rows already parsed as dicts keyed by that table's own header (column order differs between records, so use the keys, not positions); the full text is in 'text' (the data is on the user's side, also 'user'), extract_json(text) returns embedded JSON and grep_records(pattern) finds ids. Apply the events in order, and print() the result.";
