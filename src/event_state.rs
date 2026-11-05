@@ -30,3 +30,5 @@ effective step, not document order; an assignment replaces the field's value; ad
 of a set; state persists until changed), with every entity's fields at that step and sets as lists. It is an \
 unverified candidate, not an answer, and can be wrong: check what you rely on against the records themselves, and \
 where they differ, the records decide.";
+
+static TAG_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"<[^>]+>"));
