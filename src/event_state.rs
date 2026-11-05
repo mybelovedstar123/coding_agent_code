@@ -150,4 +150,8 @@ impl PyRe {
     pub fn find_iter<'a>(&self, text: &'a str) -> Vec<(usize, usize, &'a str)> {
         self.on(text).find_iter(text)
     }
+
+    pub fn findall(&self, text: &str) -> Vec<String> {
+        self.on(text).findall(text)
+    }
 }
