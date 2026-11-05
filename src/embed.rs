@@ -20,3 +20,11 @@ pub enum EmbedError {
     TooLarge(String),
     Failed(String),
 }
+
+impl std::fmt::Display for EmbedError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            EmbedError::TooLarge(m) | EmbedError::Failed(m) => f.write_str(m),
+        }
+    }
+}
