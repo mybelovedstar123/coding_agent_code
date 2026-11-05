@@ -115,3 +115,4 @@ docker run --rm -p 8080:8080 --env-file .env ditto-agent
 | `DITTOBENCH_MODEL` | Chat model name | `openai/gpt-oss-20b` |
 | `OLLAMA_BASE_URL` | Embedding endpoint (model `embeddinggemma`, 768 dimensions) | `http://localhost:11434` |
 | `DITTOBENCH_PROVIDER` | `openrouter`, `platform`, `chutes` or `ollama` | `openrouter` |
+| `DITTOBENCH_INFERENCE_BASE_URL`, `CHUTES_BASE_URL`, `CHUTES_API_KEY` | Inference relay for `platform` and `chutes` | none |
