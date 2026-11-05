@@ -60,3 +60,4 @@ The server listens on port 8080 by default.
 | Endpoint | Purpose | Body fields | Response |
 |---|---|---|---|
 | `GET /health` | Liveness | none | `{"status": "ok"}` |
+| `POST /seed` | Load a user's records | `user_id`, `pairs`, `subjects`, `links` | The count of each collection |
