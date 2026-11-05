@@ -14,4 +14,8 @@ impl Re {
     pub fn new(pattern: &str) -> Self {
         Re(Regex::new(pattern).unwrap_or_else(|e| panic!("invalid pattern {pattern:?}: {e}")))
     }
+
+    pub fn inner(&self) -> &Regex {
+        &self.0
+    }
 }
