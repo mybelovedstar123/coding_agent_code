@@ -108,3 +108,8 @@ impl SequenceMatcher {
         2.0 * self.matches() as f64 / length as f64
     }
 }
+
+/// `difflib.SequenceMatcher(None, a, b).ratio()`.
+pub fn sequence_ratio(a: &str, b: &str) -> f64 {
+    SequenceMatcher::new(a, b).ratio()
+}
