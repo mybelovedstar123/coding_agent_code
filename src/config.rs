@@ -46,3 +46,9 @@ pub fn env(name: &str, default: &str) -> String {
 pub fn model_name() -> String {
     env("DITTOBENCH_MODEL", DEFAULT_MODEL)
 }
+
+pub fn ollama_url() -> String {
+    env("OLLAMA_BASE_URL", DEFAULT_OLLAMA_URL)
+        .trim_end_matches('/')
+        .to_string()
+}
