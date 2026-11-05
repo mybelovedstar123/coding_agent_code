@@ -29,3 +29,23 @@ content, so the two agents can be compared by replaying cached runs and counting
 - **Python semantics in Rust.** Code-point string lengths, CPython `repr`, `json.dumps` output, float text and `re`
   behaviour are reproduced so that prompts stay identical.
 
+## How a request flows
+
+```mermaid
+flowchart TD
+    A["POST /run"] --> B["Spelling reading<br/>(advisory)"]
+    A --> C["Router<br/>(advisory)"]
+    B --> D["Build context<br/>retrieval + evidence notes"]
+    C --> D
+    D --> E["Deciding loop<br/>up to 12 model turns"]
+    E -->|tool call| F["Memory tools, run_python<br/>or tool endpoint"]
+    F --> E
+    E -->|reply on the tool path| I["Typography normalization"]
+    E -->|reply on the memory path| G["Second draft<br/>(when time allows)"]
+    G --> H["Final check<br/>corrects or keeps the draft"]
+    H --> I
+    E -->|no reply| J["Recovery<br/>last-resort call"]
+    J --> I
+    I --> K["final_text, tool_calls, usage"]
+```
+
