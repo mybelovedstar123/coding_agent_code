@@ -72,3 +72,4 @@ A malformed body gets HTTP 400. A request without `user_id` belongs to the defau
 | Service | `main`, `server`, `config` | Command line, HTTP routes and environment |
 | Agent core | `agent`, `router`, `spelling`, `policy`, `prompts` | The model-and-tools loop, the advisory stages and every prompt text |
 | Model access | `llm`, `embed` | OpenAI-compatible chat and Ollama-compatible embeddings, with bounded retries |
+| Memory | `store`, `memtools`, `excerpt` | Per-user records, hybrid search, the five memory tools and query-focused excerpts |
