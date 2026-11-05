@@ -57,3 +57,13 @@ pub fn len(s: &str) -> usize {
 fn byte_at(s: &str, i: usize) -> usize {
     s.char_indices().nth(i).map(|(b, _)| b).unwrap_or(s.len())
 }
+
+/// `s[start:end]` for non-negative code-point indices (clamped like Python).
+pub fn slice(s: &str, start: usize, end: usize) -> &str {
+    if start >= end {
+        return "";
+    }
+    let b0 = byte_at(s, start);
+    let b1 = byte_at(s, end);
+    &s[b0..b1.max(b0)]
+}
