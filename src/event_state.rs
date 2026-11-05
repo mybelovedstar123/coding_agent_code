@@ -168,3 +168,6 @@ pub struct PyInt {
     neg: bool,
     digits: String,
 }
+
+/// CPython's default `sys.int_info.default_max_str_digits`.
+const INT_MAX_STR_DIGITS: usize = 4300;
