@@ -42,3 +42,8 @@ pub fn squash_ws(s: &str) -> String {
 pub fn strip_chars<'a>(s: &'a str, chars: &str) -> &'a str {
     s.trim_matches(|c| chars.contains(c))
 }
+
+/// `s.rstrip(chars)`.
+pub fn rstrip_chars<'a>(s: &'a str, chars: &str) -> &'a str {
+    s.trim_end_matches(|c| chars.contains(c))
+}
