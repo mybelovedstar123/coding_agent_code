@@ -86,3 +86,8 @@ Other top-level paths:
 - `PIPELINE.md`: the declaration of every model stage, limit and recovery rule.
 - `PORTING.md`: the contract the port follows.
 
+## Getting started
+
+You need a stable Rust toolchain with support for edition 2021, and Python 3 on the `PATH` if the model may use
+`run_python`. The container image uses CPython 3.12.
+
