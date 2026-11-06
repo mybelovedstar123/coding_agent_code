@@ -189,3 +189,4 @@ pub fn wants_background_job(text: &str) -> bool {
 
 static CAL_IDENT: LazyLock<PyRe> =
     LazyLock::new(|| re(r"\b(?=[a-z0-9-]*\d)(?=[a-z0-9-]*[a-z])[a-z0-9][a-z0-9-]{7,}\b"));
+static CAL_BLOCK: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(block|blpck|bluck|slot|solt)\b"));
