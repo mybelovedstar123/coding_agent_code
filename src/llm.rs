@@ -39,3 +39,16 @@ impl Reply {
         self.message.get("tool_calls")
     }
 }
+
+/// One chat completion. `tools` is the OpenAI tools array, or None; `effort` sets `reasoning.effort`.
+pub trait ChatClient: Send + Sync {
+    fn complete<'a>(
+        &'a self,
+        messages: Vec<Value>,
+        tools: Option<&'a [Value]>,
+        case_id: &'a str,
+        base_url: Option<&'a str>,
+        deadline: Instant,
+        effort: Option<&'a str>,
+    ) -> BoxFuture<'a, Result<Reply, ModelError>>;
+}
