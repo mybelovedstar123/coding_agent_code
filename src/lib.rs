@@ -24,5 +24,6 @@ pub mod pyre;
 pub mod pytool;
 pub mod record_order;
 pub mod router;
+pub mod spelling;
 pub mod store;
 pub mod text;
