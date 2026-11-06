@@ -347,3 +347,5 @@ pub fn lower_grams(request: &str) -> HashSet<String> {
     }
     out
 }
+
+pub const NAME: &str = r"([A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)? [A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)?)";
