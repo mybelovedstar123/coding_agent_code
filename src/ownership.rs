@@ -405,3 +405,5 @@ pub fn first_named_holder(chain: &[(String, String)]) -> Option<String> {
     }
     None
 }
+
+pub const OWNERSHIP_NOTE: &str = "ownership: every sentence in the user's records that names {project} and says who holds, owns, took over or was handed it, quoted from the records in time order (record date, then order within the record), with those records shown in full. holder_now, where given, is a host-side reading of the latest of these sentences and can be wrong; the records themselves decide.";
