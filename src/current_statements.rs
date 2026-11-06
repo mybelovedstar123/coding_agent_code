@@ -85,3 +85,4 @@ pub const CURRENT_NOTE: &str = concat!(
 );
 
 static WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z][a-z'-]+"));
+static TOKEN_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z0-9:'-]+"));
