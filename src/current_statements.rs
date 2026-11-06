@@ -198,3 +198,10 @@ pub const ADD_PATTERNS: &[&str] = &[
     r"\bnow [a-z]{3,6} (?:an? |the |some )([a-z][a-z' -]*?)(?=[.,;]|$| and\b)",
     r"\bplus (?:an? |the |some )?([a-z][a-z' -]*?)(?=[.,;]|$)",
 ];
+// Python's `$` also matches before a final newline: `(?=\n?\z)` in the compiled forms.
+static ADD_RES: LazyLock<Vec<Re>> = LazyLock::new(|| {
+    ADD_PATTERNS
+        .iter()
+        .map(|p| Re::new(&p.replace("|$", r"|(?=\n?\z)")))
+        .collect()
+});
