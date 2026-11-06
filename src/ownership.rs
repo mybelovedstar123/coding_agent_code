@@ -31,3 +31,5 @@ before after over about into out up down off again thing one ones back for re re
 where are we need something work email current live address person whoever owns own owner running holding hold
 responsible accountable point things stand moment these days now give tell me who's whose anyone else someone
 everyone something anything nobody";
+
+pub static STOP: LazyLock<HashSet<&'static str>> = LazyLock::new(|| py::split_ws(STOP_WORDS).into_iter().collect());
