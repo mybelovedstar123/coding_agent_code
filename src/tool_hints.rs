@@ -469,3 +469,10 @@ pub fn research_send_note(user_input: &str, tool_defs: &[Value]) -> String {
     }
     String::new()
 }
+
+pub const EFFORT_NOTE: &str = "The user asks for their usual reasoning effort (how hard you think) without naming a \
+level. The records for \
+this request say what it is: if they state a default level, set that level with set_reasoning_effort; if they say no \
+default has been chosen, do not set one: ask which level the user wants, and in the question name the two options the \
+record for this request describes them going back and forth between, in that record's own words (not the tool's level \
+names).";
