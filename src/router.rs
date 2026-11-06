@@ -19,3 +19,10 @@ const MEMORY_READ_TOOLS: [&str; 4] = [
     "search_subjects",
     "search_memories_in_subjects",
 ];
+
+/// The router's decision: "tool", "memory" or "chat", and the app tools it named.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Decision {
+    pub route: String,
+    pub tools: Vec<String>,
+}
