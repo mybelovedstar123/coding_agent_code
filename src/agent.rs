@@ -23,3 +23,5 @@ use tokio::time::Instant;
 
 /// Validator deadline is 300 s per /run.
 pub const CASE_BUDGET_S: f64 = 270.0;
+/// Ordinary calls must leave this for a final answer.
+pub const ANSWER_RESERVE_S: f64 = 60.0;
