@@ -289,3 +289,9 @@ static CHAT_TOOL_PREFS: LazyLock<PyRe> = LazyLock::new(|| {
 pub fn wants_chat_tool_prefs(text: &str) -> bool {
     CHAT_TOOL_PREFS.is_match(&text.to_lowercase())
 }
+
+static CAPABILITY_QUESTION: LazyLock<PyRe> = LazyLock::new(|| {
+    re(
+        r"\b(is th\w{2,4} a way to|where (do|can) i find the opt\w{2,4}|how (do|can) i (turn on|set up|switch|enable))\b",
+    )
+});
