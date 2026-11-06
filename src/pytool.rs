@@ -143,3 +143,110 @@ def check():
     return None
 sys.stdout.write(json.dumps({"problem": check()}))
 "#;
+
+/// Runs inside the child process. Records arrive on stdin as JSON. Everything is set up inside _main so the module
+/// globals reachable from program frames hold no builtins, sys or import references; allowed modules are imported
+/// before the file-descriptor and process limits close the sandbox. Helpers: records(ids) (with 'rows' for a record
+/// whose user side holds a CSV or markdown table), grep_records(pattern), extract_json(text), parse_table(text) (rows
+/// keyed by each table's own header, normalised to lower case with underscores).
+const RUNNER: &str = r#"
+def _main():
+    import builtins, json, re, resource, sys
+    payload = json.loads(sys.stdin.read())
+    allowed = set(payload["allowed"])
+    for mod in sorted(allowed):
+        __import__(mod)
+    resource.setrlimit(resource.RLIMIT_CPU, (8, 8))
+    resource.setrlimit(resource.RLIMIT_AS, (768 * 1024 * 1024, 768 * 1024 * 1024))
+    resource.setrlimit(resource.RLIMIT_NOFILE, (3, 3))
+    resource.setrlimit(resource.RLIMIT_NPROC, (0, 0))
+    recs = payload["records"]
+
+    def records(ids):
+        if isinstance(ids, str):
+            ids = [ids]
+        out = [dict(recs[i]) for i in list(ids) if isinstance(i, str) and i in recs]
+        for r in out:
+            rows = parse_table(r.get("user") or "")
+            if rows:
+                r["rows"] = rows
+        return out
+
+    def grep_records(pattern):
+        rx = re.compile(pattern, re.IGNORECASE)
+        return [i for i, r in recs.items() if rx.search(r["user"] + "\n" + r["ditto"])]
+
+    def extract_json(text):
+        dec = json.JSONDecoder()
+        out, i = [], 0
+        while i < len(text):
+            j = min([k for k in (text.find("[", i), text.find("{", i)) if k >= 0], default=-1)
+            if j < 0:
+                break
+            try:
+                val, end = dec.raw_decode(text, j)
+                out.append(val)
+                i = end
+            except ValueError:
+                i = j + 1
+        return out
+
+    import csv as _csv
+
+    _LABEL = re.compile(r"^[A-Za-z_][A-Za-z0-9_ ]*$")
+    _ENT = {"&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'", "&#124;": "|", "&#10;": " ",
+            "&#13;": " "}
+
+    def _cell(c):
+        c = re.sub(r"</?code>", "", c.strip())
+        for k, v in _ENT.items():
+            c = c.replace(k, v)
+        return c.strip()
+
+    def _key(k):
+        return re.sub(r"\s+", "_", k.strip().lower())
+
+    def parse_table(text):
+        rows, lines, i = [], str(text).splitlines(), 0
+        while i < len(lines):
+            line = lines[i].strip()
+            if line.startswith("|") and i + 1 < len(lines) and re.match(r"^\|\s*:?-{3,}", lines[i + 1].strip()):
+                header = [_key(_cell(c)) for c in line.strip("|").split("|")]
+                i += 2
+                while i < len(lines) and lines[i].strip().startswith("|"):
+                    cells = [_cell(c) for c in lines[i].strip().strip("|").split("|")]
+                    if len(cells) == len(header):
+                        rows.append(dict(zip(header, cells)))
+                    i += 1
+                continue
+            fields = next(_csv.reader([line])) if "," in line else []
+            if len(fields) >= 2 and all(_LABEL.match(f.strip()) for f in fields):
+                header = [_key(f) for f in fields]
+                i += 1
+                while i < len(lines) and lines[i].strip():
+                    cells = next(_csv.reader([lines[i].strip()]))
+                    if len(cells) != len(header):
+                        break
+                    rows.append(dict(zip(header, [c.strip() for c in cells])))
+                    i += 1
+                continue
+            i += 1
+        return rows
+
+    real_import = builtins.__import__
+
+    def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name.split(".")[0] not in allowed:
+            raise ImportError(f"import of {name!r} is not allowed")
+        return real_import(name, globals, locals, fromlist, level)
+
+    banned = set(payload["banned"])
+    safe = {k: getattr(builtins, k) for k in dir(builtins) if not k.startswith("_") and k not in banned}
+    safe["__import__"] = guarded_import
+    env = {"__builtins__": safe, "records": records, "grep_records": grep_records,
+           "extract_json": extract_json, "parse_table": parse_table, "__name__": "__main__"}
+    code = compile(payload["code"], "<program>", "exec")
+    del payload, builtins, sys, resource
+    exec(code, env)
+_main()
+"#;
