@@ -332,4 +332,15 @@ impl PyVal {
             other => other.repr(),
         }
     }
+
+    /// `int(v)`; None where Python raises TypeError, ValueError or OverflowError.
+    fn int(&self) -> Option<PyInt> {
+        match self {
+            PyVal::Bool(b) => Some(PyInt::from_i64(i64::from(*b))),
+            PyVal::Int(i) => Some(i.clone()),
+            PyVal::Float(x) => PyInt::from_f64(*x),
+            PyVal::Str(s) => PyInt::parse(s),
+            _ => None,
+        }
+    }
 }
