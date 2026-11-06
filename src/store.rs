@@ -248,4 +248,9 @@ impl UserMemory {
             derived: Mutex::new(Derived::default()),
         }
     }
+
+    /// The number of records in the lexical index (`len(self._tf)`).
+    pub fn n_docs(&self) -> usize {
+        self.tf.len()
+    }
 }
