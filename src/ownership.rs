@@ -255,3 +255,4 @@ pub static HOLDER_PHRASES: LazyLock<Re> = LazyLock::new(|| {
     )
 });
 static WHOSE_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\bwhose\b"));
+static RAW_WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[A-Za-z][A-Za-z'-]*"));
