@@ -246,3 +246,6 @@ impl Index {
 }
 
 pub const HOLDER_WORDS: [&str; 6] = ["owns", "owner", "holding", "accountable", "responsible", "running"];
+pub const WH_WORDS: [&str; 12] = [
+    "who", "whom", "why", "what", "when", "where", "which", "while", "whole", "white", "whip", "whim",
+];
