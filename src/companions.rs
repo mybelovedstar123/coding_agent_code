@@ -44,3 +44,11 @@ pub fn phrases(text: &str) -> HashSet<(String, String)> {
         .map(|(a, b)| (a.clone(), b.clone()))
         .collect()
 }
+
+pub struct Index {
+    /// Counter: phrase -> number of records holding it.
+    pub phrase_records: HashMap<(String, String), usize>,
+    /// person -> pair ids whose record holds "<person> and I", in record order (sorted by person, as the Python
+    /// iterates it).
+    pub joint: BTreeMap<String, Vec<String>>,
+}
