@@ -25,3 +25,11 @@ pub fn brand(tool_name: &str) -> String {
         String::new()
     }
 }
+
+/// `word` written capitalized as a name inside a sentence (not as the sentence's first word).
+pub fn named_in(user_input: &str, word: &str) -> bool {
+    let re = Re::new(&format!(r"\b{}\b", escape(&py::capitalize(word))));
+    re.find_iter(user_input)
+        .into_iter()
+        .any(|(start, _, _)| !SENTENCE_START.is_match(&user_input[..start]))
+}
