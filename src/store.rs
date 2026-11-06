@@ -746,4 +746,9 @@ impl UserMemory {
     pub fn cmp_subject_score_pub(&self, a: &(String, f64), b: &(String, f64)) -> Ordering {
         self.cmp_subject_score(a, b)
     }
+
+    /// The newest record time, one second later (a saved note's filing time, D13).
+    pub fn after_latest(&self) -> DateTime<Utc> {
+        self.pairs.values().map(|p| p.ts).max().unwrap_or_else(epoch) + Duration::seconds(1)
+    }
 }
