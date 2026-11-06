@@ -724,3 +724,20 @@ pub fn send_on_record_note(user_input: &str, tool_defs: &[Value]) -> String {
     }
     String::new()
 }
+
+/// Any request word equal to, or (5+ letters, same first letter) a typo of, one of the targets.
+pub fn _has(words: &[String], targets: &[&str], ratio: f64) -> bool {
+    for w in words {
+        for t in targets {
+            if w == t
+                || (py::len(t) >= 5
+                    && py::len(w) >= 4
+                    && w.chars().next() == t.chars().next()
+                    && sequence_ratio(w, t) >= ratio)
+            {
+                return true;
+            }
+        }
+    }
+    false
+}
