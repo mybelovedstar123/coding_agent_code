@@ -270,4 +270,23 @@ impl UserMemory {
         self.derived.lock().expect("derived lock").put(key, built.clone());
         built
     }
+
+    // ----------------------------------------------------------------- writes
+    fn index_lexical(&mut self, pair: &Pair) {
+        if let Some(old) = self.tf.get(&pair.pair_id) {
+            for tok in old.keys() {
+                *self.df.get_mut(tok).expect("indexed token") -= 1;
+            }
+        }
+        let toks = tokenize(&pair.text());
+        let mut tf: IndexMap<String, usize> = IndexMap::new();
+        for t in &toks {
+            *tf.entry(t.clone()).or_insert(0) += 1;
+        }
+        for tok in tf.keys() {
+            *self.df.entry(tok.clone()).or_insert(0) += 1;
+        }
+        self.tlen.insert(pair.pair_id.clone(), toks.len().max(1));
+        self.tf.insert(pair.pair_id.clone(), tf);
+    }
 }
