@@ -499,3 +499,12 @@ pub fn wants_usual_effort(text: &str) -> bool {
     let level = EFFORT_LEVEL.is_match(&low.replace("quick one", ""));
     effort && !level
 }
+
+/// EFFORT_NOTE when set_reasoning_effort is offered and the request asks for the usual level.
+pub fn effort_note(user_input: &str, tool_defs: &[Value]) -> String {
+    if offered_names(tool_defs).contains(&"set_reasoning_effort") && wants_usual_effort(user_input) {
+        EFFORT_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
