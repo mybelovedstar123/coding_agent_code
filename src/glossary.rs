@@ -138,3 +138,37 @@ pub fn glossed_statements(records: &[(String, String)], ident: &str, terms: &Ind
     }
     out
 }
+
+/// The memory context with `glossary` and `glossed_statements` added when the identifier records define their own
+/// field names; unchanged otherwise.
+///
+/// A payload that parses but is not a JSON object raises in the Python (never reached); here it is unchanged.
+pub fn with_glossary(context: Option<String>, prefix: &str, items: &[(String, String)], ident: &str) -> Option<String> {
+    let Some(ctx) = context.as_deref() else { return context };
+    if ctx.is_empty() || !ctx.contains('\n') || items.iter().map(|(_, p)| py::len(p)).sum::<usize>() > MAX_RECORD_CHARS
+    {
+        return context;
+    }
+    let terms = glossary(items, ident);
+    if terms.is_empty() {
+        return context;
+    }
+    let Some((_, body)) = ctx.split_once('\n') else {
+        return context;
+    };
+    let Ok(mut payload) = serde_json::from_str::<Value>(body) else {
+        return context;
+    };
+    let Some(obj) = payload.as_object_mut() else {
+        return context;
+    };
+    let note = obj.get("note").map(py::str_value).unwrap_or_default();
+    obj.insert(
+        "note".into(),
+        Value::String(py::strip(&format!("{note} {GLOSSARY_NOTE}")).to_string()),
+    );
+    let statements = glossed_statements(items, ident, &terms);
+    obj.insert("glossary".into(), json!(terms));
+    obj.insert("glossed_statements".into(), Value::Array(statements));
+    Some(format!("{prefix}\n{}", py::dumps(&payload, false)))
+}
