@@ -710,4 +710,34 @@ impl Store {
         self.ranked(user_id, expanded, top_k, restrict, session_id, deadline)
             .await
     }
+
+    pub async fn search_subjects(
+        &self,
+        user_id: &str,
+        queries: &[String],
+        top_k: usize,
+        deadline: Option<Instant>,
+    ) -> Result<Vec<(Subject, f64)>, EmbedError> {
+        let mem = self.user(user_id);
+        let queries: Vec<String> = queries.iter().filter(|q| !py::strip(q).is_empty()).cloned().collect();
+        if queries.is_empty() || mem.read().await.subjects.is_empty() {
+            return Ok(Vec::new());
+        }
+        let qvecs = self.embedder.embed(queries.clone(), deadline).await?;
+        let mem = mem.read().await;
+        let mut best: IndexMap<String, f64> = IndexMap::new();
+        for (query, qvec) in queries.iter().zip(&qvecs) {
+            for (sid, score) in mem.subject_scores(qvec, query).into_iter().take(top_k) {
+                let cur = best.get(&sid).copied().unwrap_or(-1.0);
+                best.insert(sid, cur.max(score));
+            }
+        }
+        let mut ranked: Vec<(String, f64)> = best.into_iter().collect();
+        ranked.sort_by(|a, b| mem.cmp_subject_score_pub(a, b));
+        Ok(ranked
+            .into_iter()
+            .take(top_k)
+            .map(|(sid, score)| (mem.subjects[&sid].clone(), score))
+            .collect())
+    }
 }
