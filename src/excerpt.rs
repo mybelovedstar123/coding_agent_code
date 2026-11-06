@@ -13,3 +13,13 @@ use std::sync::LazyLock;
 
 static SENT_SPLIT: LazyLock<Re> = LazyLock::new(|| Re::new("(?<=[.!?;])\\s+(?=[A-Z0-9\"'\u{201c}(])|\\n+"));
 static FACT_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\d|@"));
+
+pub fn split_sentences(text: &str) -> Vec<String> {
+    SENT_SPLIT
+        .split(text)
+        .into_iter()
+        .map(py::strip)
+        .filter(|p| !p.is_empty())
+        .map(String::from)
+        .collect()
+}
