@@ -36,3 +36,24 @@ pub fn parse_ts(value: Option<&Value>) -> DateTime<Utc> {
     };
     parse_iso(&text.replace('Z', "+00:00")).unwrap_or_else(epoch)
 }
+
+fn parse_iso(s: &str) -> Option<DateTime<Utc>> {
+    let chars: Vec<char> = s.chars().collect();
+    if chars.len() < 10 {
+        return None;
+    }
+    let date_str: String = chars[..10].iter().collect();
+    let date = NaiveDate::parse_from_str(&date_str, "%Y-%m-%d").ok()?;
+    if chars.len() == 10 {
+        return Some(Utc.from_utc_datetime(&date.and_time(NaiveTime::MIN)));
+    }
+    // Any single character separates the date and the time.
+    let rest: String = chars[11..].iter().collect();
+    let (time_part, offset) = split_offset(&rest)?;
+    let time = parse_time(&time_part)?;
+    let naive = NaiveDateTime::new(date, time);
+    Some(match offset {
+        None => Utc.from_utc_datetime(&naive),
+        Some(off) => off.from_local_datetime(&naive).single()?.with_timezone(&Utc),
+    })
+}
