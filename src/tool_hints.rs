@@ -367,3 +367,10 @@ pub const RULE_EXTRA: &[(&str, &str)] = &[
          instead of asking first.",
     ),
 ];
+
+/// `(t.get("function") or {}).get(key)` of one tool definition.
+fn function_field<'a>(t: &'a Value, key: &str) -> Option<&'a Value> {
+    t.get("function")
+        .filter(|f| crate::store::truthy(f))
+        .and_then(|f| f.get(key))
+}
