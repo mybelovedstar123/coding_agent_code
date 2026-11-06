@@ -92,3 +92,23 @@ pub fn reordered_sets(records: &[Record], ident: &str) -> Vec<Vec<Copy>> {
     order.sort_unstable();
     order.into_iter().map(|i| sets[i].clone()).collect()
 }
+
+/// COPIES_NOTE_HEAD plus, per reordered copy set, its pairIDs with their filing times (which records are copies of
+/// one note and when each was filed; no reading instruction); empty when the copies agree on order.
+pub fn copies_note(items: &[Record], ident: &str) -> String {
+    let sets = reordered_sets(items, ident);
+    if sets.is_empty() {
+        return String::new();
+    }
+    let listed = sets
+        .iter()
+        .map(|s| {
+            s.iter()
+                .map(|(pid, stamp, _)| format!("{pid} (filed {stamp})"))
+                .collect::<Vec<_>>()
+                .join(", ")
+        })
+        .collect::<Vec<_>>()
+        .join("; ");
+    format!("{COPIES_NOTE_HEAD} {listed}.")
+}
