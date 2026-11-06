@@ -164,3 +164,10 @@ pub fn statement(prompt: &str, ident: &str) -> String {
     let s = py::strip(s.trim_start_matches(':'));
     py::strip(s.trim_matches('"')).to_string()
 }
+
+/// One distinct note and the pairIDs that carry it.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Note {
+    pub text: String,
+    pub records: Vec<String>,
+}
