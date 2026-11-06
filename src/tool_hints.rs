@@ -44,3 +44,6 @@ pub fn _any(words: &[String], targets: &[&str], ratio: f64) -> bool {
 fn has_word(words: &[String], word: &str) -> bool {
     words.iter().any(|w| w == word)
 }
+
+static SCHED_COUNTING: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(how m\w{1,3} r\w{1,4}|logged|run count|pull up|lay out|show me|what|which)\b"));
