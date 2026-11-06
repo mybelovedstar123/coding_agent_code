@@ -47,3 +47,5 @@ fn has_word(words: &[String], word: &str) -> bool {
 
 static SCHED_COUNTING: LazyLock<PyRe> =
     LazyLock::new(|| re(r"\b(how m\w{1,3} r\w{1,4}|logged|run count|pull up|lay out|show me|what|which)\b"));
+static SCHED_SET_UP: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(put|set up|make|have|turn)\b[^.?!]*\b(every|each|daily|weekly|nightly)\b"));
