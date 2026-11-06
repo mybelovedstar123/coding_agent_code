@@ -41,3 +41,5 @@ pub const CONTEXT_CHARS: usize = 600;
 /// record containing one is pre-loaded in full (no size cap, never replaced by an excerpt or an id-only pointer).
 static IDENT_RE: LazyLock<Re> =
     LazyLock::new(|| Re::new(r"\b(?=[A-Za-z0-9-]*\d)(?=[A-Za-z0-9-]*[A-Za-z])[A-Za-z0-9][A-Za-z0-9-]{7,}\b"));
+/// Identifier records longer than this are event histories worth computing over with the program tool.
+pub const PROGRAM_HISTORY_CHARS: usize = 15_000;
