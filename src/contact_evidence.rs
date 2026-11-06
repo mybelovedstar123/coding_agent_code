@@ -147,3 +147,8 @@ fn appended_note(payload: &Map<String, Value>, extra: &str) -> String {
     let note = payload.get("note").map(py::str_value).unwrap_or_default();
     py::strip(&format!("{note} {extra}")).to_string()
 }
+
+/// `prefix + "\n" + json.dumps(payload, ensure_ascii=False)`.
+fn dump_context(prefix: &str, payload: &Value) -> String {
+    format!("{prefix}\n{}", py::dumps(payload, false))
+}
