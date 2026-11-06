@@ -595,3 +595,12 @@ static APPROXIMATE_OPTION: LazyLock<PyRe> = LazyLock::new(|| {
 pub fn names_option_approximately(text: &str) -> bool {
     APPROXIMATE_OPTION.is_match(&text.to_lowercase())
 }
+
+/// APPROXIMATE_OPTION_NOTE when the catalog reports the configured options and the request spells one approximately.
+pub fn approximate_option_note(user_input: &str, tool_defs: &[Value]) -> String {
+    if offered_names(tool_defs).contains(&"discover_capabilities") && names_option_approximately(user_input) {
+        APPROXIMATE_OPTION_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
