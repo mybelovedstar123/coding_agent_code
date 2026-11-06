@@ -87,3 +87,8 @@ pub fn person_name_forms(mem: &UserMemory, question: &str) -> BTreeSet<String> {
     }
     forms
 }
+
+/// The text names one of the given name forms (whole words).
+pub fn names_any(text: &str, forms: &BTreeSet<String>) -> bool {
+    forms.iter().any(|f| names_form(f, text))
+}
