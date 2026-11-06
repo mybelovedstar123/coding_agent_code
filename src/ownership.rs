@@ -20,3 +20,14 @@ use serde_json::{Map, Value};
 use std::collections::HashSet;
 use std::ops::Deref;
 use std::sync::{LazyLock, OnceLock};
+
+// --------------------------------------------------------------------------------------------------------- module
+
+const STOP_WORDS: &str =
+    "a an the and or but of to in on at for with from by is are was were be been it its this that these those
+my our your their his her we i you they he she me us them now then there here what which who whom whose when where how
+just still also not no yes so as if than too very can will would should could do does did done have has had please
+before after over about into out up down off again thing one ones back for re regarding quick help remember think
+where are we need something work email current live address person whoever owns own owner running holding hold
+responsible accountable point things stand moment these days now give tell me who's whose anyone else someone
+everyone something anything nobody";
