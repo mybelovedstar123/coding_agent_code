@@ -250,3 +250,10 @@ pub fn wants_job_figure(text: &str) -> bool {
 }
 
 static NOTE_NOTE: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(note|scr\w{2,5}pa?d|handoff)\b"));
+static NOTE_FIX: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(fix the note|correct what|bin the old|make it \w+day|moved to|shifted to|scratch that|is \w+day now|",
+        r"rather than adding|instead of piling|update the note|change the note|forget \w+day|handoff is \w+day|",
+        r"keep that in the)\b",
+    ))
+});
