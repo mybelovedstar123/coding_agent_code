@@ -29,3 +29,4 @@ pub const ANSWER_RESERVE_S: f64 = 60.0;
 pub const WRAP_UP_S: f64 = 90.0;
 /// A very large transcript (long records read in full) makes each call slow: wrap up earlier.
 pub const BIG_TRANSCRIPT_CHARS: usize = 150_000;
+pub const WRAP_UP_BIG_S: f64 = 120.0;
