@@ -355,3 +355,28 @@ const ID_ARGS: [(&str, &str); 6] = [
     ("subject_id", "subject"),
     ("subjectId", "subject"),
 ];
+
+/// Identifier arguments that do not name a record in this user's store, as "key=repr(value)".
+pub fn unknown_store_ids(args: &Map<String, Value>, mem: &UserMemory) -> Vec<String> {
+    let mut bad = Vec::new();
+    for (key, kind) in ID_ARGS {
+        let Some(v) = args.get(key) else { continue };
+        let vals: Vec<&Value> = match v {
+            Value::Array(a) => a.iter().collect(),
+            other => vec![other],
+        };
+        for v in vals {
+            let known = match v {
+                Value::String(s) => match kind {
+                    "pair" => mem.pairs.contains_key(s),
+                    _ => mem.subjects.contains_key(s),
+                },
+                _ => false,
+            };
+            if !known {
+                bad.push(format!("{key}={}", py::repr_value(v)));
+            }
+        }
+    }
+    bad
+}
