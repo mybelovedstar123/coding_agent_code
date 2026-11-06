@@ -552,3 +552,17 @@ pub fn agreed_start_note(user_input: &str, tool_defs: &[Value]) -> String {
 pub const CALENDAR_ENTRY_NOTE: &str = "The user asks to have a named item on their calendar. If the records say it is \
 already on the calendar, do not create another event: find it with the calendar search and tell the user it is \
 already there. Otherwise create the event as asked.";
+
+/// A request to have a quoted, named item on the user's calendar ("get the \"…\" review onto my calendar", "make sure
+/// the \"…\" review is on my calendar"); "calendar" and "onto" tolerate typos.
+pub fn wants_named_calendar_entry(text: &str) -> bool {
+    if text.matches('"').count() < 2 && !text.contains('\u{201c}') {
+        return false;
+    }
+    let w = _words(text);
+    (2..w.len()).any(|i| {
+        _fuzzy(&w[i], "calendar", 0.7)
+            && w[i - 1] == "my"
+            && (["on", "onto", "in", "into", "to"].contains(&w[i - 2].as_str()) || _fuzzy(&w[i - 2], "onto", 0.6))
+    })
+}
