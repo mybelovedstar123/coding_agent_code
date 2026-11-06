@@ -31,3 +31,7 @@ pub fn statement(text: &str, ident: &str) -> String {
         }
     }
 }
+
+pub fn words(text: &str) -> BTreeSet<String> {
+    WORD_RE.findall(text).into_iter().collect()
+}
