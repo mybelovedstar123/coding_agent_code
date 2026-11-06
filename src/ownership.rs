@@ -124,3 +124,13 @@ pub fn thread_like(word: &str) -> bool {
 pub type Chain = Vec<(String, String)>;
 /// A record's handover sentence: (stripped sentence, its tokens).
 type Handover = (String, Vec<String>);
+
+/// Records tokenised once: (timestamp, text, token list, token set).
+pub struct Index {
+    pub recs: Vec<(String, String, Vec<String>)>,
+    pub sets: Vec<HashSet<String>>,
+    /// Per record, built on first use: its handover sentences as (stripped sentence, tokens), the sentences that pass
+    /// the phrase-independent tests of `chain` (no quotation mark, OWNERSHIP and PERSON match), in record order. A
+    /// cache only: `chain` and `sources` decide exactly as the Python, which re-splits the record on every call.
+    handovers: Vec<OnceLock<Vec<Handover>>>,
+}
