@@ -25,3 +25,8 @@ fn table(c: char) -> char {
         c => c,
     }
 }
+
+pub fn normalize(text: &str) -> String {
+    let text: String = text.chars().map(table).collect();
+    STRONG.sub_with(&text, |c| c.get(1).map(|m| m.as_str().to_string()).unwrap_or_default())
+}
