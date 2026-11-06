@@ -12,3 +12,6 @@ const NAMED_TOOL_NOTE: &str = "The user asked for {tools} by name. Call it with 
      request's own words, as its input: the tool's result is where the value comes from, so do not look for missing \
      details elsewhere first, and do not ask the user for them first: leave a detail the request does not give \
      unspecified.";
+
+/// `(?:^|[.!?]\s+)$` — Python's `$` also matches before a final newline.
+static SENTENCE_START: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?:^|[.!?]\s+)(?=\n?\z)"));
