@@ -370,3 +370,85 @@ fn splitlines(s: &str) -> Vec<&str> {
     }
     out
 }
+
+pub async fn run(code: &str, texts: &serde_json::Map<String, Value>) -> Value {
+    if py::strip(code).is_empty() {
+        return json!({"error": "missing required argument 'code': pass the Python program as a string"});
+    }
+    if let Some(problem) = validate(code).await {
+        return json!({"error": problem});
+    }
+    let payload = json!({
+        "code": code,
+        "records": Value::Object(texts.clone()),
+        "allowed": sorted_strs(&ALLOWED_IMPORTS),
+        "banned": sorted_strs(&BANNED_NAMES),
+    });
+    let spawned = Command::new(python())
+        .args(["-I", "-S", "-c", RUNNER])
+        .env_clear()
+        .env("PATH", "/usr/bin:/bin")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .kill_on_drop(true)
+        .spawn();
+    let mut child = match spawned {
+        Ok(c) => c,
+        Err(err) => return json!({"error": format!("the program could not be started: {err}")}),
+    };
+    let mut stdin = child.stdin.take().expect("piped stdin");
+    let mut stdout = child.stdout.take().expect("piped stdout");
+    let mut stderr = child.stderr.take().expect("piped stderr");
+    let bytes = py::dumps(&payload, true).into_bytes();
+    let exchange = async {
+        let writer = async move {
+            let _ = stdin.write_all(&bytes).await;
+            let _ = stdin.shutdown().await;
+            drop(stdin);
+        };
+        let (_, (out, flooded), (err, _)) = tokio::join!(writer, read_bounded(&mut stdout), read_bounded(&mut stderr));
+        (out, err, flooded)
+    };
+    let (out, err, flooded) = match tokio::time::timeout(Duration::from_secs_f64(WALL_TIMEOUT_S), exchange).await {
+        Ok(r) => r,
+        Err(_) => {
+            let _ = child.kill().await;
+            return json!({"error": format!("program exceeded the {}s time limit", WALL_TIMEOUT_S as i64)});
+        }
+    };
+    if flooded {
+        let _ = child.kill().await;
+    }
+    let status = child.wait().await.ok();
+    let stdout_text = String::from_utf8_lossy(&out).into_owned();
+    if flooded {
+        return json!({"stdout": format!("{}\n\u{2026}[output truncated]", py::head(&stdout_text, MAX_OUTPUT_CHARS))});
+    }
+    let code_opt = status.and_then(|s| s.code());
+    if status.is_some() && code_opt.is_none() {
+        return json!({"error": "program was stopped: it exceeded the CPU or memory limit"});
+    }
+    if code_opt != Some(0) {
+        let err_text = String::from_utf8_lossy(&err).into_owned();
+        let lines = splitlines(py::strip(&err_text));
+        let tail = &lines[lines.len().saturating_sub(3)..];
+        return json!({
+            "error": format!("program failed: {}", tail.join(" | ")),
+            "stdout": py::head(&stdout_text, MAX_OUTPUT_CHARS),
+        });
+    }
+    let stdout_text = if py::len(&stdout_text) > MAX_OUTPUT_CHARS {
+        format!(
+            "{}\n\u{2026}[output truncated]",
+            py::head(&stdout_text, MAX_OUTPUT_CHARS)
+        )
+    } else {
+        stdout_text
+    };
+    if py::strip(&stdout_text).is_empty() {
+        json!({"stdout": "(no output; use print())"})
+    } else {
+        json!({"stdout": stdout_text})
+    }
+}
