@@ -14,3 +14,8 @@ use indexmap::IndexMap;
 use serde_json::{json, Value};
 use std::collections::HashSet;
 use std::sync::LazyLock;
+
+pub const DEF_VERBS: &str = concat!(
+    r"is|are|designates|denotes|names|records|identifies|carries|marks|means|stands for|refers to|",
+    r"is the|holds|gives|captures|tracks|labels"
+);
