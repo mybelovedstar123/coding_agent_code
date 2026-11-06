@@ -131,3 +131,10 @@ pub struct Pair {
     pub source: String,
     pub subjects: BTreeSet<String>,
 }
+
+impl Pair {
+    /// `f"{prompt}\n{response}".strip()`.
+    pub fn text(&self) -> String {
+        py::strip(&format!("{}\n{}", self.prompt, self.response)).to_string()
+    }
+}
