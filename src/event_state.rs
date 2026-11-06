@@ -365,4 +365,11 @@ impl JsonParser<'_> {
     fn at(&self, i: usize) -> Option<char> {
         self.s.get(i).copied()
     }
+
+    fn ws(&self, mut i: usize) -> usize {
+        while matches!(self.at(i), Some(' ' | '\t' | '\n' | '\r')) {
+            i += 1;
+        }
+        i
+    }
 }
