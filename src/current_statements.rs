@@ -191,3 +191,10 @@ pub fn notes_of(records: &[(String, String)], ident: &str) -> Vec<Note> {
     }
     notes
 }
+
+pub const ADD_PATTERNS: &[&str] = &[
+    r"([a-z][a-z' -]*?) (?:is|are) on it",
+    r"\badded (?:an? |the |some )?([a-z][a-z' -]*?)(?=[.,;]|$| and\b)",
+    r"\bnow [a-z]{3,6} (?:an? |the |some )([a-z][a-z' -]*?)(?=[.,;]|$| and\b)",
+    r"\bplus (?:an? |the |some )?([a-z][a-z' -]*?)(?=[.,;]|$)",
+];
