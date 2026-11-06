@@ -120,3 +120,14 @@ fn parse_time(s: &str) -> Option<NaiveTime> {
 pub fn fmt_ts(ts: &DateTime<Utc>) -> String {
     ts.format("%Y-%m-%dT%H:%M:%SZ").to_string()
 }
+
+#[derive(Debug, Clone)]
+pub struct Pair {
+    pub pair_id: String,
+    pub session_id: String,
+    pub ts: DateTime<Utc>,
+    pub prompt: String,
+    pub response: String,
+    pub source: String,
+    pub subjects: BTreeSet<String>,
+}
