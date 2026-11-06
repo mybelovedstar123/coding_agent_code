@@ -645,4 +645,9 @@ impl CsvReader {
         self.field_len += 1;
         Ok(())
     }
+
+    fn save_field(&mut self) {
+        self.fields.push(std::mem::take(&mut self.field));
+        self.field_len = 0;
+    }
 }
