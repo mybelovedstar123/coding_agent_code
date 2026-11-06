@@ -11,3 +11,4 @@ use std::collections::{BTreeSet, HashSet};
 use std::sync::LazyLock;
 
 pub const COPY_JACCARD: f64 = 0.7;
+pub const MIN_WORDS: usize = 5;
