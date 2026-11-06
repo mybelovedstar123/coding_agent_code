@@ -101,3 +101,11 @@ fn messages(user_input: &str, tool_defs: &[Value], wire_system: &str) -> Vec<Val
         json!({"role": "user", "content": user_input}),
     ]
 }
+
+fn names_of(tool_defs: &[Value]) -> HashSet<String> {
+    tool_defs
+        .iter()
+        .filter_map(|t| function_of(t).get("name").and_then(Value::as_str))
+        .map(String::from)
+        .collect()
+}
