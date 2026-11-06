@@ -119,3 +119,6 @@ pub fn thread_like(word: &str) -> bool {
                 && sequence_ratio(word, b) >= 0.7)
     })
 }
+
+/// Handover sentences as (record timestamp, sentence), in time order.
+pub type Chain = Vec<(String, String)>;
