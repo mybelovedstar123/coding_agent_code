@@ -2,3 +2,11 @@
 //! sees the request's system prompt, the user's message and the live tool catalog (names and descriptions, each
 //! description shortened to 220 characters), and no memory records; its tool names are advisory and unused.
 
+use crate::llm::{ChatClient, Usage};
+use crate::prompts::ROUTER_PROMPT;
+use crate::py;
+use crate::pyre::Re;
+use serde_json::{json, Value};
+use std::collections::HashSet;
+use std::sync::LazyLock;
+use tokio::time::Instant;
