@@ -406,3 +406,21 @@ fn collect_ids(obj: &Value, out: &mut HashSet<String>) {
         _ => {}
     }
 }
+
+/// Ids named by earlier executed tool results of this request (exact values from id fields). Results that are only an
+/// error (including the harness's own block errors) contribute nothing.
+pub fn ids_from_results(results: &[String]) -> HashSet<String> {
+    let mut seen = HashSet::new();
+    for rendered in results {
+        let Ok(parsed) = serde_json::from_str::<Value>(rendered) else {
+            continue;
+        };
+        if let Value::Object(map) = &parsed {
+            if map.len() == 1 && map.contains_key("error") {
+                continue;
+            }
+        }
+        collect_ids(&parsed, &mut seen);
+    }
+    seen
+}
