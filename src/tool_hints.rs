@@ -418,3 +418,9 @@ static RS_FIGURE: LazyLock<PyRe> =
     LazyLock::new(|| re(r"\bat (?:r\w{2,4}t now|today|as of now)|sit\w{0,4}ng at|set\w{0,4}ng at"));
 static RS_LOOKUP: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(l\w{1,3}k up|c\w?h?e?c?k|pu\w?ll?|find)\b"));
 static RS_UPDATE: LazyLock<PyRe> = LazyLock::new(|| re(r"\bupdate\b"));
+static RS_SEND: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(get (?:it|the \w+) over|s\w{1,2}nt to|s[ne]\w{0,2}t to|e-mail|shoot it|p\w{0,2}s{1,2} (?:it|the)|",
+        r"email what)\b",
+    ))
+});
