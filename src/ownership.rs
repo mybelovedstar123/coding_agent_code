@@ -41,3 +41,7 @@ pub static OWNERSHIP: LazyLock<Re> = LazyLock::new(|| {
 });
 pub static PERSON: LazyLock<Re> =
     LazyLock::new(|| Re::new(r"\b([A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)? [A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)?)\b"));
+/// The Python sentence splitter, `(?<=[.;!?])\s+|\s+…\s+|\n+`. `sentences` splits with an equivalent pattern that
+/// needs no lookbehind, so the regex crate's automata run it instead of the backtracking engine.
+pub static SENT: LazyLock<Re> =
+    LazyLock::new(|| Re::new(r"(?<=[.;!?])[\s\x1c-\x1f]+|[\s\x1c-\x1f]+…[\s\x1c-\x1f]+|\n+"));
