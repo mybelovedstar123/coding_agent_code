@@ -98,3 +98,23 @@ fn oldest_first(mut out: Vec<Pair>) -> Vec<Pair> {
     out.sort_by(cmp_content);
     out
 }
+
+/// For a handle request: the records naming the person asked about together with the channel, oldest
+/// first; empty for any other request.
+pub fn channel_records(mem: &UserMemory, question: &str) -> Vec<Pair> {
+    if !asks_for_handle(question) {
+        return Vec::new();
+    }
+    let forms = person_name_forms(mem, question);
+    if forms.is_empty() {
+        return Vec::new();
+    }
+    let out = mem
+        .pairs
+        .values()
+        // Both tests are pure: the cheap name test (a literal prefilter) runs first.
+        .filter(|p| names_any(&p.prompt, &forms) && CHANNEL_RE.is_match(&p.prompt))
+        .cloned()
+        .collect();
+    oldest_first(out)
+}
