@@ -678,3 +678,12 @@ pub fn asks_to_confirm_preference(text: &str) -> bool {
         && CONFIRM_STATED.is_match(&low)
         && !CONFIRM_CHANGE.is_match(&low)
 }
+
+/// CONFIRM_PREFERENCE_NOTE when the request asks to confirm the value of one of the user's own settings.
+pub fn confirm_preference_note(user_input: &str) -> String {
+    if asks_to_confirm_preference(user_input) {
+        CONFIRM_PREFERENCE_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
