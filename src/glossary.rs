@@ -59,3 +59,29 @@ pub fn statement(prompt: &str, ident: &str) -> String {
     let s = py::strip(s.trim_end_matches('}'));
     py::strip(s.trim_matches('"')).to_string()
 }
+
+/// term -> meaning from a definitions note; empty when the note defines fewer than two names.
+pub fn definitions(text: &str) -> IndexMap<String, String> {
+    let m = INTRO_RE.search(text);
+    let start = match m {
+        Some((_, end)) => end,
+        None if SCOPE_RE.match_start(text).is_some() => text.find(',').map_or(0, |b| b + 1),
+        None => 0,
+    };
+    let mut out: IndexMap<String, String> = IndexMap::new();
+    for clause in CLAUSE_SPLIT.split(&text[start..]) {
+        let last = clause.rsplit(':').next().unwrap_or(clause);
+        let candidate = py::strip(last).trim_end_matches('.');
+        if let Some(d) = DEF_RE.match_start(candidate) {
+            let (term, verb, meaning) = (&d[1], &d[2], &d[3]);
+            out.entry(term.to_string())
+                .or_insert_with(|| py::strip(&format!("{verb} {meaning}")).to_string());
+        }
+    }
+    let need = if m.is_some() { 2 } else { 3 };
+    if out.len() >= need {
+        out
+    } else {
+        IndexMap::new()
+    }
+}
