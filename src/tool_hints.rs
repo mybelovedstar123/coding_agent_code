@@ -276,3 +276,10 @@ static TEAM_FEEDBACK: LazyLock<PyRe> = LazyLock::new(|| {
 pub fn wants_team_feedback(text: &str) -> bool {
     TEAM_FEEDBACK.is_match(&text.to_lowercase())
 }
+
+static CHAT_TOOL_PREFS: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(chat t\w{2,4}ls|(t\w{2}n (off|on)|disable|enable|allow only|switch (off|on)) (the )?",
+        r"(agent j\w{2,3}s|image t\w{2,4}ls|memory t\w{2,4}ls|web (search|t\w{2,4}ls)|\w+ t\w{2,4}ls))\b",
+    ))
+});
