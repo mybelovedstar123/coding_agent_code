@@ -35,3 +35,12 @@ pub fn proper_words(text: &str) -> BTreeSet<String> {
         .map(|(_, _, t)| t.to_string())
         .collect()
 }
+
+/// Adjacent pairs of content words (`text.tokenize`).
+pub fn phrases(text: &str) -> HashSet<(String, String)> {
+    let toks = tokenize(text);
+    toks.iter()
+        .zip(toks.iter().skip(1))
+        .map(|(a, b)| (a.clone(), b.clone()))
+        .collect()
+}
