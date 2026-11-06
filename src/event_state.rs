@@ -235,3 +235,12 @@ impl PyInt {
         Some(PyInt::new(neg, &digits))
     }
 }
+
+impl fmt::Display for PyInt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.neg {
+            f.write_str("-")?;
+        }
+        f.write_str(&self.digits)
+    }
+}
