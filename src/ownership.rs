@@ -106,3 +106,4 @@ pub fn fuzzy_in(phrase: &str, text_tokens: &[String], ratio: Option<f64>) -> boo
 }
 
 pub const MAX_PHRASE_RECORDS: usize = 25;
+pub const BOUNDARY_WORDS: [&str; 5] = ["thread", "saga", "situation", "business", "project"];
