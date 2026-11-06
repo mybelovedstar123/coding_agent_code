@@ -148,4 +148,16 @@ impl Index {
         let handovers = recs.iter().map(|_| OnceLock::new()).collect();
         Index { recs, sets, handovers }
     }
+
+    /// Record `i`'s handover sentences (see `handovers`).
+    fn handovers(&self, i: usize) -> &[Handover] {
+        self.handovers[i].get_or_init(|| {
+            sentences(&self.recs[i].1)
+                .into_iter()
+                .filter(|s| !s.contains('"') && !s.contains('\u{201c}'))
+                .filter(|s| OWNERSHIP.is_match(s) && PERSON.is_match(s))
+                .map(|s| (py::strip(s).to_string(), tokens(s)))
+                .collect()
+        })
+    }
 }
