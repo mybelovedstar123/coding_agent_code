@@ -118,3 +118,7 @@ pub fn channel_records(mem: &UserMemory, question: &str) -> Vec<Pair> {
         .collect();
     oldest_first(out)
 }
+
+static REMOVAL_RE: LazyLock<Re> = LazyLock::new(|| {
+    Re::new(r"(?i)\b(?:remove|drop|delete|retired?|closed|forget)\b|\bdon['’]t (?:want it on file|hand it out)\b")
+});
