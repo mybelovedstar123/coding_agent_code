@@ -122,3 +122,8 @@ pub fn channel_records(mem: &UserMemory, question: &str) -> Vec<Pair> {
 static REMOVAL_RE: LazyLock<Re> = LazyLock::new(|| {
     Re::new(r"(?i)\b(?:remove|drop|delete|retired?|closed|forget)\b|\bdon['’]t (?:want it on file|hand it out)\b")
 });
+
+/// One of the channel records asks for a saved handle to be removed.
+pub fn has_removal_instruction(records: &[Pair]) -> bool {
+    records.iter().any(|p| REMOVAL_RE.is_match(&p.prompt))
+}
