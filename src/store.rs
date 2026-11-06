@@ -540,3 +540,12 @@ pub fn truthy(v: &Value) -> bool {
         Value::Object(o) => !o.is_empty(),
     }
 }
+
+/// `str(d.get(a) or d.get(b) or "")` over a JSON object: the first truthy field, as Python's str() prints it.
+pub fn first_str(item: &serde_json::Map<String, Value>, keys: &[&str]) -> String {
+    keys.iter()
+        .filter_map(|k| item.get(*k))
+        .find(|v| truthy(v))
+        .map(py::str_value)
+        .unwrap_or_default()
+}
