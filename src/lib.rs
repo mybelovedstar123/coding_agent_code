@@ -28,3 +28,4 @@ pub mod spelling;
 pub mod store;
 pub mod text;
 pub mod tool_hints;
+pub mod typography;
