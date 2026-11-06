@@ -447,4 +447,24 @@ impl UserMemory {
         }
         scores
     }
+
+    pub fn subject_scores(&self, qvec: &[f32], query: &str) -> Vec<(String, f64)> {
+        if self.subj_order.is_empty() {
+            return Vec::new();
+        }
+        let qtoks: BTreeSet<String> = tokenize(query).into_iter().collect();
+        let mut out: Vec<(String, f64)> = self
+            .subj_order
+            .iter()
+            .zip(&self.subj_vecs)
+            .map(|(sid, v)| {
+                let subj = &self.subjects[sid];
+                let name_toks: BTreeSet<String> = tokenize(&subj.text).into_iter().collect();
+                let lex = qtoks.intersection(&name_toks).count() as f64 / name_toks.len().max(1) as f64;
+                (sid.clone(), dot(v, qvec) as f64 + 0.3 * lex)
+            })
+            .collect();
+        out.sort_by(|a, b| self.cmp_subject_score(a, b));
+        out
+    }
 }
