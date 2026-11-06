@@ -83,3 +83,5 @@ pub const CURRENT_NOTE: &str = concat!(
     "be wrong; the records themselves decide. When you name the current decision or plan, use the statement's own ",
     "words and verb form as written (not rephrased into another tense or an -ing form)."
 );
+
+static WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z][a-z'-]+"));
