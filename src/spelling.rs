@@ -41,3 +41,27 @@ pub fn usable_correction(original: &str, corrected: &str) -> String {
     }
     corrected.to_string()
 }
+
+/// (usable correction or "", usage) from one low-effort call that sees only the user's message.
+pub async fn corrected_reading(
+    chat: &dyn ChatClient,
+    user_input: &str,
+    case_id: &str,
+    base_url: Option<&str>,
+    deadline: Instant,
+) -> (String, Usage) {
+    let messages = vec![
+        json!({"role": "system", "content": SPELLING_PROMPT}),
+        json!({"role": "user", "content": user_input}),
+    ];
+    match chat
+        .complete(messages, None, case_id, base_url, deadline, Some("low"))
+        .await
+    {
+        Err(_) => (String::new(), Usage::default()),
+        Ok(msg) => {
+            let content = msg.content.as_ref().and_then(Value::as_str).unwrap_or("");
+            (usable_correction(user_input, content), msg.usage.clone())
+        }
+    }
+}
