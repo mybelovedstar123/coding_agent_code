@@ -39,3 +39,5 @@ pub static OWNERSHIP: LazyLock<Re> = LazyLock::new(|| {
         r"(?i)\b(owns?|owner|owned|holding|holds|held|in charge|on point|took over|taken over|takes over|picked up|passed|handed|the handoff on|moved to|hands? (?:it )?(?:over|off)|now runs|running it|holding the thread|'s now|off it|accountable|responsible|person to ask|took it on|stepped back|in the lead|leads it)\b",
     )
 });
+pub static PERSON: LazyLock<Re> =
+    LazyLock::new(|| Re::new(r"\b([A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)? [A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)?)\b"));
