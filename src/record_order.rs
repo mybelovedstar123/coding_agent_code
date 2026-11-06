@@ -47,3 +47,24 @@ pub fn near_copies(a: &BTreeSet<String>, b: &BTreeSet<String>) -> bool {
 }
 
 pub const COPIES_NOTE_HEAD: &str = "Some of these records are copies of the same note filed more than once, and the copies disagree on order, so a record's timestamp is when that copy was filed. Copies of one note:";
+
+/// Each statement filed in more than one copy, as [(pairID, timestamp text, timestamp)].
+pub fn copy_sets(records: &[Record], ident: &str) -> Vec<Vec<Copy>> {
+    let mut groups: Vec<(BTreeSet<String>, Vec<Copy>)> = Vec::new();
+    for (pid, stamp, ts, prompt) in records {
+        let w = words(&statement(prompt, ident));
+        if w.len() < MIN_WORDS {
+            continue;
+        }
+        let copy = (pid.clone(), stamp.clone(), *ts);
+        match groups.iter_mut().find(|(rep, _)| near_copies(rep, &w)) {
+            Some((_, members)) => members.push(copy),
+            None => groups.push((w, vec![copy])),
+        }
+    }
+    groups
+        .into_iter()
+        .filter(|(_, members)| members.len() > 1)
+        .map(|(_, members)| members)
+        .collect()
+}
