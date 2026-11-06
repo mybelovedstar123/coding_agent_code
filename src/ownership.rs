@@ -256,3 +256,58 @@ pub static HOLDER_PHRASES: LazyLock<Re> = LazyLock::new(|| {
 });
 static WHOSE_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\bwhose\b"));
 static RAW_WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[A-Za-z][A-Za-z'-]*"));
+
+/// The request asks who holds something now (typo-tolerant on the holder words).
+pub fn asks_holder(request: &str) -> bool {
+    let raw = RAW_WORD_RE.findall(request);
+    let internal = ["internal", "internally"];
+    if raw.iter().any(|w| {
+        let lw = w.to_lowercase();
+        lw.starts_with("int")
+            && internal
+                .iter()
+                .map(|t| py::len(w).abs_diff(py::len(t)))
+                .min()
+                .unwrap_or(0)
+                <= 2
+            && internal
+                .iter()
+                .map(|t| sequence_ratio(&lw, t))
+                .fold(f64::NEG_INFINITY, f64::max)
+                >= 0.85
+    }) {
+        return false;
+    }
+    if HOLDER_PHRASES.is_match(request) || WHOSE_RE.is_match(request) {
+        return true;
+    }
+    for w in &raw {
+        let lw = w.to_lowercase();
+        let n = py::len(&lw);
+        if (3..=6).contains(&n)
+            && lw.starts_with("wh")
+            && !WH_WORDS.contains(&lw.as_str())
+            && sequence_ratio(&lw, "whose") >= 0.6
+        {
+            return true;
+        }
+        if *w != lw {
+            continue;
+        }
+        // re.sub(r"'s$", "", w): the words carry no newline, so `$` is the end.
+        let w = w.strip_suffix("'s").unwrap_or(w);
+        let wl = py::len(w);
+        for h in HOLDER_WORDS {
+            let hl = py::len(h);
+            if w == h
+                || (wl >= 4
+                    && wl.abs_diff(hl) <= 1
+                    && w.chars().next() == h.chars().next()
+                    && sequence_ratio(w, h) >= if hl >= 8 { 0.7 } else { 0.75 })
+            {
+                return true;
+            }
+        }
+    }
+    false
+}
