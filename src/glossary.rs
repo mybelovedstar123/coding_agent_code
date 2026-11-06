@@ -85,3 +85,13 @@ pub fn definitions(text: &str) -> IndexMap<String, String> {
         IndexMap::new()
     }
 }
+
+pub fn glossary(records: &[(String, String)], ident: &str) -> IndexMap<String, String> {
+    let mut terms: IndexMap<String, String> = IndexMap::new();
+    for (_, prompt) in records {
+        for (term, meaning) in definitions(&statement(prompt, ident)) {
+            terms.entry(term).or_insert(meaning);
+        }
+    }
+    terms
+}
