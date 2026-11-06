@@ -133,3 +133,11 @@ pub const REMOVAL_NOTE: &str = concat!(
     "A handle the user asked you to remove is no longer theirs to hand out: do not give it as the current ",
     "handle, and do not repeat it at all, not even as the old or previous handle."
 );
+
+/// `json.loads(context.split("\n", 1)[1])` for a context that has a newline; None when there is no context, no
+/// newline or the payload does not parse (the Python `except ValueError` path).
+fn load_payload(context: Option<&str>) -> Option<Value> {
+    let context = context.filter(|c| !c.is_empty())?;
+    let (_, body) = context.split_once('\n')?;
+    serde_json::from_str(body).ok()
+}
