@@ -86,3 +86,11 @@ pub const CURRENT_NOTE: &str = concat!(
 
 static WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z][a-z'-]+"));
 static TOKEN_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z0-9:'-]+"));
+/// The whole-word pattern of each change and aside cue, compiled once.
+static CUE_RES: LazyLock<HashMap<&'static str, Re>> = LazyLock::new(|| {
+    CHANGE_CUES
+        .iter()
+        .chain(&["separately", "unrelated"])
+        .map(|c| (*c, cue_re(c)))
+        .collect()
+});
