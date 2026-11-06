@@ -380,3 +380,9 @@ pub fn unknown_store_ids(args: &Map<String, Value>, mem: &UserMemory) -> Vec<Str
     }
     bad
 }
+
+/// The id value inside an `unknown_store_ids` entry of the form "key='value'".
+fn bad_value(entry: &str) -> String {
+    let value = entry.split_once('=').map(|(_, v)| v).unwrap_or("");
+    py::strip_chars(py::strip(value), "'\"").to_string()
+}
