@@ -811,3 +811,33 @@ fn try_from_csv(text: &str) -> Option<Vec<Event>> {
 pub fn from_csv(text: &str) -> Vec<Event> {
     try_from_csv(text).unwrap_or_default()
 }
+
+pub fn from_markdown(text: &str) -> Vec<Event> {
+    let mut out = Vec::new();
+    let mut header: Option<Vec<String>> = None;
+    for line in splitlines(text) {
+        if !py::strip(line).starts_with('|') {
+            header = None;
+            continue;
+        }
+        let cells: Vec<String> = py::strip_chars(py::strip(line), "|")
+            .split('|')
+            .map(|c| py::strip(c).to_string())
+            .collect();
+        if cells.iter().all(|c| c.chars().all(|ch| matches!(ch, '-' | ':' | ' '))) {
+            continue;
+        }
+        let Some(h) = &header else {
+            header = Some(cells);
+            continue;
+        };
+        let mut d = IndexMap::new();
+        for (k, v) in h.iter().zip(cells) {
+            d.insert(k.clone(), PyVal::Str(v));
+        }
+        if let Some(e) = _event(&PyVal::Dict(d)) {
+            out.push(e);
+        }
+    }
+    out
+}
