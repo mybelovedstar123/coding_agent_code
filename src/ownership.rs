@@ -368,3 +368,9 @@ pub static TARGETS: LazyLock<Vec<Re>> = LazyLock::new(|| {
     .map(|p| Re::new(p))
     .collect()
 });
+
+const ORG_WORDS_TEXT: &str =
+    "consulting logistics lodge inn box media catering clinic clinics health rooms company partners capital
+supply labs studio studios systems group holdings ventures industries brands collective guild workshop atelier press
+analytics digital energy foods interactive textiles cooperative works services hotel hotels removals movers club
+academy school centre center";
