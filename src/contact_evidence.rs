@@ -127,3 +127,9 @@ static REMOVAL_RE: LazyLock<Re> = LazyLock::new(|| {
 pub fn has_removal_instruction(records: &[Pair]) -> bool {
     records.iter().any(|p| REMOVAL_RE.is_match(&p.prompt))
 }
+
+pub const REMOVAL_NOTE: &str = concat!(
+    "Some of these records are the user's own instructions to remove or stop sharing a saved handle. ",
+    "A handle the user asked you to remove is no longer theirs to hand out: do not give it as the current ",
+    "handle, and do not repeat it at all, not even as the old or previous handle."
+);
