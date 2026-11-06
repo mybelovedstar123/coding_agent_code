@@ -61,3 +61,29 @@ fn names_form(form: &str, text: &str) -> bool {
     }
     false
 }
+
+/// Every recorded name form (full names and aliases) of the persons the request names by either form.
+///
+/// A Python set: callers only test it for emptiness and membership (`names_any`), so its order never reaches
+/// output; the sorted set here is an implementation choice, not a reproduced order.
+pub fn person_name_forms(mem: &UserMemory, question: &str) -> BTreeSet<String> {
+    let low = question.to_lowercase();
+    let mut forms = BTreeSet::new();
+    for (alias, people) in &mem.alias_people {
+        if names_form(alias, question) {
+            forms.insert(alias.clone());
+            forms.extend(people.iter().cloned());
+        }
+    }
+    for (full, aliases) in &mem.aliases {
+        if low.contains(full.as_str()) {
+            forms.extend(aliases.iter().cloned());
+            for a in aliases {
+                if let Some(people) = mem.alias_people.get(a) {
+                    forms.extend(people.iter().filter(|p| p.to_lowercase() == *full).cloned());
+                }
+            }
+        }
+    }
+    forms
+}
