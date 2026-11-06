@@ -8,3 +8,9 @@
 //!
 //! Port of `harness/glossary.py`.
 
+use crate::py;
+use crate::pyre::{escape, Re};
+use indexmap::IndexMap;
+use serde_json::{json, Value};
+use std::collections::HashSet;
+use std::sync::LazyLock;
