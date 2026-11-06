@@ -52,3 +52,19 @@ pub struct Index {
     /// iterates it).
     pub joint: BTreeMap<String, Vec<String>>,
 }
+
+/// `pairs` in a total order (the caller sorts by content key) so the joint lists are deterministic.
+pub fn build_index(pairs: &[&Pair]) -> Index {
+    let mut phrase_records: HashMap<(String, String), usize> = HashMap::new();
+    let mut joint: BTreeMap<String, Vec<String>> = BTreeMap::new();
+    for p in pairs {
+        for ph in phrases(&p.prompt) {
+            *phrase_records.entry(ph).or_insert(0) += 1;
+        }
+        let names: BTreeSet<String> = JOINT_RE.findall(&p.prompt).into_iter().collect();
+        for name in names {
+            joint.entry(name).or_default().push(p.pair_id.clone());
+        }
+    }
+    Index { phrase_records, joint }
+}
