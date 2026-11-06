@@ -248,3 +248,5 @@ pub fn wants_job_figure(text: &str) -> bool {
     let start = JOBFIG_START.is_match(&low);
     job && figure && !start
 }
+
+static NOTE_NOTE: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(note|scr\w{2,5}pa?d|handoff)\b"));
