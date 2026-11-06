@@ -35,3 +35,8 @@ fn cached_re(pattern: String) -> Arc<Re> {
 }
 
 static WORD_CHAR_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\A\w\z"));
+
+/// A word character as `\b` sees it (the regex's own `\w`).
+fn is_word(c: Option<char>) -> bool {
+    c.is_some_and(|c| WORD_CHAR_RE.is_match(c.encode_utf8(&mut [0u8; 4])))
+}
