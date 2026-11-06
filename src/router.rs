@@ -26,3 +26,10 @@ pub struct Decision {
     pub route: String,
     pub tools: Vec<String>,
 }
+
+fn function_of(t: &Value) -> &Value {
+    match t.get("function") {
+        Some(f) if crate::store::truthy(f) => f,
+        _ => t,
+    }
+}
