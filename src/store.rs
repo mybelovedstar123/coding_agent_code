@@ -361,4 +361,20 @@ impl UserMemory {
             self.subjects.insert(subj.subject_id.clone(), subj);
         }
     }
+
+    pub fn link(&mut self, subject_id: &str, pair_id: &str) {
+        if !self.subjects.contains_key(subject_id) || !self.pairs.contains_key(pair_id) {
+            return;
+        }
+        self.subjects
+            .get_mut(subject_id)
+            .expect("checked")
+            .pairs
+            .insert(pair_id.to_string());
+        self.pairs
+            .get_mut(pair_id)
+            .expect("checked")
+            .subjects
+            .insert(subject_id.to_string());
+    }
 }
