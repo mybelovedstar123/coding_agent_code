@@ -257,3 +257,9 @@ static NOTE_FIX: LazyLock<PyRe> = LazyLock::new(|| {
         r"keep that in the)\b",
     ))
 });
+
+/// Correct a stored note in place (a handoff or scratchpad note whose fact changed).
+pub fn wants_note_fix(text: &str) -> bool {
+    let low = text.to_lowercase();
+    NOTE_NOTE.is_match(&low) && NOTE_FIX.is_match(&low)
+}
