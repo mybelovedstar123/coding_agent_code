@@ -703,3 +703,4 @@ pub static _SEND_VERB_RE: LazyLock<PyRe> = LazyLock::new(|| {
     ))
 });
 static SEND_PRONOUN: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(?:them|him|her|th\w{1,2}m)\b"));
+static SEND_TO_NAME: LazyLock<PyRe> = LazyLock::new(|| re(r"\bto [A-Z][a-z]+\b"));
