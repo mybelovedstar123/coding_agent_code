@@ -746,3 +746,16 @@ pub const EXACT_VALUE_NOTE: &str =
     "The user asks for the exact value a tool returns. A tool's result can mention more \
 than one item, each with its own value: report the value the result gives for the item the user named, copied exactly \
 as written, and leave out the other items and their values.";
+
+/// A request for the exact or precise value, figure, number, reading, amount, result or code (typo-tolerant).
+pub fn wants_exact_value(text: &str) -> bool {
+    let w = _words(text);
+    _has(&w, &["exact", "exactly", "precise", "precisely"], 0.8)
+        && _has(
+            &w,
+            &[
+                "value", "figure", "number", "reading", "amount", "result", "code", "returns",
+            ],
+            0.8,
+        )
+}
