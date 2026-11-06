@@ -15,3 +15,13 @@ const NAMED_TOOL_NOTE: &str = "The user asked for {tools} by name. Call it with 
 
 /// `(?:^|[.!?]\s+)$` — Python's `$` also matches before a final newline.
 static SENTENCE_START: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?:^|[.!?]\s+)(?=\n?\z)"));
+
+/// The distinctive first word of a multi-word tool name (lalabi_unit_converter -> lalabi).
+pub fn brand(tool_name: &str) -> String {
+    let parts: Vec<&str> = tool_name.split('_').collect();
+    if parts.len() > 1 && py::len(parts[0]) >= 4 {
+        parts[0].to_string()
+    } else {
+        String::new()
+    }
+}
