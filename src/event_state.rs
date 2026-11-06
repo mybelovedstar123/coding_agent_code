@@ -650,4 +650,58 @@ impl CsvReader {
         self.fields.push(std::mem::take(&mut self.field));
         self.field_len = 0;
     }
+
+    /// `parse_process_char` of Modules/_csv.c for the excel dialect (`None` is EOL).
+    fn process_char(&mut self, c: Option<char>) -> Result<(), ()> {
+        let newline = matches!(c, Some('\n' | '\r'));
+        let line_end = if c.is_none() {
+            CsvState::StartRecord
+        } else {
+            CsvState::EatCrnl
+        };
+        if self.state == CsvState::StartRecord {
+            if c.is_none() {
+                return Ok(());
+            }
+            if newline {
+                self.state = CsvState::EatCrnl;
+                return Ok(());
+            }
+            self.state = CsvState::StartField;
+        }
+        match (self.state, c) {
+            (CsvState::StartRecord, _) => {}
+            (CsvState::StartField | CsvState::InField | CsvState::QuoteInQuotedField, _) if newline || c.is_none() => {
+                self.save_field();
+                self.state = line_end;
+            }
+            (CsvState::StartField, Some('"')) => self.state = CsvState::InQuotedField,
+            (CsvState::StartField | CsvState::InField | CsvState::QuoteInQuotedField, Some(',')) => {
+                self.save_field();
+                self.state = CsvState::StartField;
+            }
+            (CsvState::StartField | CsvState::InField, Some(ch)) => {
+                self.add_char(ch)?;
+                self.state = CsvState::InField;
+            }
+            (CsvState::InQuotedField, None) => {}
+            (CsvState::InQuotedField, Some('"')) => self.state = CsvState::QuoteInQuotedField,
+            (CsvState::InQuotedField, Some(ch)) => self.add_char(ch)?,
+            (CsvState::QuoteInQuotedField, Some('"')) => {
+                self.add_char('"')?;
+                self.state = CsvState::InQuotedField;
+            }
+            // strict=False: a character after the closing quote joins the field.
+            (CsvState::QuoteInQuotedField, Some(ch)) => {
+                self.add_char(ch)?;
+                self.state = CsvState::InField;
+            }
+            (CsvState::StartField | CsvState::InField | CsvState::QuoteInQuotedField, None) => {}
+            (CsvState::EatCrnl, None) => self.state = CsvState::StartRecord,
+            (CsvState::EatCrnl, Some(_)) if newline => {}
+            // "new-line character seen in unquoted field"
+            (CsvState::EatCrnl, Some(_)) => return Err(()),
+        }
+        Ok(())
+    }
 }
