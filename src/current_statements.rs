@@ -252,3 +252,51 @@ pub fn current_list(earlier: &[String], change: &str) -> Vec<String> {
     out.extend(added.into_iter().filter(|a| !kept_low.contains(a)));
     out
 }
+
+/// For each change note sharing a topic word with the request: the note and the earlier plain notes of that
+/// topic (not asides) it supersedes. Each entry is `{"current": {"records", "text"}, "supersedes": [{"records",
+/// "text"}, ...]}` plus `"current_list"` when one earlier list changes.
+pub fn current_statements(records: &[(String, String)], ident: &str, request: &str) -> Vec<Value> {
+    let notes = notes_of(records, ident);
+    let req = words(request);
+    // Pure per-note facts, computed once (the Python recomputes them per pair of notes).
+    let changes: Vec<bool> = notes.iter().map(|n| is_change(&n.text)).collect();
+    let asides: Vec<bool> = notes.iter().map(|n| is_aside(&n.text)).collect();
+    let note_words: Vec<HashSet<String>> = notes.iter().map(|n| words(&n.text)).collect();
+    let mut out = Vec::new();
+    for (idx, n) in notes.iter().enumerate() {
+        if !changes[idx] {
+            continue;
+        }
+        let topic: HashSet<String> = note_words[idx].intersection(&req).cloned().collect();
+        if topic.is_empty() {
+            continue;
+        }
+        let older: Vec<&Note> = notes
+            .iter()
+            .enumerate()
+            .filter(|(j, _)| *j != idx && !changes[*j] && !asides[*j] && !note_words[*j].is_disjoint(&topic))
+            .map(|(_, m)| m)
+            .collect();
+        let mut entry = json!({
+            "current": {"records": n.records, "text": n.text},
+            "supersedes": older.iter().map(|m| json!({"records": m.records, "text": m.text})).collect::<Vec<_>>(),
+        });
+        let lists: Vec<Vec<String>> = older
+            .iter()
+            .map(|m| list_items(&m.text))
+            .filter(|x| !x.is_empty())
+            .collect();
+        if lists.len() == 1 {
+            let updated = current_list(&lists[0], &n.text);
+            let (mut a, mut b) = (updated.clone(), lists[0].clone());
+            a.sort();
+            b.sort();
+            if a != b {
+                entry["current_list"] = json!(updated);
+            }
+        }
+        out.push(entry);
+    }
+    out
+}
