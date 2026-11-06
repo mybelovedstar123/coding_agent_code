@@ -662,3 +662,5 @@ static CONFIRM_VERIFY: LazyLock<PyRe> = LazyLock::new(|| {
         r"(?:\s+that)?\s+my\b",
     ))
 });
+/// The setting is stated to have a value: "my Ditto accent is ...".
+static CONFIRM_STATED: LazyLock<PyRe> = LazyLock::new(|| re(r"\bmy\b[^.?!]{0,48}?\b(?:is|stays|uses|remains)\b"));
