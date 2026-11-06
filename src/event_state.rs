@@ -807,3 +807,7 @@ fn try_from_csv(text: &str) -> Option<Vec<Event>> {
     }
     Some(out)
 }
+
+pub fn from_csv(text: &str) -> Vec<Event> {
+    try_from_csv(text).unwrap_or_default()
+}
