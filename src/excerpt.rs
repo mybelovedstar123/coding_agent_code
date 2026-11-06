@@ -10,3 +10,5 @@ use crate::text::tokenize;
 use indexmap::IndexMap;
 use std::collections::BTreeSet;
 use std::sync::LazyLock;
+
+static SENT_SPLIT: LazyLock<Re> = LazyLock::new(|| Re::new("(?<=[.!?;])\\s+(?=[A-Z0-9\"'\u{201c}(])|\\n+"));
