@@ -571,3 +571,27 @@ static SWAP: LazyLock<Re> = LazyLock::new(|| {
         r"\b(?:took over|has taken over|taken over)\b[^.;]*?\bfrom[\s\x1c-\x1f]+{NAME}"
     ))
 });
+
+/// The person the latest handover sentence names as the new holder, skipping names the records mark as
+/// organisations, and skipping a takeover "A took over … from B" whose B never held the project earlier in the chain
+/// (a supplier swap, not a handover).
+pub fn holder_now(chain: &[(String, String)], orgs: &HashSet<String>) -> Option<String> {
+    for k in (0..chain.len()).rev() {
+        let s = &chain[k].1;
+        let earlier = chain[..k].iter().map(|(_, t)| t.as_str()).collect::<Vec<_>>().join(" ");
+        if let Some(c) = SWAP.captures(s) {
+            let b = c.get(1).map(|m| m.as_str()).unwrap_or("");
+            if !earlier.contains(b) {
+                continue;
+            }
+        }
+        for pat in TARGETS.iter() {
+            for name in last_groups(pat, s) {
+                if is_person(&name) && !orgs.contains(&name) {
+                    return Some(name);
+                }
+            }
+        }
+    }
+    None
+}
