@@ -144,3 +144,8 @@ pub fn has_phrase(low: &str, cue: &str) -> bool {
     }
     false
 }
+
+pub fn is_aside(stmt: &str) -> bool {
+    let low = stmt.to_lowercase();
+    has_phrase(py::head(&low, 14), "separately") || has_phrase(py::head(&low, 12), "unrelated")
+}
