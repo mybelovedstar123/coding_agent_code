@@ -22,3 +22,6 @@ static CHANNEL_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\bsignal\b|\bh\
 pub fn asks_for_handle(question: &str) -> bool {
     !question.is_empty() && HANDLE_REQUEST_RE.is_match(question)
 }
+
+/// Compiled name patterns, by pattern text (names recur across requests; compiling dominates otherwise).
+static NAME_RES: LazyLock<Mutex<HashMap<String, Arc<Re>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
