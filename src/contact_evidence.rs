@@ -212,3 +212,28 @@ pub fn email_records(mem: &UserMemory, forms: &BTreeSet<String>) -> Vec<Pair> {
         .collect();
     oldest_first(out)
 }
+
+/// The record texts of a memory context (empty when there is none or it is not a record payload).
+///
+/// Where the Python raises (a payload that is not an object, or `memories` a truthy number/bool), this returns "".
+pub fn context_texts(context: Option<&str>) -> String {
+    let Some(payload) = load_payload(context) else {
+        return String::new();
+    };
+    let Some(obj) = payload.as_object() else {
+        return String::new();
+    };
+    match obj.get("memories") {
+        Some(Value::Array(items)) => items
+            .iter()
+            .filter_map(Value::as_object)
+            .map(|it| match it.get("text") {
+                Some(v) if crate::store::truthy(v) => py::str_value(v),
+                _ => String::new(),
+            })
+            .collect::<Vec<_>>()
+            .join("\n"),
+        // A string or an object iterates as strings: none is a dict.
+        _ => String::new(),
+    }
+}
