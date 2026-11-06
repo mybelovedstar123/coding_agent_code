@@ -207,3 +207,4 @@ static ADD_RES: LazyLock<Vec<Re>> = LazyLock::new(|| {
 });
 static LIST_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?:—|:|wants:?|needs:?)\s*([^—:]+?)\.?\s*(?=\n?\z)"));
 static LIST_SPLIT_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r",\s*|\s+and\s+"));
+static ARTICLE_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"^(?:an?|the|some)\s+"));
