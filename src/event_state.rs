@@ -188,4 +188,13 @@ impl PyInt {
     pub fn from_i64(v: i64) -> PyInt {
         PyInt::new(v < 0, &v.unsigned_abs().to_string())
     }
+
+    /// `int(x)` for a finite float (truncation toward zero, exact).
+    fn from_f64(x: f64) -> Option<PyInt> {
+        if !x.is_finite() {
+            return None;
+        }
+        let t = x.trunc();
+        Some(PyInt::new(t < 0.0, &format!("{:.0}", t.abs())))
+    }
 }
