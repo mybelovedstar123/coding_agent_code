@@ -26,3 +26,13 @@ static WORDS_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z]+"));
 pub fn _words(text: &str) -> Vec<String> {
     WORDS_RE.findall(&text.to_lowercase())
 }
+
+// ------------------------------------------------------------------------------------------------------- triggers
+
+pub fn _fuzzy(w: &str, target: &str, ratio: f64) -> bool {
+    w == target
+        || (py::len(w) >= 4
+            && w.chars().next() == target.chars().next()
+            && py::len(w).abs_diff(py::len(target)) <= 2
+            && sequence_ratio(w, target) >= ratio)
+}
