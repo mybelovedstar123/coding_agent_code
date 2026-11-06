@@ -13,3 +13,10 @@
 //! `[\s\x1c-\x1f]`. `\w`/`\b` keep the regex crate's Unicode definition, which differs from Python's only on combining
 //! marks, connector punctuation other than `_`, and non-decimal numerics (none occur in the records).
 
+use crate::difflib::sequence_ratio;
+use crate::py;
+use crate::pyre::Re;
+use serde_json::{Map, Value};
+use std::collections::HashSet;
+use std::ops::Deref;
+use std::sync::{LazyLock, OnceLock};
