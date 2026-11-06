@@ -98,3 +98,14 @@ static CUE_RES: LazyLock<HashMap<&'static str, Re>> = LazyLock::new(|| {
 fn cue_re(cue: &str) -> Re {
     Re::new(&format!(r"(?<![a-z]){}(?![a-z])", escape(cue)))
 }
+
+/// `{w for w in re.findall(r"[a-z][a-z'-]+", text.lower()) if w not in STOP and len(w) > 2}`.
+///
+/// A Python set: only intersected and tested for emptiness, so its order never reaches output.
+pub fn words(text: &str) -> HashSet<String> {
+    WORD_RE
+        .findall(&text.to_lowercase())
+        .into_iter()
+        .filter(|w| !STOP.contains(w.as_str()) && py::len(w) > 2)
+        .collect()
+}
