@@ -95,3 +95,9 @@ pub fn wants_schedules(text: &str) -> bool {
 }
 
 static IMG_THE_ONE: LazyLock<PyRe> = LazyLock::new(|| re(r"\bthe one you (?:just )?\w+"));
+static IMG_EARLIER: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(from earlier|from before|you (?:just )?(?:g\w{4,9}d|m\w{1,3}de|cr\w{3,6}d)|the one you (?:just )?\w+|",
+        r"(?:that|the) (?:latest|last) \w+)\b",
+    ))
+});
