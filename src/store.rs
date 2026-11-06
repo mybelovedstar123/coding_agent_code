@@ -151,3 +151,9 @@ pub fn render_pair(pair: &Pair) -> String {
     }
     parts.join("\n")
 }
+
+/// A total order over records from their content only: timestamp, then text. Ids are re-randomised every run and
+/// concurrent writes change insertion order, so neither may decide an order that reaches a prompt (D15).
+pub fn content_key(pair: &Pair) -> (DateTime<Utc>, &str, &str) {
+    (pair.ts, pair.prompt.as_str(), pair.response.as_str())
+}
