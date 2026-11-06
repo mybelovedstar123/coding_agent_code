@@ -183,3 +183,20 @@ static EMAIL_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[\w.+-]+@[\w-]+\.[\w.
 pub fn asks_owner_contact(question: &str) -> bool {
     !question.is_empty() && EMAIL_REQUEST_RE.is_match(question) && OWNER_RE.is_match(question)
 }
+
+/// Every recorded name form of the persons a text names by a full name or alias (alias index).
+///
+/// A Python set: it only feeds `email_records` (`names_any`, an `any`), so its order never reaches output.
+pub fn people_named(mem: &UserMemory, text: &str) -> BTreeSet<String> {
+    let mut forms = BTreeSet::new();
+    for (alias, people) in &mem.alias_people {
+        let hit_alias = names_form(alias, text);
+        for full in people {
+            if hit_alias || names_form(full, text) {
+                forms.insert(alias.clone());
+                forms.insert(full.clone());
+            }
+        }
+    }
+    forms
+}
