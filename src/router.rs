@@ -51,3 +51,5 @@ pub fn catalog_text(tool_defs: &[Value]) -> String {
         .collect::<Vec<_>>()
         .join("\n")
 }
+
+static JSON_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?s)\{.*\}"));
