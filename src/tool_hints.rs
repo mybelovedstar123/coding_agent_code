@@ -5,3 +5,10 @@
 //!
 //! Patterns are `event_state::PyRe`, so `\s`, `\w` and `\b` keep Python's classes.
 
+use crate::difflib::sequence_ratio;
+use crate::event_state::PyRe;
+use crate::py;
+use crate::pyre::Re;
+use indexmap::IndexMap;
+use serde_json::Value;
+use std::sync::LazyLock;
