@@ -759,3 +759,12 @@ pub fn wants_exact_value(text: &str) -> bool {
             0.8,
         )
 }
+
+/// EXACT_VALUE_NOTE when the request asks for the exact value a tool returns (tool path only).
+pub fn exact_value_note(user_input: &str) -> String {
+    if wants_exact_value(user_input) {
+        EXACT_VALUE_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
