@@ -320,3 +320,18 @@ pub fn wants_work_done(text: &str) -> bool {
 }
 
 pub type Rule = (&'static str, fn(&str) -> bool);
+
+pub const RULES: &[Rule] = &[
+    ("list_schedules", wants_schedules),
+    ("edit_image", wants_image_edit),
+    ("run_code", wants_arithmetic),
+    ("execute_agent_job", wants_background_job),
+    ("calendar_create_event", wants_calendar_entry),
+    ("run_code", wants_sandbox_run),
+    ("list_agent_jobs", wants_job_figure),
+    ("update_memory", wants_note_fix),
+    ("file_feedback_for_team", wants_team_feedback),
+    ("set_chat_tool_preferences", wants_chat_tool_prefs),
+    ("discover_capabilities", asks_capability),
+    ("execute_agent_job", wants_work_done),
+];
