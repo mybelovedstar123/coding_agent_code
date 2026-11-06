@@ -285,3 +285,42 @@ fn sorted_strs(items: &[&str]) -> Vec<String> {
     v.sort();
     v
 }
+
+/// Why the program may not run, or None. A too-long program's error also says how to load record text.
+pub async fn validate(code: &str) -> Option<String> {
+    let n = py::len(code);
+    if n > MAX_CODE_CHARS {
+        return Some(format!("program too long ({n} chars, limit {MAX_CODE_CHARS})") + TOO_LONG_HELP);
+    }
+    let payload = json!({
+        "code": code,
+        "allowed": sorted_strs(&ALLOWED_IMPORTS),
+        "banned_names": sorted_strs(&BANNED_NAMES),
+        "banned_attrs": sorted_strs(&BANNED_ATTRS),
+    });
+    let out = Command::new(python())
+        .args(["-I", "-S", "-c", VALIDATOR])
+        .env_clear()
+        .env("PATH", "/usr/bin:/bin")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .kill_on_drop(true)
+        .spawn();
+    let Ok(mut child) = out else {
+        return Some("the program could not be validated".into());
+    };
+    if let Some(mut stdin) = child.stdin.take() {
+        let _ = stdin.write_all(py::dumps(&payload, true).as_bytes()).await;
+    }
+    let result = tokio::time::timeout(Duration::from_secs(10), child.wait_with_output()).await;
+    let Ok(Ok(output)) = result else {
+        return Some("the program could not be validated".into());
+    };
+    let parsed: Value = serde_json::from_slice(&output.stdout).unwrap_or(Value::Null);
+    match parsed.get("problem") {
+        Some(Value::String(p)) => Some(p.clone()),
+        Some(Value::Null) => None,
+        _ => Some("the program could not be validated".into()),
+    }
+}
