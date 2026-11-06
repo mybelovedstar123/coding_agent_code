@@ -195,3 +195,9 @@ pub fn alias_declaration(text: &str) -> Option<(String, String)> {
 /// Data derived from one user's records (indexes built on first use), dropped whenever a record changes (D4).
 #[derive(Default)]
 pub struct Derived(HashMap<&'static str, Arc<dyn Any + Send + Sync>>);
+
+impl Derived {
+    pub fn get<T: Any + Send + Sync>(&self, key: &'static str) -> Option<Arc<T>> {
+        self.0.get(key).cloned().and_then(|a| a.downcast::<T>().ok())
+    }
+}
