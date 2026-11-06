@@ -107,3 +107,15 @@ pub fn fuzzy_in(phrase: &str, text_tokens: &[String], ratio: Option<f64>) -> boo
 
 pub const MAX_PHRASE_RECORDS: usize = 25;
 pub const BOUNDARY_WORDS: [&str; 5] = ["thread", "saga", "situation", "business", "project"];
+
+/// A word that names the conversation rather than the project (thread, saga, …), typos included.
+pub fn thread_like(word: &str) -> bool {
+    let wlen = py::len(word);
+    BOUNDARY_WORDS.iter().any(|b| {
+        word == *b
+            || (wlen >= 4
+                && word.chars().next() == b.chars().next()
+                && wlen.abs_diff(py::len(b)) <= 2
+                && sequence_ratio(word, b) >= 0.7)
+    })
+}
