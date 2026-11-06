@@ -346,3 +346,23 @@ pub fn related_person_note(named: &IndexMap<String, String>) -> String {
          address, which belongs to them, not to the person asked about."
     )
 }
+
+/// The memory context with `records` added in full (chronological, no duplicates) and `note` appended to its
+/// note; a new context when there was none.
+///
+/// The Python always returns a str: this always returns Some. Where the Python raises (a payload that parses but
+/// is not an object, a non-dict memory item), the context is returned unchanged.
+pub fn with_records_and_note(context: Option<String>, prefix: &str, records: &[Pair], note: &str) -> Option<String> {
+    let mut payload = json!({"note": "", "memories": []});
+    if let Some(parsed) = load_payload(context.as_deref()) {
+        payload = parsed;
+    }
+    let Some(obj) = payload.as_object_mut() else {
+        return context;
+    };
+    let Some(items) = memory_items(obj) else { return context };
+    obj.insert("memories".into(), Value::Array(merged_items(items, records)));
+    let full_note = appended_note(obj, note);
+    obj.insert("note".into(), Value::String(full_note));
+    Some(dump_context(prefix, &payload))
+}
