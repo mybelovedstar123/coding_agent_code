@@ -320,4 +320,16 @@ impl PyVal {
             other => other.str(),
         }
     }
+
+    /// `str(v)`.
+    fn str(&self) -> String {
+        match self {
+            PyVal::None => "None".into(),
+            PyVal::Bool(b) => if *b { "True" } else { "False" }.into(),
+            PyVal::Int(i) => i.to_string(),
+            PyVal::Float(x) => py::float_repr(*x),
+            PyVal::Str(s) => s.clone(),
+            other => other.repr(),
+        }
+    }
 }
