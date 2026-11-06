@@ -221,3 +221,6 @@ static JOBFIG_JOB: LazyLock<PyRe> = LazyLock::new(|| {
         r"scrape) job)\b",
     ))
 });
+static JOBFIG_START: LazyLock<PyRe> = LazyLock::new(|| {
+    re(r"\b(start|launch|kick off|run|queue up|spin up|fire off|delegate|turn off|turn on|prefer\w*)\b")
+});
