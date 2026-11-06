@@ -467,4 +467,11 @@ impl UserMemory {
         out.sort_by(|a, b| self.cmp_subject_score(a, b));
         out
     }
+
+    fn cmp_subject_score(&self, a: &(String, f64), b: &(String, f64)) -> Ordering {
+        let (sa, sb) = (&self.subjects[&a.0], &self.subjects[&b.0]);
+        cmp_f64(-a.1, -b.1)
+            .then_with(|| sa.text.cmp(&sb.text))
+            .then_with(|| sa.description.cmp(&sb.description))
+    }
 }
