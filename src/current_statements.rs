@@ -300,3 +300,41 @@ pub fn current_statements(records: &[(String, String)], ident: &str, request: &s
     }
     out
 }
+
+/// The memory context with `current_statements` and CURRENT_NOTE added when the identifier records (short
+/// notes, not long histories) hold a change statement on the request's topic; unchanged otherwise.
+///
+/// A payload that parses but is not a JSON object raises in the Python (never reached); here it is unchanged.
+pub fn with_current_statements(
+    context: Option<String>,
+    prefix: &str,
+    items: &[(String, String)],
+    ident: &str,
+    user_input: &str,
+) -> Option<String> {
+    let Some(ctx) = context.as_deref() else { return context };
+    if ctx.is_empty() || !ctx.contains('\n') || items.iter().map(|(_, p)| py::len(p)).sum::<usize>() > MAX_RECORD_CHARS
+    {
+        return context;
+    }
+    let found = current_statements(items, ident, user_input);
+    if found.is_empty() {
+        return context;
+    }
+    let Some((_, body)) = ctx.split_once('\n') else {
+        return context;
+    };
+    let Ok(mut payload) = serde_json::from_str::<Value>(body) else {
+        return context;
+    };
+    let Some(obj) = payload.as_object_mut() else {
+        return context;
+    };
+    let note = obj.get("note").map(py::str_value).unwrap_or_default();
+    obj.insert(
+        "note".into(),
+        Value::String(py::strip(&format!("{note} {CURRENT_NOTE}")).to_string()),
+    );
+    obj.insert("current_statements".into(), Value::Array(found));
+    Some(format!("{prefix}\n{}", py::dumps(&payload, false)))
+}
