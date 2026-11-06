@@ -53,3 +53,36 @@ pub fn catalog_text(tool_defs: &[Value]) -> String {
 }
 
 static JSON_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?s)\{.*\}"));
+
+pub fn parse(text: &str, names: &HashSet<String>) -> Option<Decision> {
+    let m = JSON_RE.search_str(text)?;
+    let data: Value = serde_json::from_str(m).ok()?;
+    let obj = data.as_object()?;
+    let route = obj
+        .get("route")
+        .filter(|r| crate::store::truthy(r))
+        .map(py::str_value)
+        .unwrap_or_default()
+        .to_lowercase();
+    if !["tool", "memory", "chat"].contains(&route.as_str()) {
+        return None;
+    }
+    let tools: Vec<String> = obj
+        .get("tools")
+        .and_then(Value::as_array)
+        .map(|raw| {
+            raw.iter()
+                .filter_map(Value::as_str)
+                .filter(|t| names.contains(*t) && !MEMORY_READ_TOOLS.contains(t))
+                .map(String::from)
+                .collect()
+        })
+        .unwrap_or_default();
+    // A tool route that names no app tool is not actionable.
+    let route = if route == "tool" && tools.is_empty() {
+        "memory".to_string()
+    } else {
+        route
+    };
+    Some(Decision { route, tools })
+}
