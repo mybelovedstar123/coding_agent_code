@@ -397,4 +397,54 @@ impl UserMemory {
                 .collect(),
         }
     }
+
+    /// BM25 with typo-tolerant term matching (one edit on 5+ char terms).
+    pub fn bm25_scores(&self, query: &str, ids: Option<&[String]>) -> Vec<(String, f64)> {
+        // Sorted: float sums must not follow set order (D16).
+        let qtoks: Vec<String> = tokenize(query)
+            .into_iter()
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .collect();
+        if qtoks.is_empty() || self.tf.is_empty() {
+            return Vec::new();
+        }
+        let n = self.tf.len() as f64;
+        let avg = self.tlen.values().sum::<usize>() as f64 / n;
+        let (k1, b) = (1.2f64, 0.75f64);
+        let df = &self.df;
+        let expanded = expand_terms(
+            &qtoks,
+            || Box::new(df.keys().map(|k| k.as_str())),
+            |t| df.contains_key(t),
+        );
+        let pool: Vec<&String> = match ids {
+            Some(ids) => ids.iter().collect(),
+            None => self.tf.keys().collect(),
+        };
+        let mut scores = Vec::new();
+        for pid in pool {
+            let Some(tf) = self.tf.get(pid) else { continue };
+            let norm = k1 * (1.0 - b + b * self.tlen[pid] as f64 / avg);
+            let mut s = 0.0f64;
+            for matches in expanded.values() {
+                let mut best = 0.0f64;
+                for (tok, w) in matches {
+                    let Some(&f) = tf.get(tok) else { continue };
+                    if f == 0 {
+                        continue;
+                    }
+                    let d = df[tok] as f64;
+                    let idf = (1.0 + (n - d + 0.5) / (d + 0.5)).ln();
+                    let f = f as f64;
+                    best = best.max(w * idf * f * (k1 + 1.0) / (f + norm));
+                }
+                s += best;
+            }
+            if s > 0.0 {
+                scores.push((pid.clone(), s));
+            }
+        }
+        scores
+    }
 }
