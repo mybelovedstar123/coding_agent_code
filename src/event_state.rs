@@ -402,4 +402,31 @@ impl JsonParser<'_> {
         self.depth -= 1;
         out
     }
+
+    fn object(&mut self, i: usize) -> Option<(PyVal, usize)> {
+        let mut m = IndexMap::new();
+        let mut i = self.ws(i);
+        if self.at(i) == Some('}') {
+            return Some((PyVal::Dict(m), i + 1));
+        }
+        loop {
+            if self.at(i) != Some('"') {
+                return None;
+            }
+            let (k, e) = self.string(i + 1)?;
+            i = self.ws(e);
+            if self.at(i) != Some(':') {
+                return None;
+            }
+            i = self.ws(i + 1);
+            let (v, e) = self.value(i)?;
+            m.insert(k, v);
+            i = self.ws(e);
+            match self.at(i)? {
+                '}' => return Some((PyVal::Dict(m), i + 1)),
+                ',' => i = self.ws(i + 1),
+                _ => return None,
+            }
+        }
+    }
 }
