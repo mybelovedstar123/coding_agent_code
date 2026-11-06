@@ -366,3 +366,34 @@ pub fn with_records_and_note(context: Option<String>, prefix: &str, records: &[P
     obj.insert("note".into(), Value::String(full_note));
     Some(dump_context(prefix, &payload))
 }
+
+/// For a handle request whose channel records include the user's removal instruction: the removal rule plus
+/// the grounded-decline form with the records' own name forms of the person asked about; empty otherwise.
+pub fn removed_handle_note(mem: &UserMemory, question: &str) -> String {
+    let records = channel_records(mem, question);
+    if !has_removal_instruction(&records) {
+        return String::new();
+    }
+    let low = question.to_lowercase();
+    let mut known: BTreeSet<String> = BTreeSet::new();
+    for (alias, people) in &mem.alias_people {
+        for full in people {
+            let full_low = full.to_lowercase();
+            if low.contains(full_low.as_str()) && mem.aliases.get(&full_low).map_or(0, |a| a.len()) == 1 {
+                known.insert(format!("{full} goes by {alias}"));
+            }
+        }
+    }
+    let who = if known.is_empty() {
+        String::new()
+    } else {
+        format!(
+            " (in the records, {})",
+            known.into_iter().collect::<Vec<_>>().join("; ")
+        )
+    };
+    format!(
+        "{REMOVAL_NOTE} If you decline, say who the person asked about is in the records{who}: the name they go \
+         by and how the records describe them, without the removed handle."
+    )
+}
