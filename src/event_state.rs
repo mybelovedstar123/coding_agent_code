@@ -265,3 +265,9 @@ impl Ord for PyInt {
         }
     }
 }
+
+impl PartialOrd for PyInt {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
