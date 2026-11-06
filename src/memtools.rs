@@ -35,3 +35,7 @@ pub const FETCH_CHARS: usize = 60_000;
 pub fn is_memory_tool(name: &str) -> bool {
     MEMORY_TOOLS.contains(&name)
 }
+
+pub fn is_read_tool(name: &str) -> bool {
+    READ_TOOLS.contains(&name)
+}
