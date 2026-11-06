@@ -29,3 +29,4 @@ pub static INTRO_RE: LazyLock<Re> = LazyLock::new(|| {
         r"note that\s*"
     ))
 });
+static SCOPE_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\s*(?:within|for|in|under)\b"));
