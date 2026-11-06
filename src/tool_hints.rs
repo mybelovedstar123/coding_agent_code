@@ -224,3 +224,27 @@ static JOBFIG_JOB: LazyLock<PyRe> = LazyLock::new(|| {
 static JOBFIG_START: LazyLock<PyRe> = LazyLock::new(|| {
     re(r"\b(start|launch|kick off|run|queue up|spin up|fire off|delegate|turn off|turn on|prefer\w*)\b")
 });
+
+/// A figure a background/agent job reports (items processed, a count), read off the job list; not starting a job,
+/// not a status check.
+pub fn wants_job_figure(text: &str) -> bool {
+    let low = text.to_lowercase();
+    let w = _words(text);
+    let job = JOBFIG_JOB.is_match(&low);
+    let figure = _any(
+        &w,
+        &[
+            "items",
+            "count",
+            "many",
+            "number",
+            "processed",
+            "process",
+            "through",
+            "reports",
+        ],
+        0.75,
+    );
+    let start = JOBFIG_START.is_match(&low);
+    job && figure && !start
+}
