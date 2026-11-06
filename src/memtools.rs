@@ -165,3 +165,7 @@ fn embed_error_name(e: crate::embed::EmbedError) -> String {
         crate::embed::EmbedError::Failed(_) => "EmbedError".into(),
     }
 }
+
+fn error(msg: impl Into<String>) -> Value {
+    json!({"error": msg.into()})
+}
