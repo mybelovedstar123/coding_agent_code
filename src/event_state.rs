@@ -376,4 +376,19 @@ impl JsonParser<'_> {
     fn lit(&self, i: usize, word: &str) -> bool {
         word.chars().enumerate().all(|(k, c)| self.at(i + k) == Some(c))
     }
+
+    fn value(&mut self, i: usize) -> Option<(PyVal, usize)> {
+        match self.at(i)? {
+            '"' => self.string(i + 1).map(|(s, e)| (PyVal::Str(s), e)),
+            '{' => self.nested(i, true),
+            '[' => self.nested(i, false),
+            'n' if self.lit(i, "null") => Some((PyVal::None, i + 4)),
+            't' if self.lit(i, "true") => Some((PyVal::Bool(true), i + 4)),
+            'f' if self.lit(i, "false") => Some((PyVal::Bool(false), i + 5)),
+            'N' if self.lit(i, "NaN") => Some((PyVal::Float(f64::NAN), i + 3)),
+            'I' if self.lit(i, "Infinity") => Some((PyVal::Float(f64::INFINITY), i + 8)),
+            '-' if self.lit(i, "-Infinity") => Some((PyVal::Float(f64::NEG_INFINITY), i + 9)),
+            _ => self.number(i),
+        }
+    }
 }
