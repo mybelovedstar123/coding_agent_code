@@ -10,3 +10,12 @@ use serde_json::{json, Value};
 use std::collections::HashSet;
 use std::sync::LazyLock;
 use tokio::time::Instant;
+
+/// Tools that only read the user's stored memories. Everything else in the catalog acts on an app, the outside
+/// world, or the memory store itself.
+const MEMORY_READ_TOOLS: [&str; 4] = [
+    "search_memories",
+    "fetch_memories",
+    "search_subjects",
+    "search_memories_in_subjects",
+];
