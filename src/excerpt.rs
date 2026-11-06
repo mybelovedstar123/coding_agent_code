@@ -12,3 +12,4 @@ use std::collections::BTreeSet;
 use std::sync::LazyLock;
 
 static SENT_SPLIT: LazyLock<Re> = LazyLock::new(|| Re::new("(?<=[.!?;])\\s+(?=[A-Z0-9\"'\u{201c}(])|\\n+"));
+static FACT_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\d|@"));
