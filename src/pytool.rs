@@ -265,3 +265,17 @@ pub fn program_text(args: &serde_json::Map<String, Value>) -> String {
 pub fn is_local_program_call(name: &str, wire_names: &std::collections::HashSet<String>) -> bool {
     name == TOOL_NAME && !wire_names.contains(name)
 }
+
+/// The interpreter: CPython 3.12 from the image (`/usr/local/bin/python3`), else `python3` on PATH.
+fn python() -> String {
+    std::env::var("DITTO_PYTHON")
+        .ok()
+        .filter(|p| !p.is_empty())
+        .unwrap_or_else(|| {
+            if std::path::Path::new("/usr/local/bin/python3").exists() {
+                "/usr/local/bin/python3".into()
+            } else {
+                "python3".into()
+            }
+        })
+}
