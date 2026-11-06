@@ -424,3 +424,15 @@ pub fn ids_from_results(results: &[String]) -> HashSet<String> {
     }
     seen
 }
+
+/// As `unknown_store_ids`, but an id an earlier executed result of this request named exactly (for example an
+/// endpoint's save receipt) is accepted; empty ids are never accepted.
+pub fn invalid_ids(args: &Map<String, Value>, mem: &UserMemory, seen_ids: &HashSet<String>) -> Vec<String> {
+    unknown_store_ids(args, mem)
+        .into_iter()
+        .filter(|bad| {
+            let value = bad_value(bad);
+            value.is_empty() || !seen_ids.contains(&value)
+        })
+        .collect()
+}
