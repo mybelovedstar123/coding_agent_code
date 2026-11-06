@@ -607,3 +607,5 @@ pub fn approximate_option_note(user_input: &str, tool_defs: &[Value]) -> String 
 
 pub const PREFERENCE_NOTE: &str = "The user's own stored preference for this setting is in their records; answer with \
 it, writing the value exactly as the records spell it (the same words and spaces, not joined with hyphens).";
+
+static PREF_SETTING: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(f[a-z]{1,2}t|mode|m[a-z]de|asent|accnet)\b"));
