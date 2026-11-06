@@ -31,3 +31,4 @@ pub static INTRO_RE: LazyLock<Re> = LazyLock::new(|| {
 });
 static SCOPE_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\s*(?:within|for|in|under)\b"));
 static NON_WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\W+"));
+pub const MAX_RECORD_CHARS: usize = 15_000;
