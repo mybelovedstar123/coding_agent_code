@@ -115,3 +115,8 @@ fn parse_time(s: &str) -> Option<NaiveTime> {
     };
     NaiveTime::from_hms_micro_opt(h, m, sec, micros)
 }
+
+/// `ts.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")`.
+pub fn fmt_ts(ts: &DateTime<Utc>) -> String {
+    ts.format("%Y-%m-%dT%H:%M:%SZ").to_string()
+}
