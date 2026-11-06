@@ -687,3 +687,9 @@ pub fn confirm_preference_note(user_input: &str) -> String {
         String::new()
     }
 }
+
+pub const SEND_ON_RECORD_NOTE: &str = "The user asks you to send something to a person. Find in the request or the \
+records who receives it. If they name the recipient and their address, send it with {send} to that address; if the \
+records do not hold the content to send, write a short message from what the request and the records say about it \
+and send that, rather than asking the user for the content. If the records say no recipient has been decided for it, \
+do not send anything: ask the user who should receive it, naming the people the records mention.";
