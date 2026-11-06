@@ -573,4 +573,48 @@ impl Store {
             .or_insert_with(|| Arc::new(RwLock::new(UserMemory::new(user_id))))
             .clone()
     }
+
+    pub async fn seed(&self, user_id: &str, pairs: &Value, subjects: &Value, links: &Value) -> Result<(), EmbedError> {
+        let mem = self.user(user_id);
+        let pair_objs: Vec<Pair> = last_per_id(pairs, &["pair_id", "id"])
+            .into_iter()
+            .map(|p| Pair {
+                pair_id: first_str(p, &["pair_id", "id"]),
+                session_id: first_str(p, &["session_id"]),
+                ts: parse_ts(p.get("timestamp")),
+                prompt: first_str(p, &["prompt"]),
+                response: first_str(p, &["response"]),
+                source: "seed".into(),
+                subjects: BTreeSet::new(),
+            })
+            .collect();
+        let subj_objs: Vec<Subject> = last_per_id(subjects, &["id", "subject_id"])
+            .into_iter()
+            .map(|s| Subject {
+                subject_id: first_str(s, &["id", "subject_id"]),
+                text: first_str(s, &["subject_text", "text"]),
+                description: first_str(s, &["description_text", "description"]),
+                pairs: BTreeSet::new(),
+            })
+            .collect();
+        // Embed outside the lock (slow network work), then publish atomically: the 2xx that follows is the ingest
+        // acknowledgement.
+        let pair_texts: Vec<String> = pair_objs.iter().map(|p| p.text()).collect();
+        let subj_texts: Vec<String> = subj_objs
+            .iter()
+            .map(|s| py::strip(&format!("{}\n{}", s.text, s.description)).to_string())
+            .collect();
+        let (pair_vecs, subj_vecs) = tokio::try_join!(
+            self.embedder.embed(pair_texts, None),
+            self.embedder.embed(subj_texts, None)
+        )?;
+        let mut guard = mem.write().await;
+        guard.upsert_pairs(pair_objs, pair_vecs);
+        guard.upsert_subjects(subj_objs, subj_vecs);
+        for link in links.as_array().map(|a| a.as_slice()).unwrap_or(&[]) {
+            let Some(link) = link.as_object() else { continue };
+            guard.link(&first_str(link, &["subject_id"]), &first_str(link, &["pair_id"]));
+        }
+        Ok(())
+    }
 }
