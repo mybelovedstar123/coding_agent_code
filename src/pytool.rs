@@ -1,0 +1,10 @@
+//! run_python: a generic, resource-bounded interpreter for model-authored programs over the current user's records.
+//!
+//! The model decides whether to use it, writes the whole program, and reads the printed output as a receipt; nothing
+//! here knows what the program computes. Validation covers only syntax and safety: allowlisted imports, no dunder
+//! access, no file/process/network builtins. The program runs in a separate Python process with CPU, memory, file,
+//! process and wall-clock limits, and its output is read with a bound.
+//!
+//! The model writes Python, so the image carries CPython 3.12 (the reference's interpreter); validation runs in it
+//! too, so a rejected program gets CPython's own syntax messages.
+
