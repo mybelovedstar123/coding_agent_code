@@ -49,3 +49,20 @@ pub static SENT: LazyLock<Re> =
 /// character later. The leftmost match is the same: a first-branch match at p-1 is one of SENT's at p, and no other
 /// branch of either pattern can start on the punctuation character.
 static SENT_FAST: LazyLock<Re> = LazyLock::new(|| Re::new(r"[.;!?][\s\x1c-\x1f]+|[\s\x1c-\x1f]+…[\s\x1c-\x1f]+|\n+"));
+
+/// `SENT.split(text)`.
+pub fn sentences(text: &str) -> Vec<&str> {
+    let mut out = Vec::new();
+    let mut last = 0;
+    for (start, end, m) in SENT_FAST.find_iter(text) {
+        let start = if m.starts_with(['.', ';', '!', '?']) {
+            start + 1
+        } else {
+            start
+        };
+        out.push(&text[last..start]);
+        last = end;
+    }
+    out.push(&text[last..]);
+    out
+}
