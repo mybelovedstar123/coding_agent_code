@@ -576,3 +576,8 @@ pub fn calendar_entry_note(user_input: &str, tool_defs: &[Value]) -> String {
         String::new()
     }
 }
+
+pub const APPROXIMATE_OPTION_NOTE: &str = "The user spells the option they want only approximately. After looking up \
+the configured options, apply the listed option closest to what they wrote: letters may be swapped, doubled or \
+missing, and a variant word they give (condensed, display, slab, a colour shade) belongs to the option. Do not stop \
+because the exact spelling is not in the list.";
