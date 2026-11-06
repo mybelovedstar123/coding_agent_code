@@ -342,3 +342,31 @@ async fn read_bounded<R: AsyncRead + Unpin>(stream: &mut R) -> (Vec<u8>, bool) {
         }
     }
 }
+
+/// `str.splitlines()`.
+fn splitlines(s: &str) -> Vec<&str> {
+    let mut out = Vec::new();
+    let mut start = 0;
+    let mut iter = s.char_indices().peekable();
+    while let Some((i, c)) = iter.next() {
+        let is_break = matches!(
+            c,
+            '\n' | '\r' | '\u{0b}' | '\u{0c}' | '\u{1c}' | '\u{1d}' | '\u{1e}' | '\u{85}' | '\u{2028}' | '\u{2029}'
+        );
+        if is_break {
+            out.push(&s[start..i]);
+            let mut next = i + c.len_utf8();
+            if c == '\r' {
+                if let Some(&(j, '\n')) = iter.peek() {
+                    iter.next();
+                    next = j + 1;
+                }
+            }
+            start = next;
+        }
+    }
+    if start < s.len() {
+        out.push(&s[start..]);
+    }
+    out
+}
