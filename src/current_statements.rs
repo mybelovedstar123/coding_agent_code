@@ -94,3 +94,7 @@ static CUE_RES: LazyLock<HashMap<&'static str, Re>> = LazyLock::new(|| {
         .map(|c| (*c, cue_re(c)))
         .collect()
 });
+
+fn cue_re(cue: &str) -> Re {
+    Re::new(&format!(r"(?<![a-z]){}(?![a-z])", escape(cue)))
+}
