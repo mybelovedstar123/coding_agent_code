@@ -208,3 +208,20 @@ static ADD_RES: LazyLock<Vec<Re>> = LazyLock::new(|| {
 static LIST_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?:—|:|wants:?|needs:?)\s*([^—:]+?)\.?\s*(?=\n?\z)"));
 static LIST_SPLIT_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r",\s*|\s+and\s+"));
 static ARTICLE_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"^(?:an?|the|some)\s+"));
+
+/// Items of a note that is a list ("… list …: a, b, c and d" / "… — a, b, c, d"); empty otherwise.
+pub fn list_items(text: &str) -> Vec<String> {
+    let Some(c) = LIST_RE.captures(text) else {
+        return Vec::new();
+    };
+    let body = c.get(1).map_or("", |m| m.as_str());
+    if !body.contains(',') {
+        return Vec::new();
+    }
+    LIST_SPLIT_RE
+        .split(py::strip(body))
+        .into_iter()
+        .filter(|p| !py::strip(p).is_empty())
+        .map(|p| py::strip(py::strip(p).trim_matches('.')).to_string())
+        .collect()
+}
