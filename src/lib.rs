@@ -4,6 +4,7 @@
 //! byte-for-byte the request the reference sends for the same case, so the two can be compared on cached replays.
 //! `py` and `pyre` hold the Python semantics that guarantee it.
 
+pub mod companions;
 pub mod config;
 pub mod current_statements;
 pub mod difflib;
