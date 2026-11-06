@@ -271,3 +271,23 @@ impl PartialOrd for PyInt {
         Some(self.cmp(other))
     }
 }
+
+/// `unicodedata.decimal(c)`: the value of a Unicode decimal digit (category Nd, which comes in runs of ten).
+fn decimal_value(c: char) -> Option<u32> {
+    if c.is_ascii_digit() {
+        return Some(c as u32 - '0' as u32);
+    }
+    if c.is_ascii() || !DIGIT_RE.is_match(c.encode_utf8(&mut [0; 4])) {
+        return None;
+    }
+    let mut n = 0u32;
+    let mut cp = c as u32;
+    while cp > 0 {
+        cp -= 1;
+        match char::from_u32(cp) {
+            Some(p) if DIGIT_RE.is_match(p.encode_utf8(&mut [0; 4])) => n += 1,
+            _ => break,
+        }
+    }
+    Some(n % 10)
+}
