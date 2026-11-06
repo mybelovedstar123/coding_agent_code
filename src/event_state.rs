@@ -184,4 +184,8 @@ impl PyInt {
             PyInt { neg, digits: d.into() }
         }
     }
+
+    pub fn from_i64(v: i64) -> PyInt {
+        PyInt::new(v < 0, &v.unsigned_abs().to_string())
+    }
 }
