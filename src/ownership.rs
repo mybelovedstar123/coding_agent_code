@@ -374,3 +374,6 @@ const ORG_WORDS_TEXT: &str =
 supply labs studio studios systems group holdings ventures industries brands collective guild workshop atelier press
 analytics digital energy foods interactive textiles cooperative works services hotel hotels removals movers club
 academy school centre center";
+
+pub static ORG_WORDS: LazyLock<HashSet<&'static str>> =
+    LazyLock::new(|| py::split_ws(ORG_WORDS_TEXT).into_iter().collect());
