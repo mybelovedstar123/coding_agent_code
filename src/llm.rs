@@ -23,3 +23,13 @@ impl std::error::Error for ModelError {}
 
 /// A token-usage block as the provider sent it (a JSON object; malformed fields count as zero where read).
 pub type Usage = Map<String, Value>;
+
+/// The first choice's message plus the response's usage and finish reason.
+#[derive(Debug, Clone, Default)]
+pub struct Reply {
+    /// The whole message object as received (content, tool_calls, …).
+    pub message: Map<String, Value>,
+    pub content: Option<Value>,
+    pub usage: Usage,
+    pub finish_reason: Value,
+}
