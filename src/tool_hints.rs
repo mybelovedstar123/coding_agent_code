@@ -263,3 +263,10 @@ pub fn wants_note_fix(text: &str) -> bool {
     let low = text.to_lowercase();
     NOTE_NOTE.is_match(&low) && NOTE_FIX.is_match(&low)
 }
+
+static TEAM_FEEDBACK: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(let the t\w{2,3}m know|report (this |it )?to the (d\w{1,2}vs?|developers?|t\w{2,3}m)",
+        r"|to the ditto t\w{2,3}m|whoever (builds|makes) (this|it|t\w{2,3})|tell the (devs?|developers?|ditto t\w{2,3}m))\b",
+    ))
+});
