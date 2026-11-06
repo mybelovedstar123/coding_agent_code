@@ -612,3 +612,9 @@ static PREF_SETTING: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(f[a-z]{1,2}t|mode
 static PREF_OWN: LazyLock<PyRe> =
     LazyLock::new(|| re(r"\bmy (?:own |personal )?(?:ditto|workspace|interface|app|setup|look|chat)\b"));
 static PREF_QUESTION: LazyLock<PyRe> = LazyLock::new(|| re(r"\s*(which|what|if you|suppose)\b"));
+static PREF_TASK: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\s*(?:please\s+|can you\s+|could you\s+)?(set|change|switch|make|turn|update|apply|",
+        r"review|look|inspect|check|find|my)\b",
+    ))
+});
