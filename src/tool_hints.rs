@@ -654,3 +654,11 @@ value they name. Their stored preference for that setting is in their records. C
 already give that same value, do not call any tool (not even one that lists settings or options); reply that it is \
 already set to that value, citing the record. If the records give a different value, or none, set the value the user \
 named with that setting's tool.";
+
+/// A verify word (typo-tolerant) followed by "my": "confirm my", "make sure my", "double-check that my".
+static CONFIRM_VERIFY: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(c\w{0,2}nf\w{1,3}m|ch\w{0,2}ck|m\w{1,3}e? s\w{0,2}re|double-?\s?ch\w{1,3}k|ver\w{1,3}y|ens\w{1,2}re)\b",
+        r"(?:\s+that)?\s+my\b",
+    ))
+});
