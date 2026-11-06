@@ -82,3 +82,5 @@ pub const BANNED_ATTRS: [&str; 17] = [
 pub const MAX_CODE_CHARS: usize = 8000;
 pub const MAX_OUTPUT_CHARS: usize = 6000;
 pub const WALL_TIMEOUT_S: f64 = 15.0;
+/// Bytes read from each of the program's output streams; anything beyond is never buffered (D25).
+pub const READ_LIMIT_BYTES: usize = 1024 * 1024;
