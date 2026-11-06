@@ -68,3 +68,27 @@ pub fn copy_sets(records: &[Record], ident: &str) -> Vec<Vec<Copy>> {
         .map(|(_, members)| members)
         .collect()
 }
+
+/// The copy sets that take part in an order disagreement (see `has_reordered_copies`).
+pub fn reordered_sets(records: &[Record], ident: &str) -> Vec<Vec<Copy>> {
+    let sets = copy_sets(records, ident);
+    let span: Vec<(DateTime<Utc>, DateTime<Utc>)> = sets
+        .iter()
+        .map(|s| {
+            let lo = s.iter().map(|c| c.2).min().expect("copy sets are non-empty");
+            let hi = s.iter().map(|c| c.2).max().expect("copy sets are non-empty");
+            (lo, hi)
+        })
+        .collect();
+    let mut hit: HashSet<usize> = HashSet::new();
+    for i in 0..sets.len() {
+        for j in 0..sets.len() {
+            if i != j && span[i].0 < span[j].1 && span[j].0 < span[i].1 {
+                hit.insert(i);
+            }
+        }
+    }
+    let mut order: Vec<usize> = hit.into_iter().collect();
+    order.sort_unstable();
+    order.into_iter().map(|i| sets[i].clone()).collect()
+}
