@@ -424,3 +424,5 @@ static RS_SEND: LazyLock<PyRe> = LazyLock::new(|| {
         r"email what)\b",
     ))
 });
+static RS_RECIPIENT: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(?:to|over to|on to|a\w{2,4}g to) (?:[A-Z][a-z]+|th\w{0,2}m|t\w{1,3}m)\b"));
