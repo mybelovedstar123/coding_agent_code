@@ -458,3 +458,14 @@ pub fn wants_research_send(text: &str) -> bool {
     let recipient = RS_RECIPIENT.is_match(text) || RS_FOR_NAME.match_start(text).is_some();
     (figure || lookup) && send && recipient
 }
+
+/// RESEARCH_SEND_NOTE when the request asks for a looked-up figure to be sent and both tools are offered.
+pub fn research_send_note(user_input: &str, tool_defs: &[Value]) -> String {
+    let offered = offered_names(tool_defs);
+    if offered.contains(&"gmail_send") && offered.contains(&"search_web") && wants_research_send(user_input) {
+        return RESEARCH_SEND_NOTE
+            .replace("{lookup}", "search_web")
+            .replace("{send}", "gmail_send");
+    }
+    String::new()
+}
