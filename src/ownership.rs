@@ -313,3 +313,37 @@ pub fn asks_holder(request: &str) -> bool {
 }
 
 static GRAM_WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[A-Za-z0-9][A-Za-z0-9'-]*"));
+
+/// Phrases written in lower case in the request (project names), as token strings.
+pub fn lower_grams(request: &str) -> HashSet<String> {
+    let raw = GRAM_WORD_RE.findall(request);
+    let ok: Vec<Option<String>> = raw
+        .iter()
+        .map(|w| {
+            if *w == w.to_lowercase() {
+                Some(w.to_lowercase())
+            } else {
+                None
+            }
+        })
+        .collect();
+    let mut out = HashSet::new();
+    for n in [2usize, 3, 4, 5] {
+        if ok.len() < n {
+            continue;
+        }
+        for i in 0..ok.len() + 1 - n {
+            let window = &ok[i..i + n];
+            if window.iter().all(|w| w.as_deref().is_some_and(|s| !s.is_empty())) {
+                out.insert(
+                    window
+                        .iter()
+                        .map(|w| w.as_deref().unwrap_or(""))
+                        .collect::<Vec<_>>()
+                        .join(" "),
+                );
+            }
+        }
+    }
+    out
+}
