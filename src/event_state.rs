@@ -990,3 +990,51 @@ pub fn requested_step(user_input: &str, evs: &[Event]) -> PyInt {
         .max()
         .unwrap_or_else(|| PyInt::from_i64(0))
 }
+
+/// The memory context with `event_state` (the records' event history applied up to the requested step) and
+/// EVENT_STATE_NOTE added. Unchanged when the context is not a JSON payload that shows the identifier records
+/// themselves (`memories`), or when the records hold fewer than MIN_EVENTS events.
+pub fn with_event_state(
+    context: Option<String>,
+    prefix: &str,
+    pair_ids: &[String],
+    user_input: &str,
+    texts: &[String],
+) -> Option<String> {
+    let context = context?;
+    if context.is_empty() || !context.contains('\n') {
+        return Some(context);
+    }
+    let body = context.split_once('\n').map_or("", |(_, b)| b);
+    // A payload Python's json.loads takes but serde_json does not (NaN, Infinity) is left unchanged here.
+    let Ok(Value::Object(mut payload)) = serde_json::from_str::<Value>(body) else {
+        // A non-object payload: Python returns the context unless `"memories" in payload` holds, where it raises.
+        return Some(context);
+    };
+    if !payload.contains_key("memories") {
+        return Some(context);
+    }
+    let evs = events(texts);
+    if evs.len() < MIN_EVENTS {
+        return Some(context);
+    }
+    let step = requested_step(user_input, &evs);
+    let prior = payload.get("note").map_or(String::new(), py::str_value);
+    let note = format!("{prior} {}", EVENT_STATE_NOTE.replace("{step}", &step.to_string()));
+    payload.insert("note".into(), Value::String(py::strip(&note).to_string()));
+    let effective: Value = step
+        .to_string()
+        .parse::<serde_json::Number>()
+        .map(Value::Number)
+        .unwrap_or(Value::Null);
+    payload.insert(
+        "event_state".into(),
+        json!({
+            "effective_step": effective,
+            "records": pair_ids,
+            "events": evs.len(),
+            "entities": state_at(&evs, &step),
+        }),
+    );
+    Some(format!("{prefix}\n{}", py::dumps(&Value::Object(payload), false)))
+}
