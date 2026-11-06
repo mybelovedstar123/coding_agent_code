@@ -205,3 +205,4 @@ static ADD_RES: LazyLock<Vec<Re>> = LazyLock::new(|| {
         .map(|p| Re::new(&p.replace("|$", r"|(?=\n?\z)")))
         .collect()
 });
+static LIST_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?:—|:|wants:?|needs:?)\s*([^—:]+?)\.?\s*(?=\n?\z)"));
