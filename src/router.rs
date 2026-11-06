@@ -86,3 +86,18 @@ pub fn parse(text: &str, names: &HashSet<String>) -> Option<Decision> {
     };
     Some(Decision { route, tools })
 }
+
+fn messages(user_input: &str, tool_defs: &[Value], wire_system: &str) -> Vec<Value> {
+    let host = if py::strip(wire_system).is_empty() {
+        String::new()
+    } else {
+        format!(
+            "\n\nHost instructions the assistant follows:\n{}",
+            py::strip(wire_system)
+        )
+    };
+    vec![
+        json!({"role": "system", "content": format!("{ROUTER_PROMPT}\n\nTools:\n{}{host}", catalog_text(tool_defs))}),
+        json!({"role": "user", "content": user_input}),
+    ]
+}
