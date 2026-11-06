@@ -480,3 +480,21 @@ impl UserMemory {
 pub fn cmp_f64(a: f64, b: f64) -> Ordering {
     a.partial_cmp(&b).unwrap_or(Ordering::Equal)
 }
+
+/// Reciprocal-rank fusion; equal scores are ordered by the content key, never by insertion order.
+pub fn rrf_fuse(rankings: &[Vec<String>], weights: &[f64], mem: &UserMemory, k: f64) -> Vec<(String, f64)> {
+    let mut fused: IndexMap<String, f64> = IndexMap::new();
+    for (ranking, w) in rankings.iter().zip(weights) {
+        for (rank, pid) in ranking.iter().enumerate() {
+            *fused.entry(pid.clone()).or_insert(0.0) += w / (k + rank as f64 + 1.0);
+        }
+    }
+    let mut out: Vec<(String, f64)> = fused.into_iter().collect();
+    out.sort_by(|a, b| {
+        cmp_f64(-a.1, -b.1).then_with(|| match (mem.pairs.get(&a.0), mem.pairs.get(&b.0)) {
+            (Some(x), Some(y)) => cmp_content(x, y),
+            _ => a.0.cmp(&b.0),
+        })
+    });
+    out
+}
