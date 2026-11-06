@@ -13,3 +13,6 @@ use std::sync::LazyLock;
 pub const COPY_JACCARD: f64 = 0.7;
 pub const MIN_WORDS: usize = 5;
 pub static WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z0-9]{3,}"));
+
+/// A record as (pairID, timestamp text, timestamp, prompt).
+pub type Record = (String, String, DateTime<Utc>, String);
