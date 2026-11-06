@@ -192,4 +192,55 @@ impl Index {
         }
         out
     }
+
+    /// The project phrase of a holder request and its handover sentences: the longest request n-gram (5 down to 2
+    /// words) that recurs in 2..=MAX_PHRASE_RECORDS records and has a chain, the one with the most sentences (then
+    /// the greatest phrase) at that length.
+    pub fn best_chain(&self, request: &str) -> (Option<String>, Chain) {
+        if !asks_holder(request) {
+            return (None, Vec::new());
+        }
+        let lowers = lower_grams(request);
+        let toks = tokens(request);
+        for n in [5usize, 4, 3, 2] {
+            let mut found: Vec<(usize, String, Chain)> = Vec::new();
+            if toks.len() >= n {
+                for i in 0..toks.len() + 1 - n {
+                    let gram = &toks[i..i + n];
+                    if STOP.contains(gram[0].as_str())
+                        || STOP.contains(gram[n - 1].as_str())
+                        || gram.iter().filter(|w| !STOP.contains(w.as_str())).count() < 2
+                    {
+                        continue;
+                    }
+                    if thread_like(&gram[0]) || thread_like(&gram[n - 1]) {
+                        continue;
+                    }
+                    let phrase = gram.join(" ");
+                    if !lowers.contains(&phrase) {
+                        continue;
+                    }
+                    let occ = self.occurs(&phrase);
+                    if !(2..=MAX_PHRASE_RECORDS).contains(&occ) {
+                        continue;
+                    }
+                    let ch = self.chain(&phrase);
+                    if !ch.is_empty() {
+                        found.push((ch.len(), phrase, ch));
+                    }
+                }
+            }
+            // max(found): the first of the greatest (len, phrase, chain) tuples.
+            let mut best: Option<&(usize, String, Chain)> = None;
+            for f in &found {
+                if best.is_none_or(|b| (f.0, &f.1, &f.2) > (b.0, &b.1, &b.2)) {
+                    best = Some(f);
+                }
+            }
+            if let Some((_, phrase, ch)) = best {
+                return (Some(phrase.clone()), ch.clone());
+            }
+        }
+        (None, Vec::new())
+    }
 }
