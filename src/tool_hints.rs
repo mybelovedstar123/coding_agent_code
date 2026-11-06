@@ -589,3 +589,9 @@ static APPROXIMATE_OPTION: LazyLock<PyRe> = LazyLock::new(|| {
         r"|configured appearance options|accent list|look the list up)",
     ))
 });
+
+/// A request to apply an appearance option whose name the user spells only approximately, with a lookup of the
+/// configured options first ("look the list up first, I may have botched the name").
+pub fn names_option_approximately(text: &str) -> bool {
+    APPROXIMATE_OPTION.is_match(&text.to_lowercase())
+}
