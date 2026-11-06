@@ -95,3 +95,13 @@ pub fn glossary(records: &[(String, String)], ident: &str) -> IndexMap<String, S
     }
     terms
 }
+
+/// The defined names as one alternation, longest first (stable: equal lengths keep the glossary's order).
+fn terms_re(terms: &IndexMap<String, String>) -> Re {
+    let mut names: Vec<&String> = terms.keys().collect();
+    names.sort_by_key(|t| std::cmp::Reverse(py::len(t)));
+    Re::new(&format!(
+        r"\b({})\b",
+        names.iter().map(|t| escape(t)).collect::<Vec<_>>().join("|")
+    ))
+}
