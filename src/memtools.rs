@@ -388,3 +388,21 @@ fn bad_value(entry: &str) -> String {
 }
 
 const ID_KEYS: [&str; 6] = ["id", "pair_id", "pairId", "pairID", "memory_id", "memoryId"];
+
+/// Exact string values of id-named fields anywhere inside a parsed tool result.
+fn collect_ids(obj: &Value, out: &mut HashSet<String>) {
+    match obj {
+        Value::Object(map) => {
+            for (key, value) in map {
+                if let Value::String(s) = value {
+                    if ID_KEYS.contains(&key.as_str()) && !py::strip(s).is_empty() {
+                        out.insert(s.clone());
+                    }
+                }
+                collect_ids(value, out);
+            }
+        }
+        Value::Array(items) => items.iter().for_each(|i| collect_ids(i, out)),
+        _ => {}
+    }
+}
