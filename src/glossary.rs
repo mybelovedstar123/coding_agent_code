@@ -105,3 +105,17 @@ fn terms_re(terms: &IndexMap<String, String>) -> Re {
         names.iter().map(|t| escape(t)).collect::<Vec<_>>().join("|")
     ))
 }
+
+/// Each defined name in `text` followed by its meaning in brackets.
+///
+/// With no terms the Python pattern is `\b()\b` and the substitution raises KeyError (never reached: callers pass
+/// a non-empty glossary); here the text is returned unchanged.
+pub fn glossed(text: &str, terms: &IndexMap<String, String>) -> String {
+    if terms.is_empty() {
+        return text.to_string();
+    }
+    terms_re(terms).sub_with(text, |c| {
+        let name = &c[1];
+        format!("{name} [= {}]", terms.get(name).map(String::as_str).unwrap_or(""))
+    })
+}
