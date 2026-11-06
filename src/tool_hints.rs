@@ -619,3 +619,10 @@ static PREF_TASK: LazyLock<PyRe> = LazyLock::new(|| {
     ))
 });
 static PREF_VERIFY: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(confirm|check|make sure|double-check|verify|ensure)\b"));
+
+/// The request names an appearance setting: accent, colour, font, typeface, appearance or mode (typo-tolerant).
+fn names_appearance_setting(w: &[String], low: &str) -> bool {
+    _any(w, &["accent", "typeface", "appearance"], 0.7)
+        || _any(w, &["colour", "color"], 0.85)
+        || PREF_SETTING.is_match(low)
+}
