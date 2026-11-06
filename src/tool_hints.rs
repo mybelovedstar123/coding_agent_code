@@ -537,3 +537,14 @@ pub fn wants_agreed_start(text: &str) -> bool {
         })
     })
 }
+
+/// AGREED_START_NOTE when the catalog can list and run saved workflows and the request asks to start something as
+/// agreed.
+pub fn agreed_start_note(user_input: &str, tool_defs: &[Value]) -> String {
+    let names = offered_names(tool_defs);
+    if names.contains(&"list_workflows") && names.contains(&"run_workflow") && wants_agreed_start(user_input) {
+        AGREED_START_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
