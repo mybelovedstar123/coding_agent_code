@@ -160,4 +160,16 @@ impl Index {
                 .collect()
         })
     }
+
+    /// Records holding all but at most one of the phrase's words exactly (one typo'd word allowed).
+    pub fn candidates(&self, phrase: &str) -> Vec<usize> {
+        let words = py::split_ws(phrase);
+        let need = words.len().saturating_sub(1).max(1);
+        self.sets
+            .iter()
+            .enumerate()
+            .filter(|(_, st)| words.iter().filter(|w| st.contains(**w)).count() >= need)
+            .map(|(i, _)| i)
+            .collect()
+    }
 }
