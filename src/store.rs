@@ -564,4 +564,13 @@ impl Store {
             users: Mutex::new(HashMap::new()),
         }
     }
+
+    pub fn user(&self, user_id: &str) -> SharedMemory {
+        self.users
+            .lock()
+            .expect("users lock")
+            .entry(user_id.to_string())
+            .or_insert_with(|| Arc::new(RwLock::new(UserMemory::new(user_id))))
+            .clone()
+    }
 }
