@@ -6,6 +6,7 @@
 
 pub mod companions;
 pub mod config;
+pub mod contact_evidence;
 pub mod current_statements;
 pub mod difflib;
 pub mod embed;
