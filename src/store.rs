@@ -549,3 +549,5 @@ pub fn first_str(item: &serde_json::Map<String, Value>, keys: &[&str]) -> String
         .map(py::str_value)
         .unwrap_or_default()
 }
+
+pub type SharedMemory = Arc<RwLock<UserMemory>>;
