@@ -565,3 +565,9 @@ pub fn orgs_in<'a>(texts: impl IntoIterator<Item = &'a str>) -> HashSet<String> 
     }
     out
 }
+
+static SWAP: LazyLock<Re> = LazyLock::new(|| {
+    Re::new(&format!(
+        r"\b(?:took over|has taken over|taken over)\b[^.;]*?\bfrom[\s\x1c-\x1f]+{NAME}"
+    ))
+});
