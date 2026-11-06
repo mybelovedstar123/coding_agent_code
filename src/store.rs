@@ -377,4 +377,24 @@ impl UserMemory {
             .subjects
             .insert(subject_id.to_string());
     }
+
+    // ------------------------------------------------------------------ reads
+    pub fn dense_scores(&self, qvec: &[f32], ids: Option<&[String]>) -> Vec<(String, f64)> {
+        match ids {
+            None => self
+                .order
+                .iter()
+                .zip(&self.vecs)
+                .map(|(pid, v)| (pid.clone(), dot(v, qvec) as f64))
+                .collect(),
+            Some(ids) => ids
+                .iter()
+                .filter_map(|i| {
+                    self.row
+                        .get(i)
+                        .map(|&r| (self.order[r].clone(), dot(&self.vecs[r], qvec) as f64))
+                })
+                .collect(),
+        }
+    }
 }
