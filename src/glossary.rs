@@ -23,3 +23,9 @@ pub static DEF_RE: LazyLock<Re> =
     LazyLock::new(|| Re::new(&format!(r"^\s*([a-z][a-z0-9]{{4,}})\s+({DEF_VERBS})\b\s*(.+?)\s*$")));
 pub static CLAUSE_SPLIT: LazyLock<Re> =
     LazyLock::new(|| Re::new(&format!(r"[;]|\.\s+|,\s+(?=[a-z][a-z0-9]{{4,}}\s+(?:{DEF_VERBS})\b)")));
+pub static INTRO_RE: LazyLock<Re> = LazyLock::new(|| {
+    Re::new(concat!(
+        r"(?i)(?:conventions here|glossary|note that|field meanings|schema)[^:]*:\s*|before the data lands,?\s*",
+        r"note that\s*"
+    ))
+});
