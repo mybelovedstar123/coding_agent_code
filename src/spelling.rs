@@ -65,3 +65,15 @@ pub async fn corrected_reading(
         }
     }
 }
+
+/// The advisory note carrying the corrected reading, or "" when there is none.
+pub fn reading_note(corrected: &str) -> String {
+    if corrected.is_empty() {
+        return String::new();
+    }
+    format!(
+        "Reading note (spelling only): the user's message with its spelling mistakes corrected reads: \
+         \u{201c}{corrected}\u{201d}. The user's message itself is what they sent; use this only to read \
+         misspelled words as the words they mean."
+    )
+}
