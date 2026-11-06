@@ -250,3 +250,13 @@ def _main():
     exec(code, env)
 _main()
 "#;
+
+/// The model-authored source (`code`, or `program` when the model names the argument that way).
+pub fn program_text(args: &serde_json::Map<String, Value>) -> String {
+    ["program", "code"]
+        .iter()
+        .filter_map(|k| args.get(*k))
+        .find(|v| crate::store::truthy(v))
+        .map(py::str_value)
+        .unwrap_or_default()
+}
