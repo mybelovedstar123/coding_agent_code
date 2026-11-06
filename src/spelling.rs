@@ -15,3 +15,12 @@ pub const SPELLING_PROMPT: &str = "Correct the spelling mistakes in the user's m
      with the corrected message only, with no comment.";
 
 static DIGIT_TOKEN_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\S*\d\S*"));
+
+/// Tokens that contain a digit (identifiers, numbers, dates, codes), trailing punctuation removed.
+pub fn digit_tokens(text: &str) -> Vec<String> {
+    DIGIT_TOKEN_RE
+        .findall(text)
+        .iter()
+        .map(|t| py::rstrip_chars(t, ".,;:!?)\"'").to_string())
+        .collect()
+}
