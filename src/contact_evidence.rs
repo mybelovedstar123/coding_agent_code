@@ -141,3 +141,9 @@ fn load_payload(context: Option<&str>) -> Option<Value> {
     let (_, body) = context.split_once('\n')?;
     serde_json::from_str(body).ok()
 }
+
+/// `f"{payload.get('note', '')} {extra}".strip()`.
+fn appended_note(payload: &Map<String, Value>, extra: &str) -> String {
+    let note = payload.get("note").map(py::str_value).unwrap_or_default();
+    py::strip(&format!("{note} {extra}")).to_string()
+}
