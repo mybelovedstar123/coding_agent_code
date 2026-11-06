@@ -4,3 +4,11 @@
 //! calls are also sent to `tool_endpoint`). Arguments are parsed tolerantly so a model that sends a single string
 //! where a list is expected still gets a useful result.
 
+use crate::excerpt::{excerpt, Idf};
+use crate::py;
+use crate::pytool;
+use crate::store::{cmp_content, fmt_ts, render_pair, truthy, Pair, Store, UserMemory};
+use serde_json::{json, Map, Value};
+use std::collections::{BTreeSet, HashSet};
+use std::sync::LazyLock;
+use tokio::time::Instant;
