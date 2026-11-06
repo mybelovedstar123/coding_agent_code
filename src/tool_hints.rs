@@ -618,3 +618,4 @@ static PREF_TASK: LazyLock<PyRe> = LazyLock::new(|| {
         r"review|look|inspect|check|find|my)\b",
     ))
 });
+static PREF_VERIFY: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(confirm|check|make sure|double-check|verify|ensure)\b"));
