@@ -157,3 +157,11 @@ fn sorted_previews(mut previews: Vec<Value>) -> Value {
     previews.sort_by(|a, b| a["timestamp"].as_str().cmp(&b["timestamp"].as_str()));
     json!({"memories": previews})
 }
+
+/// The Python exception class name of an embedding failure, as the reference reports it.
+fn embed_error_name(e: crate::embed::EmbedError) -> String {
+    match e {
+        crate::embed::EmbedError::TooLarge(_) => "RequestTooLarge".into(),
+        crate::embed::EmbedError::Failed(_) => "EmbedError".into(),
+    }
+}
