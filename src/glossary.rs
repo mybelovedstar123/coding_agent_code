@@ -21,3 +21,5 @@ pub const DEF_VERBS: &str = concat!(
 );
 pub static DEF_RE: LazyLock<Re> =
     LazyLock::new(|| Re::new(&format!(r"^\s*([a-z][a-z0-9]{{4,}})\s+({DEF_VERBS})\b\s*(.+?)\s*$")));
+pub static CLAUSE_SPLIT: LazyLock<Re> =
+    LazyLock::new(|| Re::new(&format!(r"[;]|\.\s+|,\s+(?=[a-z][a-z0-9]{{4,}}\s+(?:{DEF_VERBS})\b)")));
