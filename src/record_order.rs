@@ -45,3 +45,5 @@ pub fn near_copies(a: &BTreeSet<String>, b: &BTreeSet<String>) -> bool {
     let union = a.union(b).count();
     inter as f64 / union as f64 >= COPY_JACCARD
 }
+
+pub const COPIES_NOTE_HEAD: &str = "Some of these records are copies of the same note filed more than once, and the copies disagree on order, so a record's timestamp is when that copy was filed. Copies of one note:";
