@@ -391,4 +391,15 @@ impl JsonParser<'_> {
             _ => self.number(i),
         }
     }
+
+    fn nested(&mut self, i: usize, object: bool) -> Option<(PyVal, usize)> {
+        // CPython's recursion limit (1000 frames) is far deeper than any record nests; bound it the same way.
+        self.depth += 1;
+        if self.depth > 990 {
+            return None;
+        }
+        let out = if object { self.object(i + 1) } else { self.array(i + 1) };
+        self.depth -= 1;
+        out
+    }
 }
