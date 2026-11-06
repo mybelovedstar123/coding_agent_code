@@ -377,3 +377,8 @@ academy school centre center";
 
 pub static ORG_WORDS: LazyLock<HashSet<&'static str>> =
     LazyLock::new(|| py::split_ws(ORG_WORDS_TEXT).into_iter().collect());
+
+pub fn is_person(name: &str) -> bool {
+    let last = py::split_ws(name).last().map(|w| w.to_lowercase()).unwrap_or_default();
+    !ORG_WORDS.contains(last.as_str())
+}
