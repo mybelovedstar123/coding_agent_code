@@ -25,3 +25,11 @@ pub fn asks_for_handle(question: &str) -> bool {
 
 /// Compiled name patterns, by pattern text (names recur across requests; compiling dominates otherwise).
 static NAME_RES: LazyLock<Mutex<HashMap<String, Arc<Re>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+
+fn cached_re(pattern: String) -> Arc<Re> {
+    let mut cache = NAME_RES.lock().unwrap_or_else(|e| e.into_inner());
+    cache
+        .entry(pattern)
+        .or_insert_with_key(|p| Arc::new(Re::new(p)))
+        .clone()
+}
