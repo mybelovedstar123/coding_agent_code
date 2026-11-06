@@ -416,3 +416,4 @@ static RS_WHICH: LazyLock<PyRe> = LazyLock::new(|| re(r"\s*(?:for \w+ contact l\
 static RS_BELONGS: LazyLock<PyRe> = LazyLock::new(|| re(r"b\w{1,3}ongs to|email do i have"));
 static RS_FIGURE: LazyLock<PyRe> =
     LazyLock::new(|| re(r"\bat (?:r\w{2,4}t now|today|as of now)|sit\w{0,4}ng at|set\w{0,4}ng at"));
+static RS_LOOKUP: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(l\w{1,3}k up|c\w?h?e?c?k|pu\w?ll?|find)\b"));
