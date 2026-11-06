@@ -122,3 +122,72 @@ impl Idf<'_> {
         (1.0 + (n - d + 0.5) / (d + 0.5)).ln()
     }
 }
+
+/// `text` if short, else its query-relevant sentences in order.
+pub fn excerpt(text: &str, query: &str, max_chars: usize, idf: Option<&Idf>) -> String {
+    let text = py::strip(text);
+    if py::len(text) <= max_chars {
+        return text.to_string();
+    }
+    let sents = split_sentences(text);
+    let qtoks: Vec<String> = tokenize(query)
+        .into_iter()
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect();
+    if sents.is_empty() || qtoks.is_empty() {
+        return format!("{} \u{2026}", py::head(text, max_chars));
+    }
+    let mut scores = Vec::with_capacity(sents.len());
+    for s in &sents {
+        let stoks: BTreeSet<String> = tokenize(s).into_iter().collect();
+        let mut score = 0.0f64;
+        for q in &qtoks {
+            let best = stoks.iter().map(|t| fuzzy_match(q, t)).fold(0.0f64, f64::max);
+            if best != 0.0 {
+                score += best * idf.map(|f| f.get(q)).unwrap_or(1.0);
+            }
+        }
+        // Numbers, codes and emails carry facts; favour sentences that have them.
+        if FACT_RE.is_match(s) {
+            score *= 1.15;
+        }
+        scores.push(score);
+    }
+    let mut order: Vec<usize> = (0..sents.len()).collect();
+    order.sort_by(|&a, &b| {
+        (-scores[a])
+            .partial_cmp(&-scores[b])
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+    let mut keep: BTreeSet<usize> = BTreeSet::new();
+    let mut budget = max_chars as i64;
+    for i in order {
+        if scores[i] <= 0.0 {
+            break;
+        }
+        let cost = py::len(&sents[i]) as i64 + 1;
+        if cost > budget {
+            continue;
+        }
+        keep.insert(i);
+        budget -= cost;
+    }
+    // The opening sentence usually names the topic of the record.
+    if !keep.contains(&0) && (py::len(&sents[0]) as i64) < budget {
+        keep.insert(0);
+    }
+    if keep.is_empty() {
+        return format!("{} \u{2026}", py::head(text, max_chars));
+    }
+    let mut out: Vec<&str> = Vec::new();
+    let mut prev: i64 = -2;
+    for &i in &keep {
+        if prev >= 0 && i as i64 != prev + 1 {
+            out.push("\u{2026}");
+        }
+        out.push(&sents[i]);
+        prev = i as i64;
+    }
+    out.join(" ")
+}
