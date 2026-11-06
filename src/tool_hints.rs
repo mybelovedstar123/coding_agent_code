@@ -427,3 +427,34 @@ static RS_SEND: LazyLock<PyRe> = LazyLock::new(|| {
 static RS_RECIPIENT: LazyLock<PyRe> =
     LazyLock::new(|| re(r"\b(?:to|over to|on to|a\w{2,4}g to) (?:[A-Z][a-z]+|th\w{0,2}m|t\w{1,3}m)\b"));
 static RS_FOR_NAME: LazyLock<PyRe> = LazyLock::new(|| re("\\s*For [A-Z][a-z]+ [\u{2014}-]"));
+
+/// Get a current figure (look it up) and send it to a person, in one request (not a question about an address,
+/// not sending an update about something).
+pub fn wants_research_send(text: &str) -> bool {
+    let low = text.to_lowercase();
+    let w = _words(text);
+    if RS_WHICH.match_start(&low).is_some() || RS_BELONGS.is_match(&low) {
+        return false;
+    }
+    let figure = _any(
+        &w,
+        &[
+            "figure",
+            "number",
+            "reading",
+            "value",
+            "latest",
+            "current",
+            "currently",
+            "stands",
+        ],
+        0.7,
+    ) || RS_FIGURE.is_match(&low);
+    let lookup = RS_LOOKUP.is_match(&low);
+    if !figure && RS_UPDATE.is_match(&low) {
+        return false;
+    }
+    let send = _any(&w, &["send", "email", "forward", "pass"], 0.7) || RS_SEND.is_match(&low);
+    let recipient = RS_RECIPIENT.is_match(text) || RS_FOR_NAME.match_start(text).is_some();
+    (figure || lookup) && send && recipient
+}
