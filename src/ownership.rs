@@ -391,3 +391,17 @@ fn last_groups(pat: &Re, s: &str) -> Vec<String> {
         .filter_map(|c| c.get(last).map(|m| m.as_str().to_string()))
         .collect()
 }
+
+/// The person the latest handover sentence names as the new holder (organisations skipped).
+pub fn first_named_holder(chain: &[(String, String)]) -> Option<String> {
+    for (_, s) in chain.iter().rev() {
+        for pat in TARGETS.iter() {
+            for name in last_groups(pat, s) {
+                if is_person(&name) {
+                    return Some(name);
+                }
+            }
+        }
+    }
+    None
+}
