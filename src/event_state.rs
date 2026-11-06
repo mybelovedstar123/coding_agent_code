@@ -923,3 +923,8 @@ pub fn events(texts: &[String]) -> Vec<Event> {
     }
     out
 }
+
+enum FieldState {
+    Value(String),
+    Set(BTreeSet<String>),
+}
