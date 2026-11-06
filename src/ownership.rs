@@ -172,4 +172,11 @@ impl Index {
             .map(|(i, _)| i)
             .collect()
     }
+
+    pub fn occurs(&self, phrase: &str) -> usize {
+        self.candidates(phrase)
+            .into_iter()
+            .filter(|&i| fuzzy_in(phrase, &self.recs[i].2, None))
+            .count()
+    }
 }
