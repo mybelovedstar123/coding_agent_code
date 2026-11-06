@@ -186,3 +186,6 @@ pub fn wants_background_job(text: &str) -> bool {
     let agent = JOB_AGENT.is_match(&low);
     (background && start) || agent
 }
+
+static CAL_IDENT: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(?=[a-z0-9-]*\d)(?=[a-z0-9-]*[a-z])[a-z0-9][a-z0-9-]{7,}\b"));
