@@ -107,3 +107,5 @@ static IMG_POINTED: LazyLock<PyRe> = LazyLock::new(|| {
         r"(?:the one|it) you (?:just )?\w+)\b",
     ))
 });
+static IMG_NEW: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(make|create|generate|draw)\s+(?:a|an|me a|me an)\s+(?:new\s+)?(?:image|picture|photo)\b"));
