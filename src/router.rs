@@ -33,3 +33,21 @@ fn function_of(t: &Value) -> &Value {
         _ => t,
     }
 }
+
+pub fn catalog_text(tool_defs: &[Value]) -> String {
+    tool_defs
+        .iter()
+        .map(|t| {
+            let f = function_of(t);
+            let desc = f
+                .get("description")
+                .filter(|d| crate::store::truthy(d))
+                .map(py::str_value)
+                .unwrap_or_default();
+            let desc = py::squash_ws(&desc);
+            let name = f.get("name").map(py::str_value).unwrap_or_else(|| "None".into());
+            format!("- {name}: {}", py::head(&desc, 220))
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
