@@ -12,3 +12,9 @@ const RETRY_STATUS: [u16; 11] = [408, 409, 425, 429, 500, 502, 503, 504, 520, 52
 
 #[derive(Debug, Clone)]
 pub struct ModelError(pub String);
+
+impl std::fmt::Display for ModelError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.0)
+    }
+}
