@@ -9,3 +9,7 @@ use crate::pyre::Re;
 use serde_json::{json, Value};
 use std::sync::LazyLock;
 use tokio::time::Instant;
+
+pub const SPELLING_PROMPT: &str = "Correct the spelling mistakes in the user's message below. Change nothing else: \
+     keep every name, number, identifier, email, quote, word choice and the word order exactly as written. Reply \
+     with the corrected message only, with no comment.";
