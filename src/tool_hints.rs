@@ -12,3 +12,6 @@ use crate::pyre::Re;
 use indexmap::IndexMap;
 use serde_json::Value;
 use std::sync::LazyLock;
+
+pub const TOOL_HINT_NOTE: &str = "For this request, the offered tool {tool} is the one made for it ({desc}). Call it \
+once with what the request gives and answer from its result.";
