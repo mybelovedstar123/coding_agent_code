@@ -260,3 +260,8 @@ pub fn program_text(args: &serde_json::Map<String, Value>) -> String {
         .map(py::str_value)
         .unwrap_or_default()
 }
+
+/// A call to the harness's own program tool (never a catalog tool of that name).
+pub fn is_local_program_call(name: &str, wire_names: &std::collections::HashSet<String>) -> bool {
+    name == TOOL_NAME && !wire_names.contains(name)
+}
