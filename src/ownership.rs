@@ -254,3 +254,4 @@ pub static HOLDER_PHRASES: LazyLock<Re> = LazyLock::new(|| {
         r"(?i)\b(on p\w{3,4}t|in charge|has (?:it|the \w+) now|who has|ended up with|who do i chase|chase about|who (?:o\w{1,3}|h\w{2,4}s) it|whose is it|owner'?s?)\b",
     )
 });
+static WHOSE_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\bwhose\b"));
