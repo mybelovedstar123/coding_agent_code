@@ -45,3 +45,7 @@ pub static PERSON: LazyLock<Re> =
 /// needs no lookbehind, so the regex crate's automata run it instead of the backtracking engine.
 pub static SENT: LazyLock<Re> =
     LazyLock::new(|| Re::new(r"(?<=[.;!?])[\s\x1c-\x1f]+|[\s\x1c-\x1f]+…[\s\x1c-\x1f]+|\n+"));
+/// `SENT` with the lookbehind's character consumed: a match starting on one of `.;!?` is a split starting one
+/// character later. The leftmost match is the same: a first-branch match at p-1 is one of SENT's at p, and no other
+/// branch of either pattern can start on the punctuation character.
+static SENT_FAST: LazyLock<Re> = LazyLock::new(|| Re::new(r"[.;!?][\s\x1c-\x1f]+|[\s\x1c-\x1f]+…[\s\x1c-\x1f]+|\n+"));
