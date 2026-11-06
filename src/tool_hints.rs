@@ -1,0 +1,770 @@
+//! Tool hints: a request whose wording matches what one offered tool is specifically for (when automations run and
+//! how often they have run; an edit to an earlier image; arithmetic on numbers the request gives) gets a one-line note
+//! naming that tool and its own description. The trigger comes from the request and the offered catalog only; the
+//! note is advisory, names no value, and the model still chooses every call.
+//!
+//! Patterns are `event_state::PyRe`, so `\s`, `\w` and `\b` keep Python's classes.
+
+use crate::difflib::sequence_ratio;
+use crate::event_state::PyRe;
+use crate::py;
+use crate::pyre::Re;
+use indexmap::IndexMap;
+use serde_json::Value;
+use std::sync::LazyLock;
+
+pub const TOOL_HINT_NOTE: &str = "For this request, the offered tool {tool} is the one made for it ({desc}). Call it \
+once with what the request gives and answer from its result.";
+pub static NUMBER_RE: LazyLock<PyRe> = LazyLock::new(|| re(r"(?<![\w.])-?\d+(?:[.,]\d+)?(?![\w])"));
+
+fn re(p: &str) -> PyRe {
+    PyRe::new(p)
+}
+
+static WORDS_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z]+"));
+
+pub fn _words(text: &str) -> Vec<String> {
+    WORDS_RE.findall(&text.to_lowercase())
+}
+
+// ------------------------------------------------------------------------------------------------------- triggers
+
+pub fn _fuzzy(w: &str, target: &str, ratio: f64) -> bool {
+    w == target
+        || (py::len(w) >= 4
+            && w.chars().next() == target.chars().next()
+            && py::len(w).abs_diff(py::len(target)) <= 2
+            && sequence_ratio(w, target) >= ratio)
+}
+
+pub fn _any(words: &[String], targets: &[&str], ratio: f64) -> bool {
+    words.iter().any(|w| targets.iter().any(|t| _fuzzy(w, t, ratio)))
+}
+
+fn has_word(words: &[String], word: &str) -> bool {
+    words.iter().any(|w| w == word)
+}
+
+static SCHED_COUNTING: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(how m\w{1,3} r\w{1,4}|logged|run count|pull up|lay out|show me|what|which)\b"));
+static SCHED_SET_UP: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(put|set up|make|have|turn)\b[^.?!]*\b(every|each|daily|weekly|nightly)\b"));
+static SCHED_EVERY: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(every|each|daily|weekly|nightly)\b"));
+static SCHED_ABOUT_RUNS: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b((?:due|q\w{3,6}d|lined up|set|scheduled) to run|timed runs?|on a c\w{3,5}e|",
+        r"on th\w{2,3} own|on (?:their|its) own|on a t\w{3}r|how m\w{1,3} r\w{0,3}s|run count|",
+        r"logged|on repeat|automatic runs?|automatically|automaically|go(?:es)? on their own)\b",
+    ))
+});
+
+/// When saved workflows run, which run on their own or on a timer, or how many runs a scheduled one logged (not
+/// a calendar request, not a timer to start, not how to set up a reminder).
+pub fn wants_schedules(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    if ["reminder", "reminders", "start", "focus"]
+        .iter()
+        .any(|x| has_word(&w, x))
+    {
+        return false;
+    }
+    let counting = SCHED_COUNTING.is_match(&low);
+    if !counting && (SCHED_SET_UP.is_match(&low) || (SCHED_EVERY.is_match(&low) && !text.contains('?'))) {
+        return false;
+    }
+    let about_runs = SCHED_ABOUT_RUNS.is_match(&low)
+        || (_any(&w, &["recurring", "upcoming"], 0.7) && _any(&w, &["runs", "run", "ruuns"], 0.7));
+    let about_automation = _any(
+        &w,
+        &[
+            "workflow",
+            "workflows",
+            "schedules",
+            "scheduled",
+            "recurring",
+            "automatic",
+            "automatically",
+            "timer",
+            "upcoming",
+        ],
+        0.7,
+    ) || low.contains("on repeat")
+        || low.contains("what do i have");
+    about_runs && about_automation
+}
+
+static IMG_THE_ONE: LazyLock<PyRe> = LazyLock::new(|| re(r"\bthe one you (?:just )?\w+"));
+static IMG_EARLIER: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(from earlier|from before|you (?:just )?(?:g\w{4,9}d|m\w{1,3}de|cr\w{3,6}d)|the one you (?:just )?\w+|",
+        r"(?:that|the) (?:latest|last) \w+)\b",
+    ))
+});
+static IMG_POINTED: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(you (?:just )?(?:g\w{4,9}d|m\w{1,3}de|cr\w{3,6}d)|from earlier|from before|",
+        r"(?:the one|it) you (?:just )?\w+)\b",
+    ))
+});
+static IMG_NEW: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(make|create|generate|draw)\s+(?:a|an|me a|me an)\s+(?:new\s+)?(?:image|picture|photo)\b"));
+
+/// A change to an image the user already has (from earlier, the one generated, the latest render), not a new
+/// one.
+pub fn wants_image_edit(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    let image =
+        _any(&w, &["image", "picture", "photo", "render"], 0.8) || has_word(&w, "pic") || IMG_THE_ONE.is_match(&low);
+    let earlier = _any(&w, &["earlier", "previous"], 0.8) || IMG_EARLIER.is_match(&low);
+    let pointed = IMG_POINTED.is_match(&low);
+    let new = (_any(&w, &["create", "generate", "draw"], 0.7) && !pointed) || IMG_NEW.is_match(&low);
+    image && earlier && !new
+}
+
+/// Arithmetic or statistics on at least two numbers the request gives.
+pub fn wants_arithmetic(text: &str) -> bool {
+    let w = _words(text);
+    let nums = NUMBER_RE.findall(text);
+    let stat = _any(
+        &w,
+        &[
+            "mean",
+            "average",
+            "total",
+            "difference",
+            "median",
+            "crunch",
+            "apart",
+            "percent",
+            "percentage",
+            "range",
+            "ratio",
+            "normalize",
+            "fractions",
+            "calculation",
+            "compute",
+            "times",
+            "minus",
+            "plus",
+            "divided",
+            "multiply",
+            "multiplied",
+            "sum",
+            "spread",
+        ],
+        0.7,
+    );
+    nums.len() >= 2 && stat
+}
+
+static JOB_STATUS: LazyLock<PyRe> = LazyLock::new(|| {
+    re(r"\b(status|how's|how is|where do things stand|options|my (?:recent |running |current )?b\w{2,4}k\w*nd)\b")
+});
+static JOB_START: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(launch|start|kick off|queue up|fire off|spin up|run|delegate|send|have|do)\b"));
+static JOB_AGENT: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(a worker|delegate a task|send an? a\w{2,4}t off|kick off an? a\w{2,4}t|",
+        r"spin up an? a\w{2,4}t|launch an? (?:a\w{2,4}t|job)|queue up an? (?:task|job)|",
+        r"while i keep working)\b",
+    ))
+});
+
+/// The user instructs a worker, an agent or a background job to do something (not a question about jobs that
+/// already exist).
+pub fn wants_background_job(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    if JOB_STATUS.is_match(&low) {
+        return false;
+    }
+    let start = JOB_START.is_match(&low);
+    let background = (_any(&w, &["background"], 0.7) && _any(&w, &["job", "task"], 0.7))
+        || _any(&w, &["asynchronously", "asynchronous"], 0.7);
+    let agent = JOB_AGENT.is_match(&low);
+    (background && start) || agent
+}
+
+static CAL_IDENT: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(?=[a-z0-9-]*\d)(?=[a-z0-9-]*[a-z])[a-z0-9][a-z0-9-]{7,}\b"));
+static CAL_BLOCK: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(block|blpck|bluck|slot|solt)\b"));
+static CAL_FOR_ME: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(pencil in|bl\w{2}k out|slot in|book)\b.*\bfor me\b"));
+
+/// A plain request to put something on the calendar (no quoted project name, no case identifier).
+pub fn wants_calendar_entry(text: &str) -> bool {
+    let low = text.to_lowercase();
+    if text.contains('"') || text.contains('\u{201c}') || CAL_IDENT.is_match(&low) {
+        return false;
+    }
+    let w = _words(text);
+    let calendar = _any(&w, &["calendar"], 0.6);
+    let put = _any(&w, &["put", "add", "schedule", "pencil", "book", "get"], 0.7) || CAL_BLOCK.is_match(&low);
+    let for_me = CAL_FOR_ME.is_match(&low);
+    (calendar && put) || for_me
+}
+
+static SANDBOX: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(sa[a-z]{1,6}x|code mode)\b"));
+static SANDBOX_CODE: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(code|in-?\s?pr\w{2,5}ss|checksum|routine)\b"));
+
+/// Run a named routine in the code sandbox / Code Mode and report what it prints.
+pub fn wants_sandbox_run(text: &str) -> bool {
+    let low = text.to_lowercase();
+    SANDBOX.is_match(&low) && SANDBOX_CODE.is_match(&low)
+}
+
+static JOBFIG_JOB: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(job list|b\w{2,4}gr?o?u?n?d (?:work|tasks?|jobs?|j\w?bs)|agent jobs?|agents i set loose|",
+        r"jobs? i (?:dispatched|queued|started)|(?:crawl|backfill|reindex|import|export|sync|migration|batch|",
+        r"scrape) job)\b",
+    ))
+});
+static JOBFIG_START: LazyLock<PyRe> = LazyLock::new(|| {
+    re(r"\b(start|launch|kick off|run|queue up|spin up|fire off|delegate|turn off|turn on|prefer\w*)\b")
+});
+
+/// A figure a background/agent job reports (items processed, a count), read off the job list; not starting a job,
+/// not a status check.
+pub fn wants_job_figure(text: &str) -> bool {
+    let low = text.to_lowercase();
+    let w = _words(text);
+    let job = JOBFIG_JOB.is_match(&low);
+    let figure = _any(
+        &w,
+        &[
+            "items",
+            "count",
+            "many",
+            "number",
+            "processed",
+            "process",
+            "through",
+            "reports",
+        ],
+        0.75,
+    );
+    let start = JOBFIG_START.is_match(&low);
+    job && figure && !start
+}
+
+static NOTE_NOTE: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(note|scr\w{2,5}pa?d|handoff)\b"));
+static NOTE_FIX: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(fix the note|correct what|bin the old|make it \w+day|moved to|shifted to|scratch that|is \w+day now|",
+        r"rather than adding|instead of piling|update the note|change the note|forget \w+day|handoff is \w+day|",
+        r"keep that in the)\b",
+    ))
+});
+
+/// Correct a stored note in place (a handoff or scratchpad note whose fact changed).
+pub fn wants_note_fix(text: &str) -> bool {
+    let low = text.to_lowercase();
+    NOTE_NOTE.is_match(&low) && NOTE_FIX.is_match(&low)
+}
+
+static TEAM_FEEDBACK: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(let the t\w{2,3}m know|report (this |it )?to the (d\w{1,2}vs?|developers?|t\w{2,3}m)",
+        r"|to the ditto t\w{2,3}m|whoever (builds|makes) (this|it|t\w{2,3})|tell the (devs?|developers?|ditto t\w{2,3}m))\b",
+    ))
+});
+
+/// Feedback meant for the people who build Ditto ("let the team know …", "report to the devs …", "send this to the
+/// Ditto team", "forward this to whoever builds this").
+pub fn wants_team_feedback(text: &str) -> bool {
+    TEAM_FEEDBACK.is_match(&text.to_lowercase())
+}
+
+static CHAT_TOOL_PREFS: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(chat t\w{2,4}ls|(t\w{2}n (off|on)|disable|enable|allow only|switch (off|on)) (the )?",
+        r"(agent j\w{2,3}s|image t\w{2,4}ls|memory t\w{2,4}ls|web (search|t\w{2,4}ls)|\w+ t\w{2,4}ls))\b",
+    ))
+});
+
+/// Which kinds of tools the assistant may use in chat ("turn off agent jobs", "allow only memory tools", "change my
+/// chat tools so …").
+pub fn wants_chat_tool_prefs(text: &str) -> bool {
+    CHAT_TOOL_PREFS.is_match(&text.to_lowercase())
+}
+
+static CAPABILITY_QUESTION: LazyLock<PyRe> = LazyLock::new(|| {
+    re(
+        r"\b(is th\w{2,4} a way to|where (do|can) i find the opt\w{2,4}|how (do|can) i (turn on|set up|switch|enable))\b",
+    )
+});
+
+/// A question about whether or where Ditto can do something ("is there a way to …", "where do I find the option
+/// for …", "how do I turn on …").
+pub fn asks_capability(text: &str) -> bool {
+    CAPABILITY_QUESTION.is_match(&text.to_lowercase())
+}
+
+static JUST_TELL_ME: LazyLock<PyRe> = LazyLock::new(|| re(r"\bdon'?t just tell me how\b"));
+
+/// A piece of software work the user wants done rather than explained: "go ahead and refactor …", "write a script to
+/// … — start it", "actually scrape …", "don't just tell me how" (the work verbs tolerate typos).
+pub fn wants_work_done(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    let work_verb = |x: &String| _any(std::slice::from_ref(x), &["refactor", "scrape", "build", "write"], 0.7);
+    let go_ahead =
+        (3..w.len()).any(|i| w[i - 3] == "go" && w[i - 2] == "ahead" && w[i - 1] == "and" && work_verb(&w[i]));
+    let actually = (1..w.len()).any(|i| w[i - 1] == "actually" && work_verb(&w[i]));
+    let start_it = low.contains("start it")
+        && (has_word(&w, "write") || has_word(&w, "build"))
+        && _any(&w, &["script", "tool", "app"], 0.7);
+    go_ahead || actually || start_it || JUST_TELL_ME.is_match(&low)
+}
+
+pub type Rule = (&'static str, fn(&str) -> bool);
+
+pub const RULES: &[Rule] = &[
+    ("list_schedules", wants_schedules),
+    ("edit_image", wants_image_edit),
+    ("run_code", wants_arithmetic),
+    ("execute_agent_job", wants_background_job),
+    ("calendar_create_event", wants_calendar_entry),
+    ("run_code", wants_sandbox_run),
+    ("list_agent_jobs", wants_job_figure),
+    ("update_memory", wants_note_fix),
+    ("file_feedback_for_team", wants_team_feedback),
+    ("set_chat_tool_preferences", wants_chat_tool_prefs),
+    ("discover_capabilities", asks_capability),
+    ("execute_agent_job", wants_work_done),
+];
+
+pub const RULE_EXTRA: &[(&str, &str)] = &[
+    (
+        "run_code",
+        " Call it directly, without searching the records first: pass the routine the user names as the task to run \
+         and report exactly the value it prints.",
+    ),
+    (
+        "update_memory",
+        " Find that note with the memory search, then update the same note in place with the corrected fact (keep the \
+         rest of its text); do not add a separate note.",
+    ),
+    (
+        "edit_image",
+        " Pass the image as the user refers to it (for example \"the image from earlier\") with the edit as the \
+         instruction; do not search the records for it or ask for a link.",
+    ),
+    (
+        "file_feedback_for_team",
+        " Pass the user's own words as the feedback; it reaches the team without an address, so do not ask for one.",
+    ),
+    (
+        "discover_capabilities",
+        " Answer the question from what it reports; the user asked whether or where, so do not change the setting \
+         yourself.",
+    ),
+    (
+        "calendar_create_event",
+        " Use the title the user gave and the timing they gave; when they gave none, pass the timing as unspecified \
+         instead of asking first.",
+    ),
+];
+
+/// `(t.get("function") or {}).get(key)` of one tool definition.
+fn function_field<'a>(t: &'a Value, key: &str) -> Option<&'a Value> {
+    t.get("function")
+        .filter(|f| crate::store::truthy(f))
+        .and_then(|f| f.get(key))
+}
+
+/// The offered tool names, `{(t.get("function") or {}).get("name") for t in tool_defs}` (string names only).
+fn offered_names(tool_defs: &[Value]) -> Vec<&str> {
+    tool_defs
+        .iter()
+        .filter_map(|t| function_field(t, "name").and_then(Value::as_str))
+        .collect()
+}
+
+/// TOOL_HINT_NOTE for the first rule whose tool is offered and whose request test holds; empty otherwise.
+pub fn tool_hint_note(user_input: &str, tool_defs: &[Value]) -> String {
+    // name -> description; a later definition of the same name replaces the description. A name or description
+    // that is not a string never matches a rule's tool (Python would raise on a non-string description).
+    let mut offered: IndexMap<&str, &str> = IndexMap::new();
+    for t in tool_defs {
+        let name = function_field(t, "name").and_then(Value::as_str).unwrap_or("");
+        let desc = function_field(t, "description").and_then(Value::as_str).unwrap_or("");
+        offered.insert(name, desc);
+    }
+    for (tool, test) in RULES {
+        if let Some(desc) = offered.get(tool) {
+            if test(user_input) {
+                let desc = py::rstrip_chars(py::strip(desc), ".");
+                let extra = RULE_EXTRA.iter().find(|(t, _)| t == tool).map_or("", |(_, e)| e);
+                return TOOL_HINT_NOTE
+                    .replace("{tool}", tool)
+                    .replacen("{desc}", py::head(desc, 200), 1)
+                    + extra;
+            }
+        }
+    }
+    String::new()
+}
+
+pub const RESEARCH_SEND_NOTE: &str = "This request has two parts: first look up the current figure it asks about \
+({lookup} when no other offered tool reports it), then send that figure to the person it names with {send}, using \
+their email from the records. Do both, and in your reply state the figure you sent and to whom.";
+
+static RS_WHICH: LazyLock<PyRe> = LazyLock::new(|| re(r"\s*(?:for \w+ contact l\w+:\s*)?w\w{1,3}ch\b"));
+static RS_BELONGS: LazyLock<PyRe> = LazyLock::new(|| re(r"b\w{1,3}ongs to|email do i have"));
+static RS_FIGURE: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\bat (?:r\w{2,4}t now|today|as of now)|sit\w{0,4}ng at|set\w{0,4}ng at"));
+static RS_LOOKUP: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(l\w{1,3}k up|c\w?h?e?c?k|pu\w?ll?|find)\b"));
+static RS_UPDATE: LazyLock<PyRe> = LazyLock::new(|| re(r"\bupdate\b"));
+static RS_SEND: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(get (?:it|the \w+) over|s\w{1,2}nt to|s[ne]\w{0,2}t to|e-mail|shoot it|p\w{0,2}s{1,2} (?:it|the)|",
+        r"email what)\b",
+    ))
+});
+static RS_RECIPIENT: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(?:to|over to|on to|a\w{2,4}g to) (?:[A-Z][a-z]+|th\w{0,2}m|t\w{1,3}m)\b"));
+static RS_FOR_NAME: LazyLock<PyRe> = LazyLock::new(|| re("\\s*For [A-Z][a-z]+ [\u{2014}-]"));
+
+/// Get a current figure (look it up) and send it to a person, in one request (not a question about an address,
+/// not sending an update about something).
+pub fn wants_research_send(text: &str) -> bool {
+    let low = text.to_lowercase();
+    let w = _words(text);
+    if RS_WHICH.match_start(&low).is_some() || RS_BELONGS.is_match(&low) {
+        return false;
+    }
+    let figure = _any(
+        &w,
+        &[
+            "figure",
+            "number",
+            "reading",
+            "value",
+            "latest",
+            "current",
+            "currently",
+            "stands",
+        ],
+        0.7,
+    ) || RS_FIGURE.is_match(&low);
+    let lookup = RS_LOOKUP.is_match(&low);
+    if !figure && RS_UPDATE.is_match(&low) {
+        return false;
+    }
+    let send = _any(&w, &["send", "email", "forward", "pass"], 0.7) || RS_SEND.is_match(&low);
+    let recipient = RS_RECIPIENT.is_match(text) || RS_FOR_NAME.match_start(text).is_some();
+    (figure || lookup) && send && recipient
+}
+
+/// RESEARCH_SEND_NOTE when the request asks for a looked-up figure to be sent and both tools are offered.
+pub fn research_send_note(user_input: &str, tool_defs: &[Value]) -> String {
+    let offered = offered_names(tool_defs);
+    if offered.contains(&"gmail_send") && offered.contains(&"search_web") && wants_research_send(user_input) {
+        return RESEARCH_SEND_NOTE
+            .replace("{lookup}", "search_web")
+            .replace("{send}", "gmail_send");
+    }
+    String::new()
+}
+
+pub const EFFORT_NOTE: &str = "The user asks for their usual reasoning effort (how hard you think) without naming a \
+level. The records for \
+this request say what it is: if they state a default level, set that level with set_reasoning_effort; if they say no \
+default has been chosen, do not set one: ask which level the user wants, and in the question name the two options the \
+record for this request describes them going back and forth between, in that record's own words (not the tool's level \
+names).";
+
+static EFFORT_RE: LazyLock<PyRe> = LazyLock::new(|| {
+    re(r"\b(r\w{0,2}[ae]\w{0,2}s\w{0,2}n\w{0,3}g|th\w{0,2}nk\w{0,3}g)\s+(ef\w{1,4}t|d\w{1,3}th|l\w{1,3}l)\b")
+});
+static EFFORT_HOW_HARD: LazyLock<PyRe> = LazyLock::new(|| re(r"\bhow h\w{2,3}d you t\w{2,4}k\b"));
+static EFFORT_LEVEL: LazyLock<PyRe> = LazyLock::new(|| {
+    re(r"\b(low|medium|high|deep\w*|careful\w*|balanced|middle|moderate|quick|light|max\w*|minimal)\b")
+});
+
+/// Set reasoning effort / thinking depth to the user's usual, without naming a level.
+pub fn wants_usual_effort(text: &str) -> bool {
+    let low = text.to_lowercase();
+    let w = _words(text);
+    // "reasoning/thinking effort, depth or level", the first word typo-tolerant ("reewoning depth").
+    let fuzzy_effort = (1..w.len()).any(|i| {
+        _any(std::slice::from_ref(&w[i - 1]), &["reasoning", "thinking"], 0.7)
+            && _any(std::slice::from_ref(&w[i]), &["effort", "depth", "level"], 0.7)
+    });
+    let effort = EFFORT_RE.is_match(&low) || EFFORT_HOW_HARD.is_match(&low) || fuzzy_effort;
+    // "Quick one: …" opens a request; it names no level.
+    let level = EFFORT_LEVEL.is_match(&low.replace("quick one", ""));
+    effort && !level
+}
+
+/// EFFORT_NOTE when set_reasoning_effort is offered and the request asks for the usual level.
+pub fn effort_note(user_input: &str, tool_defs: &[Value]) -> String {
+    if offered_names(tool_defs).contains(&"set_reasoning_effort") && wants_usual_effort(user_input) {
+        EFFORT_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
+
+pub const AGREED_START_NOTE: &str = "The user asks to start something the way it was agreed earlier; the records say \
+what was agreed. If it is a saved workflow, list the saved workflows first and run the one that matches; if the agreed \
+workflow is not saved yet, create it under the name agreed for it. If it is a one-off job, dispatch the job and do not \
+create or run a workflow.";
+
+static START_RE: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(start|kick off|begin|launch)\b"));
+
+/// A request to start something as it was agreed before ("the way we already agreed", "per what we landed on",
+/// "exactly as we settled earlier", "following what we decided"); the agreement word tolerates typos.
+pub fn wants_agreed_start(text: &str) -> bool {
+    let low = text.to_lowercase();
+    if !START_RE.is_match(&low) {
+        return false;
+    }
+    let w = _words(text);
+    (0..w.len()).filter(|&i| w[i] == "we").any(|i| {
+        let j = if w.get(i + 1).is_some_and(|x| x == "already") {
+            i + 2
+        } else {
+            i + 1
+        };
+        w.get(j).is_some_and(|verb| {
+            ["agreed", "settled", "landed", "decided"]
+                .iter()
+                .any(|t| _fuzzy(verb, t, 0.7))
+        })
+    })
+}
+
+/// AGREED_START_NOTE when the catalog can list and run saved workflows and the request asks to start something as
+/// agreed.
+pub fn agreed_start_note(user_input: &str, tool_defs: &[Value]) -> String {
+    let names = offered_names(tool_defs);
+    if names.contains(&"list_workflows") && names.contains(&"run_workflow") && wants_agreed_start(user_input) {
+        AGREED_START_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
+
+pub const CALENDAR_ENTRY_NOTE: &str = "The user asks to have a named item on their calendar. If the records say it is \
+already on the calendar, do not create another event: find it with the calendar search and tell the user it is \
+already there. Otherwise create the event as asked.";
+
+/// A request to have a quoted, named item on the user's calendar ("get the \"…\" review onto my calendar", "make sure
+/// the \"…\" review is on my calendar"); "calendar" and "onto" tolerate typos.
+pub fn wants_named_calendar_entry(text: &str) -> bool {
+    if text.matches('"').count() < 2 && !text.contains('\u{201c}') {
+        return false;
+    }
+    let w = _words(text);
+    (2..w.len()).any(|i| {
+        _fuzzy(&w[i], "calendar", 0.7)
+            && w[i - 1] == "my"
+            && (["on", "onto", "in", "into", "to"].contains(&w[i - 2].as_str()) || _fuzzy(&w[i - 2], "onto", 0.6))
+    })
+}
+
+/// CALENDAR_ENTRY_NOTE when the catalog can create calendar events and the request asks for a named item on the
+/// user's calendar.
+pub fn calendar_entry_note(user_input: &str, tool_defs: &[Value]) -> String {
+    if offered_names(tool_defs).contains(&"calendar_create_event") && wants_named_calendar_entry(user_input) {
+        CALENDAR_ENTRY_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
+
+pub const APPROXIMATE_OPTION_NOTE: &str = "The user spells the option they want only approximately. After looking up \
+the configured options, apply the listed option closest to what they wrote: letters may be swapped, doubled or \
+missing, and a variant word they give (condensed, display, slab, a colour shade) belongs to the option. Do not stop \
+because the exact spelling is not in the list.";
+
+static APPROXIMATE_OPTION: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"(spelling (is|may be) (approximate|off|rough)|mangled|botched|my spelling|misspelled|verify the exact option",
+        r"|closest (configured )?option|check which (fonts|accent)|look (up|at) the (available|workspace|configured)",
+        r"|configured appearance options|accent list|look the list up)",
+    ))
+});
+
+/// A request to apply an appearance option whose name the user spells only approximately, with a lookup of the
+/// configured options first ("look the list up first, I may have botched the name").
+pub fn names_option_approximately(text: &str) -> bool {
+    APPROXIMATE_OPTION.is_match(&text.to_lowercase())
+}
+
+/// APPROXIMATE_OPTION_NOTE when the catalog reports the configured options and the request spells one approximately.
+pub fn approximate_option_note(user_input: &str, tool_defs: &[Value]) -> String {
+    if offered_names(tool_defs).contains(&"discover_capabilities") && names_option_approximately(user_input) {
+        APPROXIMATE_OPTION_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
+
+pub const PREFERENCE_NOTE: &str = "The user's own stored preference for this setting is in their records; answer with \
+it, writing the value exactly as the records spell it (the same words and spaces, not joined with hyphens).";
+
+static PREF_SETTING: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(f[a-z]{1,2}t|mode|m[a-z]de|asent|accnet)\b"));
+static PREF_OWN: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\bmy (?:own |personal )?(?:ditto|workspace|interface|app|setup|look|chat)\b"));
+static PREF_QUESTION: LazyLock<PyRe> = LazyLock::new(|| re(r"\s*(which|what|if you|suppose)\b"));
+static PREF_TASK: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\s*(?:please\s+|can you\s+|could you\s+)?(set|change|switch|make|turn|update|apply|",
+        r"review|look|inspect|check|find|my)\b",
+    ))
+});
+static PREF_VERIFY: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(confirm|check|make sure|double-check|verify|ensure)\b"));
+
+/// The request names an appearance setting: accent, colour, font, typeface, appearance or mode (typo-tolerant).
+fn names_appearance_setting(w: &[String], low: &str) -> bool {
+    _any(w, &["accent", "typeface", "appearance"], 0.7)
+        || _any(w, &["colour", "color"], 0.85)
+        || PREF_SETTING.is_match(low)
+}
+
+/// A question about which appearance value (accent, colour, font, typeface, mode) is right for the user's own
+/// Ditto workspace or interface (not a task to change or set it).
+pub fn asks_own_preference(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    let setting = names_appearance_setting(&w, &low);
+    let own = PREF_OWN.is_match(&low) || (has_word(&w, "my") && _any(&w, &["workspace", "interface"], 0.6));
+    let question = text.contains('?') || PREF_QUESTION.match_start(&low).is_some();
+    let task = PREF_TASK.match_start(&low).is_some();
+    let verify = PREF_VERIFY.is_match(&low);
+    setting && own && question && !task && !verify
+}
+
+/// PREFERENCE_NOTE when the request asks which appearance value is right for the user's own workspace.
+pub fn preference_note(user_input: &str) -> String {
+    if asks_own_preference(user_input) {
+        PREFERENCE_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
+
+pub const CONFIRM_PREFERENCE_NOTE: &str = "The user asks you to confirm that one of their own Ditto settings has the \
+value they name. Their stored preference for that setting is in their records. Compare the two: if the records \
+already give that same value, do not call any tool (not even one that lists settings or options); reply that it is \
+already set to that value, citing the record. If the records give a different value, or none, set the value the user \
+named with that setting's tool.";
+
+/// A verify word (typo-tolerant) followed by "my": "confirm my", "make sure my", "double-check that my".
+static CONFIRM_VERIFY: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(c\w{0,2}nf\w{1,3}m|ch\w{0,2}ck|m\w{1,3}e? s\w{0,2}re|double-?\s?ch\w{1,3}k|ver\w{1,3}y|ens\w{1,2}re)\b",
+        r"(?:\s+that)?\s+my\b",
+    ))
+});
+/// The setting is stated to have a value: "my Ditto accent is ...".
+static CONFIRM_STATED: LazyLock<PyRe> = LazyLock::new(|| re(r"\bmy\b[^.?!]{0,48}?\b(?:is|stays|uses|remains)\b"));
+/// A request to change the setting is a task, not a confirmation.
+static CONFIRM_CHANGE: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(change|switch|set|use|turn|apply|make the|update)\b"));
+
+/// A request to confirm that the user's own Ditto appearance setting (accent, colour, font, typeface, mode) has a
+/// value they name ("make sure my Ditto accent is ..."), as opposed to a request to change it.
+pub fn asks_to_confirm_preference(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    names_appearance_setting(&w, &low)
+        && PREF_OWN.is_match(&low)
+        && CONFIRM_VERIFY.is_match(&low)
+        && CONFIRM_STATED.is_match(&low)
+        && !CONFIRM_CHANGE.is_match(&low)
+}
+
+/// CONFIRM_PREFERENCE_NOTE when the request asks to confirm the value of one of the user's own settings.
+pub fn confirm_preference_note(user_input: &str) -> String {
+    if asks_to_confirm_preference(user_input) {
+        CONFIRM_PREFERENCE_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
+
+pub const SEND_ON_RECORD_NOTE: &str = "The user asks you to send something to a person. Find in the request or the \
+records who receives it. If they name the recipient and their address, send it with {send} to that address; if the \
+records do not hold the content to send, write a short message from what the request and the records say about it \
+and send that, rather than asking the user for the content. If the records say no recipient has been decided for it, \
+do not send anything: ask the user who should receive it, naming the people the records mention.";
+
+pub static _SEND_VERB_RE: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(?:send|forward|get back to|reply to|respond to|fire off|shoot|",
+        r"get (?:it|them|those|these|th\w{1,2}m|the \w+) (?:out|over|across) to|pass (?:it|them|those|these) (?:on|along)|",
+        r"get (?:them|him|her|th\w{1,2}m) (?:the|this|that|my|our) |",
+        r#"get (?:the|this|that|my|our) [\w\s'"-]{1,60}? (?:over |across |out )?to (?:them|him|her|th\w{1,2}m)\b)"#,
+    ))
+});
+static SEND_PRONOUN: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(?:them|him|her|th\w{1,2}m)\b"));
+static SEND_TO_NAME: LazyLock<PyRe> = LazyLock::new(|| re(r"\bto [A-Z][a-z]+\b"));
+
+/// An instruction (not a question) to send, forward or reply something to a person the request points to by
+/// pronoun or name; requests to look a figure up first are `wants_research_send`.
+pub fn wants_send_on_record(text: &str) -> bool {
+    if text.contains('?') || wants_research_send(text) {
+        return false;
+    }
+    let low = text.to_lowercase();
+    let verb = _SEND_VERB_RE.is_match(&low) || _any(&_words(text), &["send", "forward"], 0.8);
+    let target = SEND_PRONOUN.is_match(&low) || SEND_TO_NAME.is_match(text);
+    verb && target
+}
+
+/// SEND_ON_RECORD_NOTE when the request asks to send something to a person and gmail_send is offered.
+pub fn send_on_record_note(user_input: &str, tool_defs: &[Value]) -> String {
+    if offered_names(tool_defs).contains(&"gmail_send") && wants_send_on_record(user_input) {
+        return SEND_ON_RECORD_NOTE.replace("{send}", "gmail_send");
+    }
+    String::new()
+}
+
+/// Any request word equal to, or (5+ letters, same first letter) a typo of, one of the targets.
+pub fn _has(words: &[String], targets: &[&str], ratio: f64) -> bool {
+    for w in words {
+        for t in targets {
+            if w == t
+                || (py::len(t) >= 5
+                    && py::len(w) >= 4
+                    && w.chars().next() == t.chars().next()
+                    && sequence_ratio(w, t) >= ratio)
+            {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+pub const EXACT_VALUE_NOTE: &str =
+    "The user asks for the exact value a tool returns. A tool's result can mention more \
+than one item, each with its own value: report the value the result gives for the item the user named, copied exactly \
+as written, and leave out the other items and their values.";
+
+/// A request for the exact or precise value, figure, number, reading, amount, result or code (typo-tolerant).
+pub fn wants_exact_value(text: &str) -> bool {
+    let w = _words(text);
+    _has(&w, &["exact", "exactly", "precise", "precisely"], 0.8)
+        && _has(
+            &w,
+            &[
+                "value", "figure", "number", "reading", "amount", "result", "code", "returns",
+            ],
+            0.8,
+        )
+}
+
+/// EXACT_VALUE_NOTE when the request asks for the exact value a tool returns (tool path only).
+pub fn exact_value_note(user_input: &str) -> String {
+    if wants_exact_value(user_input) {
+        EXACT_VALUE_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
