@@ -374,3 +374,11 @@ fn function_field<'a>(t: &'a Value, key: &str) -> Option<&'a Value> {
         .filter(|f| crate::store::truthy(f))
         .and_then(|f| f.get(key))
 }
+
+/// The offered tool names, `{(t.get("function") or {}).get("name") for t in tool_defs}` (string names only).
+fn offered_names(tool_defs: &[Value]) -> Vec<&str> {
+    tool_defs
+        .iter()
+        .filter_map(|t| function_field(t, "name").and_then(Value::as_str))
+        .collect()
+}
