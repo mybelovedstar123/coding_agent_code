@@ -14,3 +14,9 @@
 //!
 //! Port of `harness/companions.py`.
 
+use crate::pyre::Re;
+use crate::store::Pair;
+use crate::text::tokenize;
+use indexmap::IndexMap;
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::sync::LazyLock;
