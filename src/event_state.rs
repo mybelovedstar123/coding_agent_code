@@ -745,3 +745,32 @@ pub fn _cell(v: &str) -> String {
     let s = TAG_RE.sub(v, "");
     py::strip(py::strip_chars(py::strip(&s), "`")).to_string()
 }
+
+pub fn _event(d: &PyVal) -> Option<Event> {
+    let PyVal::Dict(items) = d else {
+        return None;
+    };
+    let mut m: IndexMap<String, PyVal> = IndexMap::new();
+    for (k, v) in items {
+        let v = match v {
+            PyVal::None => continue,
+            PyVal::Bool(_) | PyVal::Int(_) | PyVal::Float(_) => v.clone(),
+            other => PyVal::Str(_cell(&other.str())),
+        };
+        m.insert(_norm_key(k), v);
+    }
+    if !["entity", "field", "value", "effective_step", "operation"]
+        .iter()
+        .all(|k| m.contains_key(*k))
+    {
+        return None;
+    }
+    let step = m["effective_step"].int()?;
+    Some((
+        step,
+        m["operation"].str().to_lowercase(),
+        m["entity"].str(),
+        m["field"].str(),
+        m["value"].str(),
+    ))
+}
