@@ -626,3 +626,16 @@ fn names_appearance_setting(w: &[String], low: &str) -> bool {
         || _any(w, &["colour", "color"], 0.85)
         || PREF_SETTING.is_match(low)
 }
+
+/// A question about which appearance value (accent, colour, font, typeface, mode) is right for the user's own
+/// Ditto workspace or interface (not a task to change or set it).
+pub fn asks_own_preference(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    let setting = names_appearance_setting(&w, &low);
+    let own = PREF_OWN.is_match(&low) || (has_word(&w, "my") && _any(&w, &["workspace", "interface"], 0.6));
+    let question = text.contains('?') || PREF_QUESTION.match_start(&low).is_some();
+    let task = PREF_TASK.match_start(&low).is_some();
+    let verify = PREF_VERIFY.is_match(&low);
+    setting && own && question && !task && !verify
+}
