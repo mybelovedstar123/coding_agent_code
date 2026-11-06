@@ -35,3 +35,13 @@ pub fn statement(text: &str, ident: &str) -> String {
 pub fn words(text: &str) -> BTreeSet<String> {
     WORD_RE.findall(text).into_iter().collect()
 }
+
+/// Same statement up to the copy's typos: word-set overlap at least COPY_JACCARD.
+pub fn near_copies(a: &BTreeSet<String>, b: &BTreeSet<String>) -> bool {
+    if a.len() < MIN_WORDS || b.len() < MIN_WORDS {
+        return false;
+    }
+    let inter = a.intersection(b).count();
+    let union = a.union(b).count();
+    inter as f64 / union as f64 >= COPY_JACCARD
+}
