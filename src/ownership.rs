@@ -249,3 +249,8 @@ pub const HOLDER_WORDS: [&str; 6] = ["owns", "owner", "holding", "accountable", 
 pub const WH_WORDS: [&str; 12] = [
     "who", "whom", "why", "what", "when", "where", "which", "while", "whole", "white", "whip", "whim",
 ];
+pub static HOLDER_PHRASES: LazyLock<Re> = LazyLock::new(|| {
+    Re::new(
+        r"(?i)\b(on p\w{3,4}t|in charge|has (?:it|the \w+) now|who has|ended up with|who do i chase|chase about|who (?:o\w{1,3}|h\w{2,4}s) it|whose is it|owner'?s?)\b",
+    )
+});
