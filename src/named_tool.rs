@@ -53,3 +53,12 @@ pub fn named_tools(user_input: &str, tool_defs: &[Value]) -> Vec<String> {
         })
         .collect()
 }
+
+pub fn named_tool_note(user_input: &str, tool_defs: &[Value]) -> String {
+    let named = named_tools(user_input, tool_defs);
+    if named.is_empty() {
+        String::new()
+    } else {
+        NAMED_TOOL_NOTE.replace("{tools}", &named.join(" and "))
+    }
+}
