@@ -205,3 +205,26 @@ impl Derived {
         self.0.insert(key, value);
     }
 }
+
+/// One user's memory graph. Mutations hold the write lock; reads take the read lock only for a computation.
+pub struct UserMemory {
+    pub user_id: String,
+    pub pairs: IndexMap<String, Pair>,
+    pub subjects: IndexMap<String, Subject>,
+    // Dense index (row-aligned with `order`).
+    order: Vec<String>,
+    row: HashMap<String, usize>,
+    vecs: Vec<Vec<f32>>,
+    // Lexical index; a token's document frequency stays in `df` at zero once its last record changes (as a Python
+    // Counter keeps the key), so the typo-tolerant vocabulary is the same.
+    tf: IndexMap<String, IndexMap<String, usize>>,
+    tlen: HashMap<String, usize>,
+    pub df: IndexMap<String, i64>,
+    // Alias index: full name (lower) -> aliases, alias -> full names (see alias_declaration).
+    pub aliases: IndexMap<String, BTreeSet<String>>,
+    pub alias_people: IndexMap<String, BTreeSet<String>>,
+    // Subject vectors.
+    subj_order: Vec<String>,
+    subj_vecs: Vec<Vec<f32>>,
+    pub derived: Mutex<Derived>,
+}
