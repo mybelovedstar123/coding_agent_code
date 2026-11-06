@@ -248,3 +248,26 @@ fn memory_items(payload: &Map<String, Value>) -> Option<Vec<Value>> {
         _ => None,
     }
 }
+
+/// `items` plus `records` not yet present (by `str(it.get("pairID"))`), sorted by `str(it.get("timestamp", ""))`.
+fn merged_items(mut items: Vec<Value>, records: &[Pair]) -> Vec<Value> {
+    let have: HashSet<String> = items
+        .iter()
+        .filter_map(Value::as_object)
+        .map(|it| py::str_value(it.get("pairID").unwrap_or(&Value::Null)))
+        .collect();
+    for p in records {
+        if !have.contains(&p.pair_id) {
+            items.push(json!({"pairID": p.pair_id, "timestamp": fmt_ts(&p.ts), "text": render_pair(p)}));
+        }
+    }
+    let key = |it: &Value| -> String {
+        it.as_object()
+            .and_then(|o| o.get("timestamp"))
+            .map(py::str_value)
+            .unwrap_or_default()
+    };
+    let mut keyed: Vec<(String, Value)> = items.into_iter().map(|it| (key(&it), it)).collect();
+    keyed.sort_by(|a, b| a.0.cmp(&b.0));
+    keyed.into_iter().map(|(_, it)| it).collect()
+}
