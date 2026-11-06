@@ -109,3 +109,38 @@ pub fn words(text: &str) -> HashSet<String> {
         .filter(|w| !STOP.contains(w.as_str()) && py::len(w) > 2)
         .collect()
 }
+
+/// `cue` in `low` as whole words; a cue of 9+ letters also matches a typo'd form (same first letter, ratio
+/// >= 0.85).
+pub fn has_phrase(low: &str, cue: &str) -> bool {
+    let found = match CUE_RES.get(cue) {
+        Some(re) => re.is_match(low),
+        None => cue_re(cue).is_match(low),
+    };
+    if found {
+        return true;
+    }
+    if py::len(cue) < 9 {
+        return false;
+    }
+    let toks = TOKEN_RE.findall(low);
+    let n = py::split_ws(cue).len();
+    if toks.len() + 1 < n + 1 {
+        return false;
+    }
+    let first = py::head(cue, 1);
+    let cue_len = py::len(cue);
+    for i in 0..(toks.len() + 1 - n) {
+        let win = toks[i..i + n].join(" ");
+        if py::head(&win, 1) != first {
+            continue;
+        }
+        // The ratio is at most 2·min(len)/(len + len) (every match is shared by both texts); a window that cannot
+        // reach the threshold skips the matcher. Exact: the bound uses the ratio's own formula.
+        let win_len = py::len(&win);
+        if 2.0 * win_len.min(cue_len) as f64 / (win_len + cue_len) as f64 >= 0.85 && sequence_ratio(&win, cue) >= 0.85 {
+            return true;
+        }
+    }
+    false
+}
