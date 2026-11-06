@@ -32,3 +32,4 @@ pub const BIG_TRANSCRIPT_CHARS: usize = 150_000;
 pub const WRAP_UP_BIG_S: f64 = 120.0;
 static ARTIFACT_RE: LazyLock<Re> =
     LazyLock::new(|| Re::new(r"<\|(?:start|end|channel|message|call|constrain|return)\|>"));
+pub const MAX_TURNS: usize = 12;
