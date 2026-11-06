@@ -114,3 +114,7 @@ pub static DEFINITION: LazyLock<Value> = LazyLock::new(|| {
         },
     })
 });
+
+const TOO_LONG_HELP: &str = "; record text pasted into the program makes it too long: load the records inside the \
+     program with records([...their pairIDs]) (each has 'user' and 'ditto' with the full text; grep_records(pattern) \
+     finds ids) and parse them there, then send the shorter program again";
