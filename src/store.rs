@@ -191,3 +191,7 @@ pub fn alias_declaration(text: &str) -> Option<(String, String)> {
     }
     None
 }
+
+/// Data derived from one user's records (indexes built on first use), dropped whenever a record changes (D4).
+#[derive(Default)]
+pub struct Derived(HashMap<&'static str, Arc<dyn Any + Send + Sync>>);
