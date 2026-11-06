@@ -17,3 +17,22 @@ use tokio::io::{AsyncRead, AsyncReadExt, AsyncWriteExt};
 use tokio::process::Command;
 
 pub const TOOL_NAME: &str = "run_python";
+/// csv for comma-separated records; textwrap, pprint and copy are pure formatting/copy helpers. Not allowed on purpose:
+/// modules that perform attribute lookup from strings (operator.attrgetter, string.Formatter) would bypass the
+/// private-attribute check, and typing (forward references evaluate strings), sys and string stay out.
+pub const ALLOWED_IMPORTS: [&str; 14] = [
+    "json",
+    "re",
+    "csv",
+    "math",
+    "statistics",
+    "datetime",
+    "collections",
+    "itertools",
+    "functools",
+    "decimal",
+    "fractions",
+    "textwrap",
+    "pprint",
+    "copy",
+];
