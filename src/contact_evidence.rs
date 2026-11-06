@@ -13,3 +13,5 @@ use indexmap::IndexMap;
 use serde_json::{json, Map, Value};
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::sync::{Arc, LazyLock, Mutex};
+
+static HANDLE_REQUEST_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\bhandle\b|\bSignal\b"));
