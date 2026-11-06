@@ -109,3 +109,86 @@ impl HttpChat {
         HttpChat { http }
     }
 }
+
+impl ChatClient for HttpChat {
+    fn complete<'a>(
+        &'a self,
+        messages: Vec<Value>,
+        tools: Option<&'a [Value]>,
+        case_id: &'a str,
+        base_url: Option<&'a str>,
+        deadline: Instant,
+        effort: Option<&'a str>,
+    ) -> BoxFuture<'a, Result<Reply, ModelError>> {
+        Box::pin(async move {
+            let (base, key) = config::inference_target(base_url);
+            let body = request_body(messages, tools, effort);
+            let mut delay = 1.0f64;
+            let mut last = String::new();
+            let mut attempt = 0;
+            loop {
+                attempt += 1;
+                let remaining = deadline.saturating_duration_since(Instant::now()).as_secs_f64();
+                if remaining < 5.0 {
+                    return Err(ModelError(format!(
+                        "case deadline reached after {} attempts: {last}",
+                        attempt - 1
+                    )));
+                }
+                let timeout = Duration::from_secs_f64(PER_CALL_TIMEOUT_S.min(remaining - 2.0));
+                let sent = self
+                    .http
+                    .post(format!("{base}/chat/completions"))
+                    .bearer_auth(&key)
+                    .header("X-Ditto-Case-Id", case_id)
+                    .json(&body)
+                    .timeout(timeout)
+                    .send()
+                    .await;
+                match sent {
+                    Err(err) => last = format!("{err:?}"),
+                    Ok(resp) => {
+                        let status = resp.status().as_u16();
+                        let retry_after = resp
+                            .headers()
+                            .get("Retry-After")
+                            .and_then(|v| v.to_str().ok())
+                            .map(String::from);
+                        match resp.text().await {
+                            Err(err) => last = format!("{err:?}"),
+                            Ok(text) if status == 200 => {
+                                let data: Value = serde_json::from_str(&text).map_err(|_| {
+                                    ModelError(format!(
+                                        "invalid JSON from model endpoint: {}",
+                                        crate::py::head(&text, 200)
+                                    ))
+                                })?;
+                                match parse_reply(&data) {
+                                    Ok(reply) => return Ok(reply),
+                                    Err(why) => last = why,
+                                }
+                            }
+                            Ok(text) => {
+                                last = format!("HTTP {status}: {}", crate::py::head(&text, 300));
+                                if !RETRY_STATUS.contains(&status) {
+                                    return Err(ModelError(last));
+                                }
+                                if let Some(ra) = retry_after.and_then(|v| v.trim().parse::<f64>().ok()) {
+                                    delay = delay.max(ra);
+                                }
+                            }
+                        }
+                    }
+                }
+                if attempt >= 8 {
+                    return Err(ModelError(format!(
+                        "model call failed after {attempt} attempts: {last}"
+                    )));
+                }
+                let jitter = rand::thread_rng().gen::<f64>() * 0.5;
+                tokio::time::sleep(Duration::from_secs_f64(delay + jitter)).await;
+                delay = (delay * 2.0).min(10.0);
+            }
+        })
+    }
+}
