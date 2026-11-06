@@ -295,3 +295,9 @@ static CAPABILITY_QUESTION: LazyLock<PyRe> = LazyLock::new(|| {
         r"\b(is th\w{2,4} a way to|where (do|can) i find the opt\w{2,4}|how (do|can) i (turn on|set up|switch|enable))\b",
     )
 });
+
+/// A question about whether or where Ditto can do something ("is there a way to …", "where do I find the option
+/// for …", "how do I turn on …").
+pub fn asks_capability(text: &str) -> bool {
+    CAPABILITY_QUESTION.is_match(&text.to_lowercase())
+}
