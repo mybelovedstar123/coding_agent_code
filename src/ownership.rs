@@ -244,3 +244,5 @@ impl Index {
         (None, Vec::new())
     }
 }
+
+pub const HOLDER_WORDS: [&str; 6] = ["owns", "owner", "holding", "accountable", "responsible", "running"];
