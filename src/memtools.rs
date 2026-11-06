@@ -12,3 +12,11 @@ use serde_json::{json, Map, Value};
 use std::collections::{BTreeSet, HashSet};
 use std::sync::LazyLock;
 use tokio::time::Instant;
+
+pub const MEMORY_TOOLS: [&str; 5] = [
+    "save_memory",
+    "search_memories",
+    "fetch_memories",
+    "search_subjects",
+    "search_memories_in_subjects",
+];
