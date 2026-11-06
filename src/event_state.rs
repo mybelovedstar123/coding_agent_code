@@ -291,3 +291,15 @@ fn decimal_value(c: char) -> Option<u32> {
     }
     Some(n % 10)
 }
+
+/// A value as Python's `json.loads` makes it.
+#[derive(Clone, Debug)]
+pub enum PyVal {
+    None,
+    Bool(bool),
+    Int(PyInt),
+    Float(f64),
+    Str(String),
+    List(Vec<PyVal>),
+    Dict(IndexMap<String, PyVal>),
+}
