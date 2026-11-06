@@ -974,3 +974,19 @@ pub fn state_at(evs: &[Event], step: &PyInt) -> Value {
     }
     Value::Object(out)
 }
+
+/// The step the request names; the last step of the history when it names none.
+pub fn requested_step(user_input: &str, evs: &[Event]) -> PyInt {
+    // Past the 4300-digit int limit Python raises here; the port reads the digits anyway.
+    if let Some(m) = STEP_RE.captures(user_input) {
+        let digits: String = m[1]
+            .chars()
+            .map(|c| char::from(b'0' + decimal_value(c).unwrap_or(0) as u8))
+            .collect();
+        return PyInt::new(false, &digits);
+    }
+    evs.iter()
+        .map(|e| e.0.clone())
+        .max()
+        .unwrap_or_else(|| PyInt::from_i64(0))
+}
