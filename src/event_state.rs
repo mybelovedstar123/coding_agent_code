@@ -244,3 +244,24 @@ impl fmt::Display for PyInt {
         f.write_str(&self.digits)
     }
 }
+
+impl Ord for PyInt {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self.neg, other.neg) {
+            (false, true) => Ordering::Greater,
+            (true, false) => Ordering::Less,
+            (neg, _) => {
+                let mag = self
+                    .digits
+                    .len()
+                    .cmp(&other.digits.len())
+                    .then_with(|| self.digits.cmp(&other.digits));
+                if neg {
+                    mag.reverse()
+                } else {
+                    mag
+                }
+            }
+        }
+    }
+}
