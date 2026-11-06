@@ -79,3 +79,4 @@ pub const BANNED_ATTRS: [&str; 17] = [
     "format",
     "format_map",
 ];
+pub const MAX_CODE_CHARS: usize = 8000;
