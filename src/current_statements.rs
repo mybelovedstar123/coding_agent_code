@@ -149,3 +149,11 @@ pub fn is_aside(stmt: &str) -> bool {
     let low = stmt.to_lowercase();
     has_phrase(py::head(&low, 14), "separately") || has_phrase(py::head(&low, 12), "unrelated")
 }
+
+pub fn is_change(stmt: &str) -> bool {
+    if is_aside(stmt) {
+        return false;
+    }
+    let low = stmt.to_lowercase();
+    CHANGE_CUES.iter().any(|c| has_phrase(&low, c))
+}
