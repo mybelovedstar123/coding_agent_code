@@ -740,3 +740,8 @@ pub fn _norm_key(k: &str) -> String {
     let low = py::strip(&TAG_RE.sub(k, "")).to_lowercase();
     py::strip_chars(&NON_ALNUM_RE.sub(&low, "_"), "_").to_string()
 }
+
+pub fn _cell(v: &str) -> String {
+    let s = TAG_RE.sub(v, "");
+    py::strip(py::strip_chars(py::strip(&s), "`")).to_string()
+}
