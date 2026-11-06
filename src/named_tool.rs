@@ -33,3 +33,11 @@ pub fn named_in(user_input: &str, word: &str) -> bool {
         .into_iter()
         .any(|(start, _, _)| !SENTENCE_START.is_match(&user_input[..start]))
 }
+
+fn tool_name(t: &Value) -> String {
+    t.get("function")
+        .and_then(|f| f.get("name"))
+        .and_then(Value::as_str)
+        .unwrap_or("")
+        .to_string()
+}
