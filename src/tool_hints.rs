@@ -508,3 +508,8 @@ pub fn effort_note(user_input: &str, tool_defs: &[Value]) -> String {
         String::new()
     }
 }
+
+pub const AGREED_START_NOTE: &str = "The user asks to start something the way it was agreed earlier; the records say \
+what was agreed. If it is a saved workflow, list the saved workflows first and run the one that matches; if the agreed \
+workflow is not saved yet, create it under the name agreed for it. If it is a one-off job, dispatch the job and do not \
+create or run a workflow.";
