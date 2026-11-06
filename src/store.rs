@@ -82,3 +82,36 @@ fn split_offset(s: &str) -> Option<(String, Option<FixedOffset>)> {
         }
     }
 }
+
+fn parse_time(s: &str) -> Option<NaiveTime> {
+    let (main, frac) = match s.split_once(['.', ',']) {
+        Some((a, b)) => (a, Some(b)),
+        None => (s, None),
+    };
+    let parts: Vec<&str> = main.split(':').collect();
+    let num = |x: &str| -> Option<u32> {
+        if x.len() == 2 && x.chars().all(|c| c.is_ascii_digit()) {
+            x.parse().ok()
+        } else {
+            None
+        }
+    };
+    let (h, m, sec) = match parts.as_slice() {
+        [h] => (num(h)?, 0, 0),
+        [h, m] => (num(h)?, num(m)?, 0),
+        [h, m, sec] => (num(h)?, num(m)?, num(sec)?),
+        _ => return None,
+    };
+    let micros = match frac {
+        None => 0,
+        Some(f) if !f.is_empty() && f.chars().all(|c| c.is_ascii_digit()) => {
+            let mut digits: String = f.chars().take(6).collect();
+            while digits.len() < 6 {
+                digits.push('0');
+            }
+            digits.parse().ok()?
+        }
+        Some(_) => return None,
+    };
+    NaiveTime::from_hms_micro_opt(h, m, sec, micros)
+}
