@@ -171,3 +171,18 @@ static JOB_AGENT: LazyLock<PyRe> = LazyLock::new(|| {
         r"while i keep working)\b",
     ))
 });
+
+/// The user instructs a worker, an agent or a background job to do something (not a question about jobs that
+/// already exist).
+pub fn wants_background_job(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    if JOB_STATUS.is_match(&low) {
+        return false;
+    }
+    let start = JOB_START.is_match(&low);
+    let background = (_any(&w, &["background"], 0.7) && _any(&w, &["job", "task"], 0.7))
+        || _any(&w, &["asynchronously", "asynchronous"], 0.7);
+    let agent = JOB_AGENT.is_match(&low);
+    (background && start) || agent
+}
