@@ -68,3 +68,9 @@ pub fn build_index(pairs: &[&Pair]) -> Index {
     }
     Index { phrase_records, joint }
 }
+
+/// Python's `\w` for one character (`str.isalnum()` or `_`); `char::is_alphanumeric` differs from it only on the
+/// Other_Alphabetic marks.
+fn is_word_char(c: char) -> bool {
+    c == '_' || c.is_alphanumeric()
+}
