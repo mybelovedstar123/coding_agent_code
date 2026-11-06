@@ -624,4 +624,60 @@ impl Store {
         mem.write().await.upsert_pairs(vec![pair], vec);
         Ok(())
     }
+
+    /// Hybrid ranking of the given query variants: dense cosine + BM25 per query, fused by RRF.
+    async fn ranked(
+        &self,
+        user_id: &str,
+        queries: Vec<String>,
+        top_k: usize,
+        restrict: Option<Vec<String>>,
+        session_id: Option<&str>,
+        deadline: Option<Instant>,
+    ) -> Result<Vec<(Pair, f64)>, EmbedError> {
+        let mem = self.user(user_id);
+        let queries: Vec<String> = queries.into_iter().filter(|q| !py::strip(q).is_empty()).collect();
+        if queries.is_empty() || mem.read().await.pairs.is_empty() {
+            return Ok(Vec::new());
+        }
+        let qvecs = self.embedder.embed(queries.clone(), deadline).await?;
+        let mem = mem.read().await;
+        let mut pool = restrict;
+        if let Some(sid) = session_id.filter(|s| !s.is_empty()) {
+            let base: Vec<String> = pool.clone().unwrap_or_else(|| mem.pairs.keys().cloned().collect());
+            pool = Some(
+                base.into_iter()
+                    .filter(|pid| mem.pairs[pid].session_id == sid)
+                    .collect(),
+            );
+        }
+        let by_score_then_content = |a: &(String, f64), b: &(String, f64)| {
+            cmp_f64(-a.1, -b.1).then_with(|| cmp_content(&mem.pairs[&a.0], &mem.pairs[&b.0]))
+        };
+        let mut rankings: Vec<Vec<String>> = Vec::new();
+        let mut weights: Vec<f64> = Vec::new();
+        for (query, qvec) in queries.iter().zip(&qvecs) {
+            let mut dense = mem.dense_scores(qvec, pool.as_deref());
+            dense.sort_by(by_score_then_content);
+            rankings.push(
+                dense
+                    .into_iter()
+                    .filter(|(_, s)| *s > 0.15)
+                    .map(|(p, _)| p)
+                    .take(100)
+                    .collect(),
+            );
+            weights.push(1.0);
+            let mut lex = mem.bm25_scores(query, pool.as_deref());
+            lex.sort_by(by_score_then_content);
+            rankings.push(lex.into_iter().map(|(p, _)| p).take(100).collect());
+            weights.push(1.0);
+        }
+        let fused = rrf_fuse(&rankings, &weights, &mem, 60.0);
+        Ok(fused
+            .into_iter()
+            .take(top_k)
+            .filter_map(|(pid, score)| mem.pairs.get(&pid).map(|p| (p.clone(), score)))
+            .collect())
+    }
 }
