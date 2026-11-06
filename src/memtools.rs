@@ -111,3 +111,18 @@ fn list_arg(args: &Map<String, Value>, names: &[&str]) -> Vec<String> {
     }
     Vec::new()
 }
+
+/// `int(args.get(name) or default)` clamped to [lo, hi]; an unparseable value gives the default.
+fn int_arg(args: &Map<String, Value>, name: &str, default: i64, lo: i64, hi: i64) -> i64 {
+    let raw = args.get(name).filter(|v| truthy(v));
+    let parsed: Option<i64> = match raw {
+        None => Some(default),
+        Some(Value::Number(n)) => n
+            .as_i64()
+            .or_else(|| n.as_f64().filter(|f| f.is_finite()).map(|f| f.trunc() as i64)),
+        Some(Value::Bool(b)) => Some(*b as i64),
+        Some(Value::String(s)) => py::strip(s).replace('_', "").parse::<i64>().ok(),
+        Some(_) => None,
+    };
+    parsed.map(|v| v.clamp(lo, hi)).unwrap_or(default)
+}
