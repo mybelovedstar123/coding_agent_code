@@ -6,3 +6,10 @@
 //! Port of `harness/contact_evidence.py`. The Python `render` / `fmt_ts` callback parameters are dropped: the
 //! agent always passes `store.render_pair` / `store.fmt_ts`, which are called directly here.
 
+use crate::py;
+use crate::pyre::{escape, Re};
+use crate::store::{alias_declaration, cmp_content, fmt_ts, render_pair, Pair, UserMemory};
+use indexmap::IndexMap;
+use serde_json::{json, Map, Value};
+use std::collections::{BTreeSet, HashMap, HashSet};
+use std::sync::{Arc, LazyLock, Mutex};
