@@ -8,6 +8,7 @@ pub mod config;
 pub mod difflib;
 pub mod embed;
 pub mod event_state;
+pub mod glossary;
 pub mod policy;
 pub mod prompts;
 pub mod py;
