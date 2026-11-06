@@ -191,3 +191,16 @@ static CAL_IDENT: LazyLock<PyRe> =
     LazyLock::new(|| re(r"\b(?=[a-z0-9-]*\d)(?=[a-z0-9-]*[a-z])[a-z0-9][a-z0-9-]{7,}\b"));
 static CAL_BLOCK: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(block|blpck|bluck|slot|solt)\b"));
 static CAL_FOR_ME: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(pencil in|bl\w{2}k out|slot in|book)\b.*\bfor me\b"));
+
+/// A plain request to put something on the calendar (no quoted project name, no case identifier).
+pub fn wants_calendar_entry(text: &str) -> bool {
+    let low = text.to_lowercase();
+    if text.contains('"') || text.contains('\u{201c}') || CAL_IDENT.is_match(&low) {
+        return false;
+    }
+    let w = _words(text);
+    let calendar = _any(&w, &["calendar"], 0.6);
+    let put = _any(&w, &["put", "add", "schedule", "pencil", "book", "get"], 0.7) || CAL_BLOCK.is_match(&low);
+    let for_me = CAL_FOR_ME.is_match(&low);
+    (calendar && put) || for_me
+}
