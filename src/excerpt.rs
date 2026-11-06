@@ -4,3 +4,9 @@
 //! record by position (which can cut away the one sentence that matters), keep the sentences that match the query
 //! terms — tolerating typos — plus their immediate neighbours, in original order.
 
+use crate::py;
+use crate::pyre::Re;
+use crate::text::tokenize;
+use indexmap::IndexMap;
+use std::collections::BTreeSet;
+use std::sync::LazyLock;
