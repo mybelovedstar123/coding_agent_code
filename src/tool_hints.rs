@@ -122,3 +122,39 @@ pub fn wants_image_edit(text: &str) -> bool {
     let new = (_any(&w, &["create", "generate", "draw"], 0.7) && !pointed) || IMG_NEW.is_match(&low);
     image && earlier && !new
 }
+
+/// Arithmetic or statistics on at least two numbers the request gives.
+pub fn wants_arithmetic(text: &str) -> bool {
+    let w = _words(text);
+    let nums = NUMBER_RE.findall(text);
+    let stat = _any(
+        &w,
+        &[
+            "mean",
+            "average",
+            "total",
+            "difference",
+            "median",
+            "crunch",
+            "apart",
+            "percent",
+            "percentage",
+            "range",
+            "ratio",
+            "normalize",
+            "fractions",
+            "calculation",
+            "compute",
+            "times",
+            "minus",
+            "plus",
+            "divided",
+            "multiply",
+            "multiplied",
+            "sum",
+            "spread",
+        ],
+        0.7,
+    );
+    nums.len() >= 2 && stat
+}
