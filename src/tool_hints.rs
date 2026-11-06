@@ -609,3 +609,5 @@ pub const PREFERENCE_NOTE: &str = "The user's own stored preference for this set
 it, writing the value exactly as the records spell it (the same words and spaces, not joined with hyphens).";
 
 static PREF_SETTING: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(f[a-z]{1,2}t|mode|m[a-z]de|asent|accnet)\b"));
+static PREF_OWN: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\bmy (?:own |personal )?(?:ditto|workspace|interface|app|setup|look|chat)\b"));
