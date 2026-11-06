@@ -20,3 +20,6 @@ use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, LazyLock};
 use std::time::Duration;
 use tokio::time::Instant;
+
+/// Validator deadline is 300 s per /run.
+pub const CASE_BUDGET_S: f64 = 270.0;
