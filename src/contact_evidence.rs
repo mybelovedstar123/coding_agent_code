@@ -200,3 +200,15 @@ pub fn people_named(mem: &UserMemory, text: &str) -> BTreeSet<String> {
     }
     forms
 }
+
+/// Records that state an email address and name one of the given name forms, oldest first.
+pub fn email_records(mem: &UserMemory, forms: &BTreeSet<String>) -> Vec<Pair> {
+    // Pure tests, cheapest first: an address has an '@', and the name test has a literal prefilter.
+    let out = mem
+        .pairs
+        .values()
+        .filter(|p| p.prompt.contains('@') && names_any(&p.prompt, forms) && EMAIL_RE.is_match(&p.prompt))
+        .cloned()
+        .collect();
+    oldest_first(out)
+}
