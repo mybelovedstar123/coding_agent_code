@@ -119,3 +119,22 @@ pub fn glossed(text: &str, terms: &IndexMap<String, String>) -> String {
         format!("{name} [= {}]", terms.get(name).map(String::as_str).unwrap_or(""))
     })
 }
+
+/// The records' non-definition statements (distinct texts) with defined names glossed.
+pub fn glossed_statements(records: &[(String, String)], ident: &str, terms: &IndexMap<String, String>) -> Vec<Value> {
+    let patterns: Vec<Re> = terms.keys().map(|t| Re::new(&format!(r"\b{}\b", escape(t)))).collect();
+    let mut out = Vec::new();
+    let mut seen: HashSet<String> = HashSet::new();
+    for (pid, prompt) in records {
+        let s = statement(prompt, ident);
+        if !definitions(&s).is_empty() || !patterns.iter().any(|re| re.is_match(&s)) {
+            continue;
+        }
+        let g = glossed(&s, terms);
+        let key = NON_WORD_RE.sub(&g.to_lowercase(), "");
+        if seen.insert(key) {
+            out.push(json!({"pairID": pid, "text": g}));
+        }
+    }
+    out
+}
