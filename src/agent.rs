@@ -25,3 +25,5 @@ use tokio::time::Instant;
 pub const CASE_BUDGET_S: f64 = 270.0;
 /// Ordinary calls must leave this for a final answer.
 pub const ANSWER_RESERVE_S: f64 = 60.0;
+/// Below this remaining, the model is told time is nearly up (advisory; tools stay offered).
+pub const WRAP_UP_S: f64 = 90.0;
