@@ -566,3 +566,13 @@ pub fn wants_named_calendar_entry(text: &str) -> bool {
             && (["on", "onto", "in", "into", "to"].contains(&w[i - 2].as_str()) || _fuzzy(&w[i - 2], "onto", 0.6))
     })
 }
+
+/// CALENDAR_ENTRY_NOTE when the catalog can create calendar events and the request asks for a named item on the
+/// user's calendar.
+pub fn calendar_entry_note(user_input: &str, tool_defs: &[Value]) -> String {
+    if offered_names(tool_defs).contains(&"calendar_create_event") && wants_named_calendar_entry(user_input) {
+        CALENDAR_ENTRY_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
