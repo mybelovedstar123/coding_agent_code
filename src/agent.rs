@@ -36,3 +36,4 @@ pub const MAX_TURNS: usize = 12;
 pub const CONTEXT_MEMORIES: usize = 10;
 pub const CONTEXT_TOP_FULL: usize = 4;
 pub const CONTEXT_CHARS_TOP: usize = 1400;
+pub const CONTEXT_CHARS: usize = 600;
