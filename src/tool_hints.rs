@@ -283,3 +283,9 @@ static CHAT_TOOL_PREFS: LazyLock<PyRe> = LazyLock::new(|| {
         r"(agent j\w{2,3}s|image t\w{2,4}ls|memory t\w{2,4}ls|web (search|t\w{2,4}ls)|\w+ t\w{2,4}ls))\b",
     ))
 });
+
+/// Which kinds of tools the assistant may use in chat ("turn off agent jobs", "allow only memory tools", "change my
+/// chat tools so …").
+pub fn wants_chat_tool_prefs(text: &str) -> bool {
+    CHAT_TOOL_PREFS.is_match(&text.to_lowercase())
+}
