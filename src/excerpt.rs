@@ -76,3 +76,31 @@ pub fn fuzzy_match(qtok: &str, tok: &str) -> f64 {
     }
     0.0
 }
+
+/// For each query token, the vocabulary tokens it matches and their weight (vocabulary in insertion order).
+pub fn expand_terms<'a>(
+    qtoks: &[String],
+    vocab: impl Fn() -> Box<dyn Iterator<Item = &'a str> + 'a>,
+    contains: impl Fn(&str) -> bool,
+) -> IndexMap<String, IndexMap<String, f64>> {
+    let mut out = IndexMap::new();
+    for q in qtoks {
+        let mut matches = IndexMap::new();
+        if contains(q) {
+            matches.insert(q.clone(), 1.0);
+        }
+        let ql = py::len(q);
+        if ql >= 5 {
+            for tok in vocab() {
+                if tok != q && py::len(tok).abs_diff(ql) <= 1 && tok.chars().next() == q.chars().next() {
+                    let w = fuzzy_match(q, tok);
+                    if w != 0.0 {
+                        matches.insert(tok.to_string(), w);
+                    }
+                }
+            }
+        }
+        out.insert(q.clone(), matches);
+    }
+    out
+}
