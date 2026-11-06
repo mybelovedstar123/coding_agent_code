@@ -448,3 +448,91 @@ impl IndexV2 {
         out
     }
 }
+
+/// The memory context with `ownership` (the project's handover sentences, the records they come from shown in full
+/// in `memories`, an excerpt of them replaced) and OWNERSHIP_NOTE added when the request asks who holds a project the
+/// records name; unchanged otherwise. `full_record(pairID)` returns that record's {"pairID", "timestamp", "text"}.
+/// holder_now is the person the latest handover sentence names (`holder_now`).
+///
+/// A payload that is valid JSON but not an object makes the Python raise (an uncaught TypeError/AttributeError);
+/// it never occurs (the agent builds every context), and here the context is returned unchanged.
+pub fn with_ownership(
+    context: Option<String>,
+    prefix: &str,
+    index: &IndexV2,
+    request: &str,
+    full_record: impl Fn(&str) -> Value,
+) -> Option<String> {
+    let ctx = match context {
+        Some(c) if !c.is_empty() && c.contains('\n') => c,
+        other => return other,
+    };
+    let (phrase, chain) = index.best_chain(request);
+    if chain.is_empty() {
+        return Some(ctx);
+    }
+    let phrase = phrase.unwrap_or_default();
+    let body = ctx.split_once('\n').map(|(_, b)| b).unwrap_or("");
+    let mut payload: Map<String, Value> = match serde_json::from_str::<Value>(body) {
+        Ok(Value::Object(m)) => m,
+        _ => return Some(ctx),
+    };
+    let old_note = payload.get("note").map(py::str_value).unwrap_or_default();
+    let note = format!("{old_note} {}", OWNERSHIP_NOTE.replace("{project}", &phrase));
+    payload.insert("note".into(), Value::String(py::strip(&note).to_string()));
+    let mut own = Map::new();
+    own.insert("project".into(), Value::String(phrase.clone()));
+    own.insert(
+        "statements".into(),
+        Value::Array(
+            chain
+                .iter()
+                .map(|(ts, s)| {
+                    let mut m = Map::new();
+                    m.insert("timestamp".into(), Value::String(ts.clone()));
+                    m.insert("text".into(), Value::String(s.clone()));
+                    Value::Object(m)
+                })
+                .collect(),
+        ),
+    );
+    // `payload["ownership"] = own` happens here, ahead of `memories`; its keys are filled below.
+    payload.insert("ownership".into(), Value::Null);
+    let holder = holder_now(&chain, &index.orgs);
+    // Key order of the payload is kept exactly as the earlier two-pass build produced it (holder_now ahead of
+    // source_records when the plain reading `first_named_holder` also names a holder), so model requests are
+    // unchanged.
+    let early = holder.is_some() && first_named_holder(&chain).is_some();
+    if early {
+        own.insert("holder_now".into(), Value::String(holder.clone().unwrap_or_default()));
+    }
+    let pids = index.sources(&phrase);
+    let mut items: indexmap::IndexMap<String, Value> = indexmap::IndexMap::new();
+    if let Some(Value::Array(mems)) = payload.get("memories") {
+        for it in mems {
+            if let Value::Object(m) = it {
+                let key = m.get("pairID").map(py::str_value).unwrap_or_else(|| "None".into());
+                items.insert(key, it.clone());
+            }
+        }
+    }
+    for pid in &pids {
+        items.insert(pid.clone(), full_record(pid));
+    }
+    let mut mems: Vec<Value> = items.into_values().collect();
+    let ts_key = |it: &Value| match it.get("timestamp") {
+        Some(v) => py::str_value(v),
+        None => String::new(),
+    };
+    mems.sort_by_key(ts_key);
+    payload.insert("memories".into(), Value::Array(mems));
+    own.insert(
+        "source_records".into(),
+        Value::Array(pids.into_iter().map(Value::String).collect()),
+    );
+    if let Some(h) = holder.filter(|h| !h.is_empty() && !early) {
+        own.insert("holder_now".into(), Value::String(h));
+    }
+    payload.insert("ownership".into(), Value::Object(own));
+    Some(format!("{prefix}\n{}", py::dumps(&Value::Object(payload), false)))
+}
