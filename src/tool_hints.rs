@@ -716,3 +716,11 @@ pub fn wants_send_on_record(text: &str) -> bool {
     let target = SEND_PRONOUN.is_match(&low) || SEND_TO_NAME.is_match(text);
     verb && target
 }
+
+/// SEND_ON_RECORD_NOTE when the request asks to send something to a person and gmail_send is offered.
+pub fn send_on_record_note(user_input: &str, tool_defs: &[Value]) -> String {
+    if offered_names(tool_defs).contains(&"gmail_send") && wants_send_on_record(user_input) {
+        return SEND_ON_RECORD_NOTE.replace("{send}", "gmail_send");
+    }
+    String::new()
+}
