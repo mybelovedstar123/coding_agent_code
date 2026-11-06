@@ -344,3 +344,14 @@ impl PyVal {
         }
     }
 }
+
+/// Python's `json.loads(s)` (the C scanner, strict): None where it raises ValueError. A lone surrogate escape, which
+/// Python keeps in the str, becomes U+FFFD (a Rust string cannot hold it).
+pub fn py_json_loads(s: &str) -> Option<PyVal> {
+    let chars: Vec<char> = s.chars().collect();
+    let mut p = JsonParser { s: &chars, depth: 0 };
+    let i = p.ws(0);
+    let (v, end) = p.value(i)?;
+    let end = p.ws(end);
+    (end == chars.len()).then_some(v)
+}
