@@ -164,3 +164,10 @@ static JOB_STATUS: LazyLock<PyRe> = LazyLock::new(|| {
 });
 static JOB_START: LazyLock<PyRe> =
     LazyLock::new(|| re(r"\b(launch|start|kick off|queue up|fire off|spin up|run|delegate|send|have|do)\b"));
+static JOB_AGENT: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(a worker|delegate a task|send an? a\w{2,4}t off|kick off an? a\w{2,4}t|",
+        r"spin up an? a\w{2,4}t|launch an? (?:a\w{2,4}t|job)|queue up an? (?:task|job)|",
+        r"while i keep working)\b",
+    ))
+});
