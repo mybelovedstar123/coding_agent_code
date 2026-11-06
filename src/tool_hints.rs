@@ -36,3 +36,7 @@ pub fn _fuzzy(w: &str, target: &str, ratio: f64) -> bool {
             && py::len(w).abs_diff(py::len(target)) <= 2
             && sequence_ratio(w, target) >= ratio)
 }
+
+pub fn _any(words: &[String], targets: &[&str], ratio: f64) -> bool {
+    words.iter().any(|w| targets.iter().any(|t| _fuzzy(w, t, ratio)))
+}
