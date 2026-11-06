@@ -13,3 +13,5 @@ use tokio::time::Instant;
 pub const SPELLING_PROMPT: &str = "Correct the spelling mistakes in the user's message below. Change nothing else: \
      keep every name, number, identifier, email, quote, word choice and the word order exactly as written. Reply \
      with the corrected message only, with no comment.";
+
+static DIGIT_TOKEN_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\S*\d\S*"));
