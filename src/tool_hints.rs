@@ -639,3 +639,12 @@ pub fn asks_own_preference(text: &str) -> bool {
     let verify = PREF_VERIFY.is_match(&low);
     setting && own && question && !task && !verify
 }
+
+/// PREFERENCE_NOTE when the request asks which appearance value is right for the user's own workspace.
+pub fn preference_note(user_input: &str) -> String {
+    if asks_own_preference(user_input) {
+        PREFERENCE_NOTE.to_string()
+    } else {
+        String::new()
+    }
+}
