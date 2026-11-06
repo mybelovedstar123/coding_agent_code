@@ -27,3 +27,5 @@ pub const CASE_BUDGET_S: f64 = 270.0;
 pub const ANSWER_RESERVE_S: f64 = 60.0;
 /// Below this remaining, the model is told time is nearly up (advisory; tools stay offered).
 pub const WRAP_UP_S: f64 = 90.0;
+/// A very large transcript (long records read in full) makes each call slow: wrap up earlier.
+pub const BIG_TRANSCRIPT_CHARS: usize = 150_000;
