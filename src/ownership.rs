@@ -122,3 +122,5 @@ pub fn thread_like(word: &str) -> bool {
 
 /// Handover sentences as (record timestamp, sentence), in time order.
 pub type Chain = Vec<(String, String)>;
+/// A record's handover sentence: (stripped sentence, its tokens).
+type Handover = (String, Vec<String>);
