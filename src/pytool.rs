@@ -8,3 +8,10 @@
 //! The model writes Python, so the image carries CPython 3.12 (the reference's interpreter); validation runs in it
 //! too, so a rejected program gets CPython's own syntax messages.
 
+use crate::py;
+use serde_json::{json, Value};
+use std::process::Stdio;
+use std::sync::LazyLock;
+use std::time::Duration;
+use tokio::io::{AsyncRead, AsyncReadExt, AsyncWriteExt};
+use tokio::process::Command;
