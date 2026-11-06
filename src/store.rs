@@ -498,3 +498,33 @@ pub fn rrf_fuse(rankings: &[Vec<String>], weights: &[f64], mem: &UserMemory, k: 
     });
     out
 }
+
+/// The dict items that carry an id under one of `keys`, each id once (its last occurrence, at that position): a
+/// repeated id inside one batch used to corrupt the dense index for good (D11).
+pub fn last_per_id<'a>(items: &'a Value, keys: &[&str]) -> Vec<&'a serde_json::Map<String, Value>> {
+    let ident = |item: &serde_json::Map<String, Value>| -> String {
+        keys.iter()
+            .filter_map(|k| item.get(*k))
+            .find(|v| truthy(v))
+            .map(py::str_value)
+            .unwrap_or_default()
+    };
+    let good: Vec<&serde_json::Map<String, Value>> = items
+        .as_array()
+        .map(|a| {
+            a.iter()
+                .filter_map(|it| it.as_object())
+                .filter(|it| !ident(it).is_empty())
+                .collect()
+        })
+        .unwrap_or_default();
+    let mut last: HashMap<String, usize> = HashMap::new();
+    for (i, it) in good.iter().enumerate() {
+        last.insert(ident(it), i);
+    }
+    good.iter()
+        .enumerate()
+        .filter(|(i, it)| last[&ident(it)] == *i)
+        .map(|(_, it)| *it)
+        .collect()
+}
