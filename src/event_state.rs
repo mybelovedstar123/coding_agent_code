@@ -586,3 +586,45 @@ enum CsvState {
 
 /// `csv.field_size_limit()` default.
 const CSV_FIELD_LIMIT: usize = 128 * 1024;
+
+/// `list(csv.reader(io.StringIO(text)))` with the excel dialect; Err where the reader raises `csv.Error`.
+fn csv_rows(text: &str) -> Result<Vec<Vec<String>>, ()> {
+    // io.StringIO iterates lines split after each "\n", the newline kept.
+    let mut lines = Vec::new();
+    let mut start = 0;
+    for (i, _) in text.match_indices('\n') {
+        lines.push(&text[start..=i]);
+        start = i + 1;
+    }
+    if start < text.len() {
+        lines.push(&text[start..]);
+    }
+    let mut lines = lines.into_iter();
+    let mut out = Vec::new();
+    loop {
+        // Reader_iternext: parse_reset, then lines until the record ends.
+        let mut r = CsvReader {
+            state: CsvState::StartRecord,
+            fields: Vec::new(),
+            field: String::new(),
+            field_len: 0,
+        };
+        loop {
+            let Some(line) = lines.next() else {
+                if r.field_len != 0 || r.state == CsvState::InQuotedField {
+                    r.save_field();
+                    out.push(r.fields);
+                }
+                return Ok(out);
+            };
+            for c in line.chars() {
+                r.process_char(Some(c))?;
+            }
+            r.process_char(None)?;
+            if r.state == CsvState::StartRecord {
+                break;
+            }
+        }
+        out.push(r.fields);
+    }
+}
