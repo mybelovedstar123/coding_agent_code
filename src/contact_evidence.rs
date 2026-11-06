@@ -17,3 +17,8 @@ use std::sync::{Arc, LazyLock, Mutex};
 static HANDLE_REQUEST_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\bhandle\b|\bSignal\b"));
 // the channel named loosely, so a typo in a record ("hemdle", "hnale") does not hide it
 static CHANNEL_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\bsignal\b|\bh\w{2,4}le\b"));
+
+/// The request asks for a messaging handle.
+pub fn asks_for_handle(question: &str) -> bool {
+    !question.is_empty() && HANDLE_REQUEST_RE.is_match(question)
+}
