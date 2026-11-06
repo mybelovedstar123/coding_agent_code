@@ -628,3 +628,10 @@ fn csv_rows(text: &str) -> Result<Vec<Vec<String>>, ()> {
         out.push(r.fields);
     }
 }
+
+struct CsvReader {
+    state: CsvState,
+    fields: Vec<String>,
+    field: String,
+    field_len: usize,
+}
