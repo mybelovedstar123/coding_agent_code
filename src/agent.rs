@@ -37,3 +37,7 @@ pub const CONTEXT_MEMORIES: usize = 10;
 pub const CONTEXT_TOP_FULL: usize = 4;
 pub const CONTEXT_CHARS_TOP: usize = 1400;
 pub const CONTEXT_CHARS: usize = 600;
+/// Identifiers: tokens of 8+ characters mixing letters and digits (case, order, invoice or ticket numbers). Every
+/// record containing one is pre-loaded in full (no size cap, never replaced by an excerpt or an id-only pointer).
+static IDENT_RE: LazyLock<Re> =
+    LazyLock::new(|| Re::new(r"\b(?=[A-Za-z0-9-]*\d)(?=[A-Za-z0-9-]*[A-Za-z])[A-Za-z0-9][A-Za-z0-9-]{7,}\b"));
