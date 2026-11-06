@@ -382,3 +382,28 @@ fn offered_names(tool_defs: &[Value]) -> Vec<&str> {
         .filter_map(|t| function_field(t, "name").and_then(Value::as_str))
         .collect()
 }
+
+/// TOOL_HINT_NOTE for the first rule whose tool is offered and whose request test holds; empty otherwise.
+pub fn tool_hint_note(user_input: &str, tool_defs: &[Value]) -> String {
+    // name -> description; a later definition of the same name replaces the description. A name or description
+    // that is not a string never matches a rule's tool (Python would raise on a non-string description).
+    let mut offered: IndexMap<&str, &str> = IndexMap::new();
+    for t in tool_defs {
+        let name = function_field(t, "name").and_then(Value::as_str).unwrap_or("");
+        let desc = function_field(t, "description").and_then(Value::as_str).unwrap_or("");
+        offered.insert(name, desc);
+    }
+    for (tool, test) in RULES {
+        if let Some(desc) = offered.get(tool) {
+            if test(user_input) {
+                let desc = py::rstrip_chars(py::strip(desc), ".");
+                let extra = RULE_EXTRA.iter().find(|(t, _)| t == tool).map_or("", |(_, e)| e);
+                return TOOL_HINT_NOTE
+                    .replace("{tool}", tool)
+                    .replacen("{desc}", py::head(desc, 200), 1)
+                    + extra;
+            }
+        }
+    }
+    String::new()
+}
