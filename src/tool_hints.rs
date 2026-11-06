@@ -57,3 +57,39 @@ static SCHED_ABOUT_RUNS: LazyLock<PyRe> = LazyLock::new(|| {
         r"logged|on repeat|automatic runs?|automatically|automaically|go(?:es)? on their own)\b",
     ))
 });
+
+/// When saved workflows run, which run on their own or on a timer, or how many runs a scheduled one logged (not
+/// a calendar request, not a timer to start, not how to set up a reminder).
+pub fn wants_schedules(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    if ["reminder", "reminders", "start", "focus"]
+        .iter()
+        .any(|x| has_word(&w, x))
+    {
+        return false;
+    }
+    let counting = SCHED_COUNTING.is_match(&low);
+    if !counting && (SCHED_SET_UP.is_match(&low) || (SCHED_EVERY.is_match(&low) && !text.contains('?'))) {
+        return false;
+    }
+    let about_runs = SCHED_ABOUT_RUNS.is_match(&low)
+        || (_any(&w, &["recurring", "upcoming"], 0.7) && _any(&w, &["runs", "run", "ruuns"], 0.7));
+    let about_automation = _any(
+        &w,
+        &[
+            "workflow",
+            "workflows",
+            "schedules",
+            "scheduled",
+            "recurring",
+            "automatic",
+            "automatically",
+            "timer",
+            "upcoming",
+        ],
+        0.7,
+    ) || low.contains("on repeat")
+        || low.contains("what do i have");
+    about_runs && about_automation
+}
