@@ -311,3 +311,5 @@ pub fn asks_holder(request: &str) -> bool {
     }
     false
 }
+
+static GRAM_WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[A-Za-z0-9][A-Za-z0-9'-]*"));
