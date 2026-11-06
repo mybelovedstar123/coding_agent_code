@@ -213,3 +213,11 @@ pub fn wants_sandbox_run(text: &str) -> bool {
     let low = text.to_lowercase();
     SANDBOX.is_match(&low) && SANDBOX_CODE.is_match(&low)
 }
+
+static JOBFIG_JOB: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(job list|b\w{2,4}gr?o?u?n?d (?:work|tasks?|jobs?|j\w?bs)|agent jobs?|agents i set loose|",
+        r"jobs? i (?:dispatched|queued|started)|(?:crawl|backfill|reindex|import|export|sync|migration|batch|",
+        r"scrape) job)\b",
+    ))
+});
