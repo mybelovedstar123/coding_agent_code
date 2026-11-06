@@ -33,3 +33,5 @@ fn cached_re(pattern: String) -> Arc<Re> {
         .or_insert_with_key(|p| Arc::new(Re::new(p)))
         .clone()
 }
+
+static WORD_CHAR_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\A\w\z"));
