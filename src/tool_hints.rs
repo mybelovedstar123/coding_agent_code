@@ -318,3 +318,5 @@ pub fn wants_work_done(text: &str) -> bool {
         && _any(&w, &["script", "tool", "app"], 0.7);
     go_ahead || actually || start_it || JUST_TELL_ME.is_match(&low)
 }
+
+pub type Rule = (&'static str, fn(&str) -> bool);
