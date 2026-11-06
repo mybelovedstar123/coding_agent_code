@@ -349,3 +349,22 @@ pub fn lower_grams(request: &str) -> HashSet<String> {
 }
 
 pub const NAME: &str = r"([A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)? [A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)?)";
+
+pub static TARGETS: LazyLock<Vec<Re>> = LazyLock::new(|| {
+    let ws = r"[\s\x1c-\x1f]";
+    [
+        format!(r"\b(?:handed|passed\b.*?|moved|over|went){ws}+to{ws}+{NAME}"),
+        format!(r":{ws}*{NAME}{ws}+to{ws}+{NAME}"),
+        format!(r"\bis{ws}+{NAME}'s{ws}+now"),
+        format!(
+            r"{NAME}{ws}+(?:now{ws}+owns|is{ws}+the{ws}+owner{ws}+now|picked{ws}+up|took{ws}+over|took{ws}+it{ws}+on|has{ws}+taken{ws}+over|now{ws}+runs|is{ws}+the{ws}+one{ws}+accountable)"
+        ),
+        format!(
+            r"\bwith{ws}+{NAME}{ws}+(?:in{ws}+charge|as{ws}+the{ws}+person{ws}+holding|holding|on{ws}+point)"
+        ),
+        format!(r"\bball{ws}+is{ws}+with{ws}+{NAME}"),
+    ]
+    .iter()
+    .map(|p| Re::new(p))
+    .collect()
+});
