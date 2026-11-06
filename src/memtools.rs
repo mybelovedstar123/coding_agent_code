@@ -139,3 +139,16 @@ fn clip(text: &str, limit: usize) -> String {
         py::tail(text, limit - head)
     )
 }
+
+fn preview(pair: &Pair, query: &str, idf: Option<&Idf>) -> Value {
+    let full = render_pair(pair);
+    let body = excerpt(&full, query, PREVIEW_CHARS, idf);
+    let mut out = Map::new();
+    out.insert("id".into(), json!(pair.pair_id));
+    out.insert("timestamp".into(), json!(fmt_ts(&pair.ts)));
+    out.insert("preview".into(), json!(body));
+    if py::len(&body) < py::len(&full) {
+        out.insert("excerpted".into(), json!(true));
+    }
+    Value::Object(out)
+}
