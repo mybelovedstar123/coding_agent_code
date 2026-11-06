@@ -928,3 +928,49 @@ enum FieldState {
     Value(String),
     Set(BTreeSet<String>),
 }
+
+/// entity -> field -> value (or sorted list for sets) after the events with effective step <= `step`, applied in
+/// step order (document order within a step).
+pub fn state_at(evs: &[Event], step: &PyInt) -> Value {
+    let mut order: Vec<&Event> = evs.iter().collect();
+    order.sort_by(|a, b| a.0.cmp(&b.0));
+    let mut st: IndexMap<&str, IndexMap<&str, FieldState>> = IndexMap::new();
+    for (s, op, ent, field, val) in order {
+        if s > step {
+            continue;
+        }
+        let f = st.entry(ent.as_str()).or_default();
+        if op == "add" || op == "remove" {
+            let cur = f
+                .entry(field.as_str())
+                .or_insert_with(|| FieldState::Set(BTreeSet::new()));
+            if let FieldState::Value(_) = cur {
+                *cur = FieldState::Set(BTreeSet::new());
+            }
+            if let FieldState::Set(set) = cur {
+                if op == "add" {
+                    set.insert(val.clone());
+                } else {
+                    set.remove(val);
+                }
+            }
+        } else {
+            f.insert(field.as_str(), FieldState::Value(val.clone()));
+        }
+    }
+    let mut ents: Vec<(&str, IndexMap<&str, FieldState>)> = st.into_iter().collect();
+    ents.sort_by(|a, b| a.0.cmp(b.0));
+    let mut out = Map::new();
+    for (e, fs) in ents {
+        let mut m = Map::new();
+        for (k, v) in fs {
+            let v = match v {
+                FieldState::Value(s) => Value::String(s),
+                FieldState::Set(set) => Value::Array(set.into_iter().map(Value::String).collect()),
+            };
+            m.insert(k.to_string(), v);
+        }
+        out.insert(e.to_string(), Value::Object(m));
+    }
+    Value::Object(out)
+}
