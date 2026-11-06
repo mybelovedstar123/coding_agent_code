@@ -411,3 +411,5 @@ pub fn tool_hint_note(user_input: &str, tool_defs: &[Value]) -> String {
 pub const RESEARCH_SEND_NOTE: &str = "This request has two parts: first look up the current figure it asks about \
 ({lookup} when no other offered tool reports it), then send that figure to the person it names with {send}, using \
 their email from the records. Do both, and in your reply state the figure you sent and to whom.";
+
+static RS_WHICH: LazyLock<PyRe> = LazyLock::new(|| re(r"\s*(?:for \w+ contact l\w+:\s*)?w\w{1,3}ch\b"));
