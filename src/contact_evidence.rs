@@ -178,3 +178,8 @@ static OWNER_RE: LazyLock<Re> = LazyLock::new(|| {
     ))
 });
 static EMAIL_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[\w.+-]+@[\w-]+\.[\w.-]+"));
+
+/// The request asks for the email/address of whoever holds or owns something (the person is not named).
+pub fn asks_owner_contact(question: &str) -> bool {
+    !question.is_empty() && EMAIL_REQUEST_RE.is_match(question) && OWNER_RE.is_match(question)
+}
