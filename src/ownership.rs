@@ -414,3 +414,10 @@ pub struct IndexV2 {
     pub pids: Vec<String>,
     pub orgs: HashSet<String>,
 }
+
+impl Deref for IndexV2 {
+    type Target = Index;
+    fn deref(&self) -> &Index {
+        &self.index
+    }
+}
