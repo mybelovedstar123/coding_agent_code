@@ -22,3 +22,4 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::sync::LazyLock;
 
 pub static JOINT_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\b([A-Z][a-z]{1,15}) and I\b"));
+pub const RARE_PHRASE_RECORDS: usize = 2;
