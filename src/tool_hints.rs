@@ -335,3 +335,35 @@ pub const RULES: &[Rule] = &[
     ("discover_capabilities", asks_capability),
     ("execute_agent_job", wants_work_done),
 ];
+
+pub const RULE_EXTRA: &[(&str, &str)] = &[
+    (
+        "run_code",
+        " Call it directly, without searching the records first: pass the routine the user names as the task to run \
+         and report exactly the value it prints.",
+    ),
+    (
+        "update_memory",
+        " Find that note with the memory search, then update the same note in place with the corrected fact (keep the \
+         rest of its text); do not add a separate note.",
+    ),
+    (
+        "edit_image",
+        " Pass the image as the user refers to it (for example \"the image from earlier\") with the edit as the \
+         instruction; do not search the records for it or ask for a link.",
+    ),
+    (
+        "file_feedback_for_team",
+        " Pass the user's own words as the feedback; it reaches the team without an address, so do not ask for one.",
+    ),
+    (
+        "discover_capabilities",
+        " Answer the question from what it reports; the user asked whether or where, so do not change the setting \
+         yourself.",
+    ),
+    (
+        "calendar_create_event",
+        " Use the title the user gave and the timing they gave; when they gave none, pass the timing as unspecified \
+         instead of asking first.",
+    ),
+];
