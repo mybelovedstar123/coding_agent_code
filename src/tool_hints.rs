@@ -548,3 +548,7 @@ pub fn agreed_start_note(user_input: &str, tool_defs: &[Value]) -> String {
         String::new()
     }
 }
+
+pub const CALENDAR_ENTRY_NOTE: &str = "The user asks to have a named item on their calendar. If the records say it is \
+already on the calendar, do not create another event: find it with the calendar search and tell the user it is \
+already there. Otherwise create the event as asked.";
