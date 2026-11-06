@@ -904,3 +904,22 @@ pub fn from_sentences(text: &str) -> Vec<Event> {
     }
     out
 }
+
+/// (step, operation, entity, field, value) per event, in document order.
+pub fn events(texts: &[String]) -> Vec<Event> {
+    let mut out = Vec::new();
+    for t in texts {
+        let mut found = from_json(t);
+        if found.is_empty() {
+            found = from_csv(t);
+        }
+        if found.is_empty() {
+            found = from_markdown(t);
+        }
+        if found.is_empty() {
+            found = from_sentences(t);
+        }
+        out.extend(found);
+    }
+    out
+}
