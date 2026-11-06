@@ -109,3 +109,7 @@ fn names_of(tool_defs: &[Value]) -> HashSet<String> {
         .map(String::from)
         .collect()
 }
+
+fn content_str(reply: &crate::llm::Reply) -> &str {
+    reply.content.as_ref().and_then(Value::as_str).unwrap_or("")
+}
