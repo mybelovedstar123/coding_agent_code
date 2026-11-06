@@ -16,3 +16,15 @@ const STOPWORDS: &[&str] = &[
 pub fn is_stopword(t: &str) -> bool {
     STOPWORDS.contains(&t)
 }
+
+/// Lower-cased word tokens without stopwords, in text order.
+pub fn tokenize(text: &str) -> Vec<String> {
+    let low = text.to_lowercase();
+    TOKEN_RE
+        .find_iter(&low)
+        .into_iter()
+        .map(|(_, _, t)| t)
+        .filter(|t| !is_stopword(t))
+        .map(String::from)
+        .collect()
+}
