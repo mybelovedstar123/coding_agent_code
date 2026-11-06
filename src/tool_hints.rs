@@ -93,3 +93,5 @@ pub fn wants_schedules(text: &str) -> bool {
         || low.contains("what do i have");
     about_runs && about_automation
 }
+
+static IMG_THE_ONE: LazyLock<PyRe> = LazyLock::new(|| re(r"\bthe one you (?:just )?\w+"));
