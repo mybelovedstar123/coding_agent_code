@@ -73,3 +73,4 @@ these those
 my our your their his her we i you they he she me us them now then there here what which who whom whose when where how
 just still also not no yes so as if than too very can will would should could do does did done have has had please
 before after over about into out up down off on is it's i'd i'm we're they're one two";
+pub static STOP: LazyLock<HashSet<&'static str>> = LazyLock::new(|| py::split_ws(STOP_WORDS).into_iter().collect());
