@@ -52,3 +52,10 @@ pub(crate) fn after_ident<'a>(prompt: &'a str, ident: &str) -> &'a str {
         }
     }
 }
+
+pub fn statement(prompt: &str, ident: &str) -> String {
+    let s = after_ident(prompt, ident);
+    let s = py::strip(s.trim_start_matches(':'));
+    let s = py::strip(s.trim_end_matches('}'));
+    py::strip(s.trim_matches('"')).to_string()
+}
