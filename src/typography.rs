@@ -17,3 +17,11 @@ use std::sync::LazyLock;
 /// A paired strong-emphasis span on one line, not glued to a word on either side, whose text neither starts nor
 /// ends with a space.
 static STRONG: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?<!\w)\*\*(?=\S)([^*\n]+?)(?<=\S)\*\*(?!\w)"));
+
+fn table(c: char) -> char {
+    match c {
+        '\u{2010}' | '\u{2011}' => '-',                           // HYPHEN, NON-BREAKING HYPHEN
+        '\u{00a0}' | '\u{2007}' | '\u{2009}' | '\u{202f}' => ' ', // NO-BREAK, FIGURE, THIN, NARROW NO-BREAK SPACE
+        c => c,
+    }
+}
