@@ -204,3 +204,5 @@ pub fn wants_calendar_entry(text: &str) -> bool {
     let for_me = CAL_FOR_ME.is_match(&low);
     (calendar && put) || for_me
 }
+
+static SANDBOX: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(sa[a-z]{1,6}x|code mode)\b"));
