@@ -61,3 +61,18 @@ fn edit_distance_le1(a: &str, b: &str) -> bool {
     }
     true
 }
+
+/// 1.0 exact, 0.8 one-typo match for tokens of 5+ chars, else 0.
+pub fn fuzzy_match(qtok: &str, tok: &str) -> f64 {
+    if qtok == tok {
+        return 1.0;
+    }
+    if py::len(qtok) >= 5
+        && py::len(tok) >= 4
+        && qtok.chars().next() == tok.chars().next()
+        && edit_distance_le1(qtok, tok)
+    {
+        return 0.8;
+    }
+    0.0
+}
