@@ -66,3 +66,5 @@ pub fn sentences(text: &str) -> Vec<&str> {
     out.push(&text[last..]);
     out
 }
+
+static TOKEN_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z0-9][a-z0-9'-]*"));
