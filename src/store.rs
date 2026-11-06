@@ -556,3 +556,12 @@ pub struct Store {
     pub embedder: Arc<dyn Embed>,
     users: Mutex<HashMap<String, SharedMemory>>,
 }
+
+impl Store {
+    pub fn new(embedder: Arc<dyn Embed>) -> Self {
+        Store {
+            embedder,
+            users: Mutex::new(HashMap::new()),
+        }
+    }
+}
