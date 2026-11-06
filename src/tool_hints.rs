@@ -20,3 +20,5 @@ pub static NUMBER_RE: LazyLock<PyRe> = LazyLock::new(|| re(r"(?<![\w.])-?\d+(?:[
 fn re(p: &str) -> PyRe {
     PyRe::new(p)
 }
+
+static WORDS_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z]+"));
