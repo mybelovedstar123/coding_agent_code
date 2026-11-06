@@ -169,3 +169,10 @@ pub struct Subject {
     pub description: String,
     pub pairs: BTreeSet<String>,
 }
+
+// Alias index (declared in PIPELINE.md, context construction / memory search). People are often recorded under a
+// nickname in some records and under their full name in others. A record of the user's own data that writes exactly
+// one quoted single name next to exactly one full name introduces that name as the person's alias ("Ollie" is what
+// everyone calls Olivia Cantu). Searches that mention one form also search the other, so records about the same
+// person are found under either name. Retrieval only: it selects evidence, it never writes or picks an answer.
+static ALIAS_QUOTE_RE: LazyLock<Re> = LazyLock::new(|| Re::new("[\u{201c}\"]([A-Z][a-z]{1,15})[.,]?[\u{201d}\"]"));
