@@ -289,4 +289,14 @@ impl UserMemory {
         self.tlen.insert(pair.pair_id.clone(), toks.len().max(1));
         self.tf.insert(pair.pair_id.clone(), tf);
     }
+
+    fn index_alias(&mut self, pair: &Pair) {
+        if let Some((full, alias)) = alias_declaration(&pair.prompt) {
+            self.aliases
+                .entry(full.to_lowercase())
+                .or_default()
+                .insert(alias.clone());
+            self.alias_people.entry(alias).or_default().insert(full);
+        }
+    }
 }
