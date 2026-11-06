@@ -735,3 +735,8 @@ fn csv_dicts(text: &str) -> Result<Vec<PyVal>, ()> {
 
 /// (step, operation, entity, field, value).
 pub type Event = (PyInt, String, String, String, String);
+
+pub fn _norm_key(k: &str) -> String {
+    let low = py::strip(&TAG_RE.sub(k, "")).to_lowercase();
+    py::strip_chars(&NON_ALNUM_RE.sub(&low, "_"), "_").to_string()
+}
