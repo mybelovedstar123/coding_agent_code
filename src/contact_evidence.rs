@@ -171,3 +171,9 @@ pub fn with_removal_note(context: Option<String>, prefix: &str) -> Option<String
 
 // ---- second hop for "the current owner's email": email records of the people the retrieved records name
 static EMAIL_REQUEST_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\b(?:e-?mail|address)\b"));
+static OWNER_RE: LazyLock<Re> = LazyLock::new(|| {
+    Re::new(concat!(
+        r"(?i)\bowner\b|\baccountable\b|\bwho(?:ever)?\s+(?:\w+\s+){0,2}(?:holds|has|runs|owns|is running)\b",
+        r"|\bwhoever\s+\w+\s+it\b|\bholds it\b|\bhas it\b"
+    ))
+});
