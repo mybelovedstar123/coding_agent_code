@@ -545,3 +545,29 @@ impl JsonParser<'_> {
         }
     }
 }
+
+/// `s.splitlines()`.
+pub(crate) fn splitlines(s: &str) -> Vec<&str> {
+    let mut out = Vec::new();
+    let mut start = 0;
+    let mut it = s.char_indices().peekable();
+    while let Some((i, c)) = it.next() {
+        let boundary = matches!(
+            c,
+            '\n' | '\r' | '\x0b' | '\x0c' | '\x1c' | '\x1d' | '\x1e' | '\u{85}' | '\u{2028}' | '\u{2029}'
+        );
+        if boundary {
+            out.push(&s[start..i]);
+            let mut next = i + c.len_utf8();
+            if c == '\r' && it.peek().map(|&(_, n)| n) == Some('\n') {
+                it.next();
+                next += 1;
+            }
+            start = next;
+        }
+    }
+    if start < s.len() {
+        out.push(&s[start..]);
+    }
+    out
+}
