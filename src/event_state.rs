@@ -774,3 +774,16 @@ pub fn _event(d: &PyVal) -> Option<Event> {
         m["value"].str(),
     ))
 }
+
+pub fn from_json(text: &str) -> Vec<Event> {
+    let mut out = Vec::new();
+    for (_, _, m) in JSON_LIST_RE.find_iter(text) {
+        let Some(rows) = py_json_loads(m) else {
+            continue;
+        };
+        if let PyVal::List(rows) = rows {
+            out.extend(rows.iter().filter_map(_event));
+        }
+    }
+    out
+}
