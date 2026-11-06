@@ -617,4 +617,11 @@ impl Store {
         }
         Ok(())
     }
+
+    pub async fn save(&self, user_id: &str, pair: Pair) -> Result<(), EmbedError> {
+        let vec = self.embedder.embed(vec![pair.text()], None).await?;
+        let mem = self.user(user_id);
+        mem.write().await.upsert_pairs(vec![pair], vec);
+        Ok(())
+    }
 }
