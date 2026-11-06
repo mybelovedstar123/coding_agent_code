@@ -571,3 +571,15 @@ pub(crate) fn splitlines(s: &str) -> Vec<&str> {
     }
     out
 }
+
+// ------------------------------------------------------------------------------------------------------ csv module
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum CsvState {
+    StartRecord,
+    StartField,
+    InField,
+    InQuotedField,
+    QuoteInQuotedField,
+    EatCrnl,
+}
