@@ -179,4 +179,17 @@ impl Index {
             .filter(|&i| fuzzy_in(phrase, &self.recs[i].2, None))
             .count()
     }
+
+    pub fn chain(&self, phrase: &str) -> Chain {
+        let mut out = Vec::new();
+        for i in self.candidates(phrase) {
+            let ts = &self.recs[i].0;
+            for (s, toks) in self.handovers(i) {
+                if fuzzy_in(phrase, toks, None) {
+                    out.push((ts.clone(), s.clone()));
+                }
+            }
+        }
+        out
+    }
 }
