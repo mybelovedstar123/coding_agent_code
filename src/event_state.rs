@@ -455,4 +455,46 @@ impl JsonParser<'_> {
         }
         Some(v)
     }
+
+    fn string(&self, mut i: usize) -> Option<(String, usize)> {
+        let mut out = String::new();
+        loop {
+            let c = self.at(i)?;
+            match c {
+                '"' => return Some((out, i + 1)),
+                '\\' => {
+                    let e = self.at(i + 1)?;
+                    i += 2;
+                    match e {
+                        '"' | '\\' | '/' => out.push(e),
+                        'b' => out.push('\u{8}'),
+                        'f' => out.push('\u{c}'),
+                        'n' => out.push('\n'),
+                        'r' => out.push('\r'),
+                        't' => out.push('\t'),
+                        'u' => {
+                            let u = self.hex4(i)?;
+                            i += 4;
+                            if (0xd800..0xdc00).contains(&u) && self.at(i) == Some('\\') && self.at(i + 1) == Some('u')
+                            {
+                                if let Some(lo) = self.hex4(i + 2).filter(|lo| (0xdc00..0xe000).contains(lo)) {
+                                    let cp = 0x10000 + ((u - 0xd800) << 10) + (lo - 0xdc00);
+                                    out.push(char::from_u32(cp).unwrap_or('\u{fffd}'));
+                                    i += 6;
+                                    continue;
+                                }
+                            }
+                            out.push(char::from_u32(u).unwrap_or('\u{fffd}'));
+                        }
+                        _ => return None,
+                    }
+                }
+                c if (c as u32) < 0x20 => return None,
+                c => {
+                    out.push(c);
+                    i += 1;
+                }
+            }
+        }
+    }
 }
