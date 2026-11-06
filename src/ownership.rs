@@ -104,3 +104,5 @@ pub fn fuzzy_in(phrase: &str, text_tokens: &[String], ratio: Option<f64>) -> boo
     }
     false
 }
+
+pub const MAX_PHRASE_RECORDS: usize = 25;
