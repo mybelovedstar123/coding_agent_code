@@ -702,3 +702,4 @@ pub static _SEND_VERB_RE: LazyLock<PyRe> = LazyLock::new(|| {
         r#"get (?:the|this|that|my|our) [\w\s'"-]{1,60}? (?:over |across |out )?to (?:them|him|her|th\w{1,2}m)\b)"#,
     ))
 });
+static SEND_PRONOUN: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(?:them|him|her|th\w{1,2}m)\b"));
