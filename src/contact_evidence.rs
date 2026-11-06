@@ -324,3 +324,25 @@ pub fn identity_records(mem: &UserMemory, nicknames: &IndexMap<String, String>) 
         .collect();
     oldest_first(out)
 }
+
+/// The publicly documented grounded-decline form for this request class, with the records' own name forms:
+/// if nothing is recorded for the person asked about, say who the related person is, without handing out that
+/// person's own contact details.
+pub fn related_person_note(named: &IndexMap<String, String>) -> String {
+    let mut items: Vec<(&String, &String)> = named.iter().collect();
+    items.sort();
+    let who = items
+        .iter()
+        .map(|(alias, full)| format!("{alias} is {full}"))
+        .collect::<Vec<_>>()
+        .join("; ");
+    let mut keys: Vec<&String> = named.keys().collect();
+    keys.sort();
+    let nick = keys.iter().map(|k| k.as_str()).collect::<Vec<_>>().join(" / ");
+    format!(
+        "The request identifies the person it asks about through {nick} (in the records, {who}). \
+         If the records hold no such contact detail for the person asked about, say so and say who {nick} is \
+         in the records (full name and how the records describe them); do not quote {nick}'s own email or \
+         address, which belongs to them, not to the person asked about."
+    )
+}
