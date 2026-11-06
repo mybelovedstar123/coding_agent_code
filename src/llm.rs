@@ -52,3 +52,19 @@ pub trait ChatClient: Send + Sync {
         effort: Option<&'a str>,
     ) -> BoxFuture<'a, Result<Reply, ModelError>>;
 }
+
+/// The request body the agent sends (the order of keys follows the reference).
+pub fn request_body(messages: Vec<Value>, tools: Option<&[Value]>, effort: Option<&str>) -> Value {
+    let mut body = Map::new();
+    body.insert("model".into(), Value::String(config::model_name()));
+    body.insert("messages".into(), Value::Array(messages));
+    body.insert("temperature".into(), json!(0.0));
+    body.insert("seed".into(), json!(42));
+    if let Some(e) = effort.filter(|e| !e.is_empty()) {
+        body.insert("reasoning".into(), json!({"effort": e}));
+    }
+    if let Some(t) = tools.filter(|t| !t.is_empty()) {
+        body.insert("tools".into(), Value::Array(t.to_vec()));
+    }
+    Value::Object(body)
+}
