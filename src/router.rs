@@ -1,0 +1,169 @@
+//! Request router: one short model call that decides which agent path (which guidance text) handles the request. It
+//! sees the request's system prompt, the user's message and the live tool catalog (names and descriptions, each
+//! description shortened to 220 characters), and no memory records; its tool names are advisory and unused.
+
+use crate::llm::{ChatClient, Usage};
+use crate::prompts::ROUTER_PROMPT;
+use crate::py;
+use crate::pyre::Re;
+use serde_json::{json, Value};
+use std::collections::HashSet;
+use std::sync::LazyLock;
+use tokio::time::Instant;
+
+/// Tools that only read the user's stored memories. Everything else in the catalog acts on an app, the outside
+/// world, or the memory store itself.
+const MEMORY_READ_TOOLS: [&str; 4] = [
+    "search_memories",
+    "fetch_memories",
+    "search_subjects",
+    "search_memories_in_subjects",
+];
+
+/// The router's decision: "tool", "memory" or "chat", and the app tools it named.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Decision {
+    pub route: String,
+    pub tools: Vec<String>,
+}
+
+fn function_of(t: &Value) -> &Value {
+    match t.get("function") {
+        Some(f) if crate::store::truthy(f) => f,
+        _ => t,
+    }
+}
+
+pub fn catalog_text(tool_defs: &[Value]) -> String {
+    tool_defs
+        .iter()
+        .map(|t| {
+            let f = function_of(t);
+            let desc = f
+                .get("description")
+                .filter(|d| crate::store::truthy(d))
+                .map(py::str_value)
+                .unwrap_or_default();
+            let desc = py::squash_ws(&desc);
+            let name = f.get("name").map(py::str_value).unwrap_or_else(|| "None".into());
+            format!("- {name}: {}", py::head(&desc, 220))
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+static JSON_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?s)\{.*\}"));
+
+pub fn parse(text: &str, names: &HashSet<String>) -> Option<Decision> {
+    let m = JSON_RE.search_str(text)?;
+    let data: Value = serde_json::from_str(m).ok()?;
+    let obj = data.as_object()?;
+    let route = obj
+        .get("route")
+        .filter(|r| crate::store::truthy(r))
+        .map(py::str_value)
+        .unwrap_or_default()
+        .to_lowercase();
+    if !["tool", "memory", "chat"].contains(&route.as_str()) {
+        return None;
+    }
+    let tools: Vec<String> = obj
+        .get("tools")
+        .and_then(Value::as_array)
+        .map(|raw| {
+            raw.iter()
+                .filter_map(Value::as_str)
+                .filter(|t| names.contains(*t) && !MEMORY_READ_TOOLS.contains(t))
+                .map(String::from)
+                .collect()
+        })
+        .unwrap_or_default();
+    // A tool route that names no app tool is not actionable.
+    let route = if route == "tool" && tools.is_empty() {
+        "memory".to_string()
+    } else {
+        route
+    };
+    Some(Decision { route, tools })
+}
+
+fn messages(user_input: &str, tool_defs: &[Value], wire_system: &str) -> Vec<Value> {
+    let host = if py::strip(wire_system).is_empty() {
+        String::new()
+    } else {
+        format!(
+            "\n\nHost instructions the assistant follows:\n{}",
+            py::strip(wire_system)
+        )
+    };
+    vec![
+        json!({"role": "system", "content": format!("{ROUTER_PROMPT}\n\nTools:\n{}{host}", catalog_text(tool_defs))}),
+        json!({"role": "user", "content": user_input}),
+    ]
+}
+
+fn names_of(tool_defs: &[Value]) -> HashSet<String> {
+    tool_defs
+        .iter()
+        .filter_map(|t| function_of(t).get("name").and_then(Value::as_str))
+        .map(String::from)
+        .collect()
+}
+
+fn content_str(reply: &crate::llm::Reply) -> &str {
+    reply.content.as_ref().and_then(Value::as_str).unwrap_or("")
+}
+
+/// The router at low effort; only when it yields no valid decision (an empty or unparseable reply, a shape failure
+/// under W7), ask once more at the relay's default effort. Usage of both calls is summed.
+pub async fn route(
+    chat: &dyn ChatClient,
+    user_input: &str,
+    tool_defs: &[Value],
+    wire_system: &str,
+    case_id: &str,
+    base_url: Option<&str>,
+    deadline: Instant,
+) -> (Option<Decision>, Usage) {
+    let names = names_of(tool_defs);
+    let (decision, usage) = match chat
+        .complete(
+            messages(user_input, tool_defs, wire_system),
+            None,
+            case_id,
+            base_url,
+            deadline,
+            Some("low"),
+        )
+        .await
+    {
+        Err(_) => (None, Usage::default()),
+        Ok(msg) => (parse(content_str(&msg), &names), msg.usage.clone()),
+    };
+    if decision.is_some() {
+        return (decision, usage);
+    }
+    let msg = match chat
+        .complete(
+            messages(user_input, tool_defs, wire_system),
+            None,
+            case_id,
+            base_url,
+            deadline,
+            None,
+        )
+        .await
+    {
+        Err(_) => return (None, usage),
+        Ok(msg) => msg,
+    };
+    let mut total = usage;
+    for (key, value) in &msg.usage {
+        // Python adds only int values: a JSON integer, not a float or bool.
+        if let Some(v) = value.as_i64().filter(|_| value.is_i64() || value.is_u64()) {
+            let cur = total.get(key).and_then(Value::as_i64).unwrap_or(0);
+            total.insert(key.clone(), json!(cur + v));
+        }
+    }
+    (parse(content_str(&msg), &names), total)
+}
