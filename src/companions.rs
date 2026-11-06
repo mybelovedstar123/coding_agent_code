@@ -25,3 +25,13 @@ pub static JOINT_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\b([A-Z][a-z]{1,1
 pub const RARE_PHRASE_RECORDS: usize = 2;
 pub const MAX_RECORDS: usize = 4;
 pub static PROPER_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\b[A-Z][a-z]+\b"));
+
+/// Capitalised words other than the text's first word.
+pub fn proper_words(text: &str) -> BTreeSet<String> {
+    PROPER_RE
+        .find_iter(text)
+        .into_iter()
+        .filter(|(start, _, _)| *start > 0)
+        .map(|(_, _, t)| t.to_string())
+        .collect()
+}
