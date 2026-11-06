@@ -19,3 +19,5 @@ pub const DEF_VERBS: &str = concat!(
     r"is|are|designates|denotes|names|records|identifies|carries|marks|means|stands for|refers to|",
     r"is the|holds|gives|captures|tracks|labels"
 );
+pub static DEF_RE: LazyLock<Re> =
+    LazyLock::new(|| Re::new(&format!(r"^\s*([a-z][a-z0-9]{{4,}})\s+({DEF_VERBS})\b\s*(.+?)\s*$")));
