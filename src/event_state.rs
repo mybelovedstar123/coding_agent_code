@@ -360,3 +360,9 @@ struct JsonParser<'a> {
     s: &'a [char],
     depth: usize,
 }
+
+impl JsonParser<'_> {
+    fn at(&self, i: usize) -> Option<char> {
+        self.s.get(i).copied()
+    }
+}
