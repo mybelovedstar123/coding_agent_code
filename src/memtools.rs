@@ -27,3 +27,5 @@ pub const READ_TOOLS: [&str; 4] = [
     "search_subjects",
     "search_memories_in_subjects",
 ];
+
+pub const PREVIEW_CHARS: usize = 900;
