@@ -50,3 +50,10 @@ static SCHED_COUNTING: LazyLock<PyRe> =
 static SCHED_SET_UP: LazyLock<PyRe> =
     LazyLock::new(|| re(r"\b(put|set up|make|have|turn)\b[^.?!]*\b(every|each|daily|weekly|nightly)\b"));
 static SCHED_EVERY: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(every|each|daily|weekly|nightly)\b"));
+static SCHED_ABOUT_RUNS: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b((?:due|q\w{3,6}d|lined up|set|scheduled) to run|timed runs?|on a c\w{3,5}e|",
+        r"on th\w{2,3} own|on (?:their|its) own|on a t\w{3}r|how m\w{1,3} r\w{0,3}s|run count|",
+        r"logged|on repeat|automatic runs?|automatically|automaically|go(?:es)? on their own)\b",
+    ))
+});
