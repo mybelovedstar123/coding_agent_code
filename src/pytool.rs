@@ -59,3 +59,23 @@ pub const BANNED_NAMES: [&str; 21] = [
     "super",
     "dir",
 ];
+/// Attributes that reach frames, code objects or string formatting internals.
+pub const BANNED_ATTRS: [&str; 17] = [
+    "gi_frame",
+    "gi_code",
+    "gi_yieldfrom",
+    "cr_frame",
+    "cr_code",
+    "cr_await",
+    "ag_frame",
+    "ag_code",
+    "f_back",
+    "f_globals",
+    "f_locals",
+    "f_builtins",
+    "f_code",
+    "tb_frame",
+    "tb_next",
+    "format",
+    "format_map",
+];
