@@ -741,3 +741,9 @@ impl Store {
             .collect())
     }
 }
+
+impl UserMemory {
+    pub fn cmp_subject_score_pub(&self, a: &(String, f64), b: &(String, f64)) -> Ordering {
+        self.cmp_subject_score(a, b)
+    }
+}
