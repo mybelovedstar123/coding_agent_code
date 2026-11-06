@@ -225,3 +225,30 @@ pub fn list_items(text: &str) -> Vec<String> {
         .map(|p| py::strip(py::strip(p).trim_matches('.')).to_string())
         .collect()
 }
+
+/// The earlier list with the change applied: items the change names are taken off; items it puts on are added.
+pub fn current_list(earlier: &[String], change: &str) -> Vec<String> {
+    let low = change.to_lowercase();
+    let mut added: Vec<String> = Vec::new();
+    for re in ADD_RES.iter() {
+        for c in re.captures_iter(&low) {
+            let group = c.get(1).map_or("", |m| m.as_str());
+            let item = ARTICLE_RE.sub(py::strip(group), "");
+            if !item.is_empty() && !added.contains(&item) {
+                added.push(item);
+            }
+        }
+    }
+    let kept: Vec<String> = earlier
+        .iter()
+        .filter(|i| {
+            let l = i.to_lowercase();
+            !low.contains(l.as_str()) || added.contains(&l)
+        })
+        .cloned()
+        .collect();
+    let kept_low: Vec<String> = kept.iter().map(|k| k.to_lowercase()).collect();
+    let mut out = kept.clone();
+    out.extend(added.into_iter().filter(|a| !kept_low.contains(a)));
+    out
+}
