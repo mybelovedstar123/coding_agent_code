@@ -583,3 +583,6 @@ enum CsvState {
     QuoteInQuotedField,
     EatCrnl,
 }
+
+/// `csv.field_size_limit()` default.
+const CSV_FIELD_LIMIT: usize = 128 * 1024;
