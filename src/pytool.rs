@@ -279,3 +279,9 @@ fn python() -> String {
             }
         })
 }
+
+fn sorted_strs(items: &[&str]) -> Vec<String> {
+    let mut v: Vec<String> = items.iter().map(|s| s.to_string()).collect();
+    v.sort();
+    v
+}
