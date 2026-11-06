@@ -17,3 +17,8 @@ use std::collections::{BTreeSet, HashMap};
 use std::sync::{Arc, LazyLock, Mutex};
 use tokio::sync::RwLock;
 use tokio::time::Instant;
+
+/// A record without a usable timestamp sorts as the oldest, never as "now" (D14: the wall clock reached prompts).
+pub fn epoch() -> DateTime<Utc> {
+    DateTime::<Utc>::from_timestamp(0, 0).expect("epoch")
+}
