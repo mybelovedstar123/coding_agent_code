@@ -299,4 +299,28 @@ impl UserMemory {
             self.alias_people.entry(alias).or_default().insert(full);
         }
     }
+
+    /// Extra search queries that name the other form of a person the query names.
+    pub fn alias_queries(&self, query: &str) -> Vec<String> {
+        let low = query.to_lowercase();
+        let mut extra = Vec::new();
+        for (full, aliases) in &self.aliases {
+            if low.contains(full.as_str()) {
+                extra.push(format!(
+                    "{query} {}",
+                    aliases.iter().cloned().collect::<Vec<_>>().join(" ")
+                ));
+            }
+        }
+        for (alias, people) in &self.alias_people {
+            // Capitalized use only: "Happy" the name, not "happy".
+            if Re::new(&format!(r"\b{}\b", escape(alias))).is_match(query) {
+                extra.push(format!(
+                    "{query} {}",
+                    people.iter().cloned().collect::<Vec<_>>().join(" ")
+                ));
+            }
+        }
+        extra
+    }
 }
