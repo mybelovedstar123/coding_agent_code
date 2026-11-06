@@ -7,3 +7,8 @@ use crate::py;
 use crate::pyre::{escape, Re};
 use serde_json::Value;
 use std::sync::LazyLock;
+
+const NAMED_TOOL_NOTE: &str = "The user asked for {tools} by name. Call it with the item the request names, in the \
+     request's own words, as its input: the tool's result is where the value comes from, so do not look for missing \
+     details elsewhere first, and do not ask the user for them first: leave a detail the request does not give \
+     unspecified.";
