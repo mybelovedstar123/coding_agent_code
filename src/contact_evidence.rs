@@ -168,3 +168,6 @@ pub fn with_removal_note(context: Option<String>, prefix: &str) -> Option<String
     obj.insert("note".into(), Value::String(note));
     Some(dump_context(prefix, &payload))
 }
+
+// ---- second hop for "the current owner's email": email records of the people the retrieved records name
+static EMAIL_REQUEST_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\b(?:e-?mail|address)\b"));
