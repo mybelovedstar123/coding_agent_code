@@ -207,3 +207,9 @@ pub fn wants_calendar_entry(text: &str) -> bool {
 
 static SANDBOX: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(sa[a-z]{1,6}x|code mode)\b"));
 static SANDBOX_CODE: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(code|in-?\s?pr\w{2,5}ss|checksum|routine)\b"));
+
+/// Run a named routine in the code sandbox / Code Mode and report what it prints.
+pub fn wants_sandbox_run(text: &str) -> bool {
+    let low = text.to_lowercase();
+    SANDBOX.is_match(&low) && SANDBOX_CODE.is_match(&low)
+}
