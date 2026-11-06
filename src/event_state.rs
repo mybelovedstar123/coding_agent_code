@@ -705,3 +705,28 @@ impl CsvReader {
         Ok(())
     }
 }
+
+/// `list(csv.DictReader(io.StringIO(text)))` with the rest key (None) left out; a missing value is `PyVal::None`.
+fn csv_dicts(text: &str) -> Result<Vec<PyVal>, ()> {
+    let mut rows = csv_rows(text)?.into_iter();
+    let Some(fieldnames) = rows.next() else {
+        return Ok(Vec::new());
+    };
+    let mut out = Vec::new();
+    for row in rows {
+        if row.is_empty() {
+            continue;
+        }
+        let mut d: IndexMap<String, PyVal> = IndexMap::new();
+        for (k, v) in fieldnames.iter().zip(row.iter()) {
+            d.insert(k.clone(), PyVal::Str(v.clone()));
+        }
+        if fieldnames.len() > row.len() {
+            for k in &fieldnames[row.len()..] {
+                d.insert(k.clone(), PyVal::None);
+            }
+        }
+        out.push(PyVal::Dict(d));
+    }
+    Ok(out)
+}
