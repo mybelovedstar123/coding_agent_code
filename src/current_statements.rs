@@ -9,3 +9,9 @@
 //!
 //! Port of `harness/current_statements.py`.
 
+use crate::difflib::sequence_ratio;
+use crate::py;
+use crate::pyre::{escape, Re};
+use serde_json::{json, Value};
+use std::collections::{HashMap, HashSet};
+use std::sync::LazyLock;
