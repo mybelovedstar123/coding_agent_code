@@ -57,3 +57,28 @@ fn parse_iso(s: &str) -> Option<DateTime<Utc>> {
         Some(off) => off.from_local_datetime(&naive).single()?.with_timezone(&Utc),
     })
 }
+
+fn split_offset(s: &str) -> Option<(String, Option<FixedOffset>)> {
+    match s.find(['+', '-']) {
+        None => Some((s.to_string(), None)),
+        Some(i) => {
+            let sign = if &s[i..i + 1] == "-" { -1 } else { 1 };
+            let off = &s[i + 1..];
+            let digits: String = off.chars().filter(|c| *c != ':').collect();
+            let (h, m, sec) = match digits.len() {
+                2 => (digits[..2].parse::<i32>().ok()?, 0, 0),
+                4 => (digits[..2].parse().ok()?, digits[2..4].parse().ok()?, 0),
+                6 => (
+                    digits[..2].parse().ok()?,
+                    digits[2..4].parse().ok()?,
+                    digits[4..6].parse().ok()?,
+                ),
+                _ => return None,
+            };
+            Some((
+                s[..i].to_string(),
+                Some(FixedOffset::east_opt(sign * (h * 3600 + m * 60 + sec))?),
+            ))
+        }
+    }
+}
