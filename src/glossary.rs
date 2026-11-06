@@ -32,3 +32,9 @@ pub static INTRO_RE: LazyLock<Re> = LazyLock::new(|| {
 static SCOPE_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\s*(?:within|for|in|under)\b"));
 static NON_WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\W+"));
 pub const MAX_RECORD_CHARS: usize = 15_000;
+pub const GLOSSARY_NOTE: &str = concat!(
+    "glossary: the field names these records define for themselves, with their meanings as the records state them; ",
+    "glossed_statements are the records' other statements with each defined name followed by its meaning in ",
+    "brackets, a host-side annotation of the records: where it differs from the records, the records decide. Answer ",
+    "with the value a statement gives for the field asked about, never with the field's own name."
+);
