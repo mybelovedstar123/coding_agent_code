@@ -200,4 +200,8 @@ impl Derived {
     pub fn get<T: Any + Send + Sync>(&self, key: &'static str) -> Option<Arc<T>> {
         self.0.get(key).cloned().and_then(|a| a.downcast::<T>().ok())
     }
+
+    pub fn put<T: Any + Send + Sync>(&mut self, key: &'static str, value: Arc<T>) {
+        self.0.insert(key, value);
+    }
 }
