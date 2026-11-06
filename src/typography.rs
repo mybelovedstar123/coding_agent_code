@@ -11,3 +11,5 @@
 //! It never changes digits, signs, words, units, identifiers' letters, code, or meaningful whitespace, and it does
 //! not depend on the request, the answer's meaning, or its length.
 
+use crate::pyre::Re;
+use std::sync::LazyLock;
