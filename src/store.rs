@@ -177,3 +177,17 @@ pub struct Subject {
 // person are found under either name. Retrieval only: it selects evidence, it never writes or picks an answer.
 static ALIAS_QUOTE_RE: LazyLock<Re> = LazyLock::new(|| Re::new("[\u{201c}\"]([A-Z][a-z]{1,15})[.,]?[\u{201d}\"]"));
 static FULL_NAME_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\b([A-Z][a-z]+ [A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)?)\b"));
+
+/// (full name, alias) when the text quotes exactly one single name next to exactly one full name.
+pub fn alias_declaration(text: &str) -> Option<(String, String)> {
+    let quoted: BTreeSet<String> = ALIAS_QUOTE_RE.findall(text).into_iter().collect();
+    let names: BTreeSet<String> = FULL_NAME_RE
+        .findall(text)
+        .into_iter()
+        .filter(|n| !quoted.iter().any(|q| py::split_ws(n).contains(&q.as_str())))
+        .collect();
+    if quoted.len() == 1 && names.len() == 1 {
+        return Some((names.into_iter().next()?, quoted.into_iter().next()?));
+    }
+    None
+}
