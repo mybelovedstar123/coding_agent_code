@@ -301,3 +301,5 @@ static CAPABILITY_QUESTION: LazyLock<PyRe> = LazyLock::new(|| {
 pub fn asks_capability(text: &str) -> bool {
     CAPABILITY_QUESTION.is_match(&text.to_lowercase())
 }
+
+static JUST_TELL_ME: LazyLock<PyRe> = LazyLock::new(|| re(r"\bdon'?t just tell me how\b"));
