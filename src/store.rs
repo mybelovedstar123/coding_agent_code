@@ -323,4 +323,24 @@ impl UserMemory {
         }
         extra
     }
+
+    pub fn upsert_pairs(&mut self, pairs: Vec<Pair>, vecs: Vec<Vec<f32>>) {
+        *self.derived.lock().expect("derived lock") = Derived::default();
+        for (mut pair, vec) in pairs.into_iter().zip(vecs) {
+            if let Some(existing) = self.pairs.get(&pair.pair_id) {
+                pair.subjects.extend(existing.subjects.iter().cloned());
+            }
+            self.index_lexical(&pair);
+            self.index_alias(&pair);
+            match self.row.get(&pair.pair_id) {
+                None => {
+                    self.row.insert(pair.pair_id.clone(), self.order.len());
+                    self.order.push(pair.pair_id.clone());
+                    self.vecs.push(vec);
+                }
+                Some(&r) => self.vecs[r] = vec,
+            }
+            self.pairs.insert(pair.pair_id.clone(), pair);
+        }
+    }
 }
