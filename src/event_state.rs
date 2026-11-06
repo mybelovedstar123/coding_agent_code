@@ -355,3 +355,8 @@ pub fn py_json_loads(s: &str) -> Option<PyVal> {
     let end = p.ws(end);
     (end == chars.len()).then_some(v)
 }
+
+struct JsonParser<'a> {
+    s: &'a [char],
+    depth: usize,
+}
