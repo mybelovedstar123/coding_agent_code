@@ -14,6 +14,7 @@ pub mod event_state;
 pub mod excerpt;
 pub mod glossary;
 pub mod llm;
+pub mod memtools;
 pub mod named_tool;
 pub mod ownership;
 pub mod policy;
