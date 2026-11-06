@@ -20,3 +20,6 @@ impl std::fmt::Display for ModelError {
 }
 
 impl std::error::Error for ModelError {}
+
+/// A token-usage block as the provider sent it (a JSON object; malformed fields count as zero where read).
+pub type Usage = Map<String, Value>;
