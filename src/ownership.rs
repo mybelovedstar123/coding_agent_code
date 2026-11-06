@@ -435,4 +435,16 @@ impl IndexV2 {
             orgs: orgs_in(ordered.iter().map(|(_, _, t)| t.as_str())),
         }
     }
+
+    /// pairIDs of the records the phrase's handover sentences come from, in time order.
+    pub fn sources(&self, phrase: &str) -> Vec<String> {
+        let mut out: Vec<String> = Vec::new();
+        for i in self.candidates(phrase) {
+            // The first handover sentence naming the phrase decides (the Python breaks there).
+            if self.handovers(i).iter().any(|(_, toks)| fuzzy_in(phrase, toks, None)) && !out.contains(&self.pids[i]) {
+                out.push(self.pids[i].clone());
+            }
+        }
+        out
+    }
 }
