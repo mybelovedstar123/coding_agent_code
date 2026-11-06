@@ -68,3 +68,11 @@ pub fn sentences(text: &str) -> Vec<&str> {
 }
 
 static TOKEN_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z0-9][a-z0-9'-]*"));
+
+pub fn tokens(text: &str) -> Vec<String> {
+    TOKEN_RE
+        .find_iter(&text.to_lowercase())
+        .into_iter()
+        .map(|(_, _, t)| t.to_string())
+        .collect()
+}
