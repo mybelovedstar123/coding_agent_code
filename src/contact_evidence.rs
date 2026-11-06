@@ -177,3 +177,4 @@ static OWNER_RE: LazyLock<Re> = LazyLock::new(|| {
         r"|\bwhoever\s+\w+\s+it\b|\bholds it\b|\bhas it\b"
     ))
 });
+static EMAIL_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[\w.+-]+@[\w-]+\.[\w.-]+"));
