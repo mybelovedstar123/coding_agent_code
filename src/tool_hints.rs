@@ -476,3 +476,7 @@ this request say what it is: if they state a default level, set that level with 
 default has been chosen, do not set one: ask which level the user wants, and in the question name the two options the \
 record for this request describes them going back and forth between, in that record's own words (not the tool's level \
 names).";
+
+static EFFORT_RE: LazyLock<PyRe> = LazyLock::new(|| {
+    re(r"\b(r\w{0,2}[ae]\w{0,2}s\w{0,2}n\w{0,3}g|th\w{0,2}nk\w{0,3}g)\s+(ef\w{1,4}t|d\w{1,3}th|l\w{1,3}l)\b")
+});
