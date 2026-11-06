@@ -104,3 +104,10 @@ pub fn expand_terms<'a>(
     }
     out
 }
+
+/// Inverse document frequency over a document-frequency table of `n` documents.
+#[derive(Clone)]
+pub struct Idf<'a> {
+    pub df: &'a IndexMap<String, i64>,
+    pub n: usize,
+}
