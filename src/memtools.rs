@@ -31,3 +31,7 @@ pub const READ_TOOLS: [&str; 4] = [
 pub const PREVIEW_CHARS: usize = 900;
 /// Above any stored record; a longer one is marked as shortened.
 pub const FETCH_CHARS: usize = 60_000;
+
+pub fn is_memory_tool(name: &str) -> bool {
+    MEMORY_TOOLS.contains(&name)
+}
