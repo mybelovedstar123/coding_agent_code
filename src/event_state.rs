@@ -635,3 +635,14 @@ struct CsvReader {
     field: String,
     field_len: usize,
 }
+
+impl CsvReader {
+    fn add_char(&mut self, c: char) -> Result<(), ()> {
+        if self.field_len >= CSV_FIELD_LIMIT {
+            return Err(());
+        }
+        self.field.push(c);
+        self.field_len += 1;
+        Ok(())
+    }
+}
