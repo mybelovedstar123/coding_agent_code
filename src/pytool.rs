@@ -118,3 +118,28 @@ pub static DEFINITION: LazyLock<Value> = LazyLock::new(|| {
 const TOO_LONG_HELP: &str = "; record text pasted into the program makes it too long: load the records inside the \
      program with records([...their pairIDs]) (each has 'user' and 'ditto' with the full text; grep_records(pattern) \
      finds ids) and parse them there, then send the shorter program again";
+
+/// The reference's `validate()` after the length check, run by CPython: the problem, or null.
+const VALIDATOR: &str = r#"
+import ast, json, sys
+p = json.loads(sys.stdin.read())
+code, allowed = p["code"], set(p["allowed"])
+banned_names, banned_attrs = set(p["banned_names"]), set(p["banned_attrs"])
+def check():
+    try:
+        tree = ast.parse(code)
+    except SyntaxError as err:
+        return f"SyntaxError: {err.msg} (line {err.lineno})"
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            names = [a.name for a in node.names] if isinstance(node, ast.Import) else [node.module or ""]
+            for name in names:
+                if name.split(".")[0] not in allowed:
+                    return f"import of {name!r} is not allowed"
+        elif isinstance(node, ast.Attribute) and (node.attr.startswith("_") or node.attr in banned_attrs):
+            return f"access to attribute {node.attr!r} is not allowed"
+        elif isinstance(node, ast.Name) and (node.id.startswith("__") or node.id in banned_names):
+            return f"use of {node.id!r} is not allowed"
+    return None
+sys.stdout.write(json.dumps({"problem": check()}))
+"#;
