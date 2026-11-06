@@ -741,3 +741,8 @@ pub fn _has(words: &[String], targets: &[&str], ratio: f64) -> bool {
     }
     false
 }
+
+pub const EXACT_VALUE_NOTE: &str =
+    "The user asks for the exact value a tool returns. A tool's result can mention more \
+than one item, each with its own value: report the value the result gives for the item the user named, copied exactly \
+as written, and leave out the other items and their values.";
