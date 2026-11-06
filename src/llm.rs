@@ -18,3 +18,5 @@ impl std::fmt::Display for ModelError {
         f.write_str(&self.0)
     }
 }
+
+impl std::error::Error for ModelError {}
