@@ -841,3 +841,66 @@ pub fn from_markdown(text: &str) -> Vec<Event> {
     }
     out
 }
+
+/// Sentences that quote an entity, a field and a value and name the effective step: "add/remove "X" to/from the
+/// "F" set of "E"", or an assignment ("the value of "F" becomes ...", "the assignment of "V" to field "F" of "E"",
+/// ""E" has "F" set to ...") that replaces or supersedes the earlier value.
+pub fn from_sentences(text: &str) -> Vec<Event> {
+    let mut out = Vec::new();
+    for s in SENT_SPLIT.split(text) {
+        let Some(st) = STEP_RE.captures(s) else {
+            continue;
+        };
+        let quoted = QUOTED_RE.captures_iter(s);
+        if quoted.len() != 3 {
+            continue;
+        }
+        // int() of a \d+ match only fails past the 4300-digit limit, where Python raises.
+        let Some(step) = PyInt::parse(&st[1]) else {
+            continue;
+        };
+        if let Some(m) = ADD_REMOVE_RE.captures(s) {
+            out.push((
+                step,
+                m[1].to_lowercase(),
+                m[4].to_string(),
+                m[3].to_string(),
+                m[2].to_string(),
+            ));
+            continue;
+        }
+        let (mut entity, mut field, mut value): (Option<&str>, Option<&str>, Option<&str>) = (None, None, None);
+        for q in &quoted {
+            let (whole, inner) = (q.get(0).expect("group 0"), q.get(1).map_or("", |g| g.as_str()));
+            let before = py::rstrip(&s[..whole.start()]).to_lowercase();
+            let after = py::lstrip(&s[whole.end()..]).to_lowercase();
+            let slot = if before.ends_with("field")
+                || before.ends_with("value of")
+                || (before.ends_with("has") && after.starts_with("set to"))
+            {
+                &mut field
+            } else if before.ends_with("assignment of")
+                || before.ends_with("value")
+                || before.ends_with("to")
+                || after.starts_with("to field")
+            {
+                &mut value
+            } else if before.ends_with("for") || before.ends_with("of") || after.starts_with("has") {
+                &mut entity
+            } else {
+                &mut value
+            };
+            slot.get_or_insert(inner);
+        }
+        let low = s.to_lowercase();
+        if let (Some(e), Some(f), Some(v)) = (entity, field, value) {
+            if ["replac", "supersed", "becomes", "set to"]
+                .iter()
+                .any(|w| low.contains(w))
+            {
+                out.push((step, "assign".into(), e.into(), f.into(), v.into()));
+            }
+        }
+    }
+    out
+}
