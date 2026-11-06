@@ -528,3 +528,15 @@ pub fn last_per_id<'a>(items: &'a Value, keys: &[&str]) -> Vec<&'a serde_json::M
         .map(|(_, it)| *it)
         .collect()
 }
+
+/// Python truthiness of a JSON value.
+pub fn truthy(v: &Value) -> bool {
+    match v {
+        Value::Null => false,
+        Value::Bool(b) => *b,
+        Value::Number(n) => n.as_f64().map(|x| x != 0.0).unwrap_or(true),
+        Value::String(s) => !s.is_empty(),
+        Value::Array(a) => !a.is_empty(),
+        Value::Object(o) => !o.is_empty(),
+    }
+}
