@@ -38,3 +38,17 @@ pub const GLOSSARY_NOTE: &str = concat!(
     "brackets, a host-side annotation of the records: where it differs from the records, the records decide. Answer ",
     "with the value a statement gives for the field asked about, never with the field's own name."
 );
+
+/// `prompt[i + len(ident):]` where `i = prompt.lower().find(ident.lower())` (code-point offsets), or the whole
+/// prompt when the identifier is absent.
+pub(crate) fn after_ident<'a>(prompt: &'a str, ident: &str) -> &'a str {
+    let low = prompt.to_lowercase();
+    match low.find(&ident.to_lowercase()) {
+        None => prompt,
+        Some(b) => {
+            let start = py::len(&low[..b]) + py::len(ident);
+            let skip: usize = prompt.chars().take(start).map(char::len_utf8).sum();
+            &prompt[skip..]
+        }
+    }
+}
