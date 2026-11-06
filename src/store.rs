@@ -157,3 +157,7 @@ pub fn render_pair(pair: &Pair) -> String {
 pub fn content_key(pair: &Pair) -> (DateTime<Utc>, &str, &str) {
     (pair.ts, pair.prompt.as_str(), pair.response.as_str())
 }
+
+pub fn cmp_content(a: &Pair, b: &Pair) -> Ordering {
+    content_key(a).cmp(&content_key(b))
+}
