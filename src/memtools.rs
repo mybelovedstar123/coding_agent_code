@@ -126,3 +126,16 @@ fn int_arg(args: &Map<String, Value>, name: &str, default: i64, lo: i64, hi: i64
     };
     parsed.map(|v| v.clamp(lo, hi)).unwrap_or(default)
 }
+
+fn clip(text: &str, limit: usize) -> String {
+    let text = py::strip(text);
+    if py::len(text) <= limit {
+        return text.to_string();
+    }
+    let head = limit * 2 / 3;
+    format!(
+        "{} \u{2026}[truncated]\u{2026} {}",
+        py::head(text, head),
+        py::tail(text, limit - head)
+    )
+}
