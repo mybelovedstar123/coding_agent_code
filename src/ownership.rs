@@ -134,3 +134,18 @@ pub struct Index {
     /// cache only: `chain` and `sources` decide exactly as the Python, which re-splits the record on every call.
     handovers: Vec<OnceLock<Vec<Handover>>>,
 }
+
+impl Index {
+    /// Records as (timestamp, text), sorted (stably) by timestamp.
+    pub fn new(records: &[(String, String)]) -> Index {
+        let mut sorted: Vec<&(String, String)> = records.iter().collect();
+        sorted.sort_by(|x, y| x.0.cmp(&y.0));
+        let recs: Vec<(String, String, Vec<String>)> = sorted
+            .into_iter()
+            .map(|(ts, t)| (ts.clone(), t.clone(), tokens(t)))
+            .collect();
+        let sets = recs.iter().map(|(_, _, tk)| tk.iter().cloned().collect()).collect();
+        let handovers = recs.iter().map(|_| OnceLock::new()).collect();
+        Index { recs, sets, handovers }
+    }
+}
