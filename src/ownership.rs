@@ -382,3 +382,12 @@ pub fn is_person(name: &str) -> bool {
     let last = py::split_ws(name).last().map(|w| w.to_lowercase()).unwrap_or_default();
     !ORG_WORDS.contains(last.as_str())
 }
+
+/// The last group of each match of `pat` in `s`, in match order.
+fn last_groups(pat: &Re, s: &str) -> Vec<String> {
+    let last = pat.inner().captures_len() - 1;
+    pat.captures_iter(s)
+        .iter()
+        .filter_map(|c| c.get(last).map(|m| m.as_str().to_string()))
+        .collect()
+}
