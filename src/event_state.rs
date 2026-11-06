@@ -730,3 +730,8 @@ fn csv_dicts(text: &str) -> Result<Vec<PyVal>, ()> {
     }
     Ok(out)
 }
+
+// -------------------------------------------------------------------------------------------------------- the module
+
+/// (step, operation, entity, field, value).
+pub type Event = (PyInt, String, String, String, String);
