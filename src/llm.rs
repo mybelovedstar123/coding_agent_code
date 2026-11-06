@@ -8,3 +8,4 @@ use std::time::Duration;
 use tokio::time::Instant;
 
 pub const PER_CALL_TIMEOUT_S: f64 = 75.0;
+const RETRY_STATUS: [u16; 11] = [408, 409, 425, 429, 500, 502, 503, 504, 520, 522, 524];
