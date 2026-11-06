@@ -40,3 +40,7 @@ pub fn _fuzzy(w: &str, target: &str, ratio: f64) -> bool {
 pub fn _any(words: &[String], targets: &[&str], ratio: f64) -> bool {
     words.iter().any(|w| targets.iter().any(|t| _fuzzy(w, t, ratio)))
 }
+
+fn has_word(words: &[String], word: &str) -> bool {
+    words.iter().any(|w| w == word)
+}
