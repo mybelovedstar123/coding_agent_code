@@ -9,6 +9,7 @@ pub mod current_statements;
 pub mod difflib;
 pub mod embed;
 pub mod event_state;
+pub mod excerpt;
 pub mod glossary;
 pub mod named_tool;
 pub mod ownership;
