@@ -11,6 +11,7 @@ pub mod embed;
 pub mod event_state;
 pub mod glossary;
 pub mod named_tool;
+pub mod ownership;
 pub mod policy;
 pub mod prompts;
 pub mod py;
