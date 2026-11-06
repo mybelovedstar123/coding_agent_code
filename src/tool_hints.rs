@@ -704,3 +704,15 @@ pub static _SEND_VERB_RE: LazyLock<PyRe> = LazyLock::new(|| {
 });
 static SEND_PRONOUN: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(?:them|him|her|th\w{1,2}m)\b"));
 static SEND_TO_NAME: LazyLock<PyRe> = LazyLock::new(|| re(r"\bto [A-Z][a-z]+\b"));
+
+/// An instruction (not a question) to send, forward or reply something to a person the request points to by
+/// pronoun or name; requests to look a figure up first are `wants_research_send`.
+pub fn wants_send_on_record(text: &str) -> bool {
+    if text.contains('?') || wants_research_send(text) {
+        return false;
+    }
+    let low = text.to_lowercase();
+    let verb = _SEND_VERB_RE.is_match(&low) || _any(&_words(text), &["send", "forward"], 0.8);
+    let target = SEND_PRONOUN.is_match(&low) || SEND_TO_NAME.is_match(text);
+    verb && target
+}
