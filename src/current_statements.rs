@@ -171,3 +171,23 @@ pub struct Note {
     pub text: String,
     pub records: Vec<String>,
 }
+
+/// Distinct notes (copies merged by text similarity >= 0.85) with the pairIDs that carry them.
+pub fn notes_of(records: &[(String, String)], ident: &str) -> Vec<Note> {
+    let mut notes: Vec<Note> = Vec::new();
+    for (pid, prompt) in records {
+        let s = statement(prompt, ident);
+        let low = s.to_lowercase();
+        match notes
+            .iter_mut()
+            .find(|n| sequence_ratio(&n.text.to_lowercase(), &low) >= 0.85)
+        {
+            Some(n) => n.records.push(pid.clone()),
+            None => notes.push(Note {
+                text: s,
+                records: vec![pid.clone()],
+            }),
+        }
+    }
+    notes
+}
