@@ -551,3 +551,8 @@ pub fn first_str(item: &serde_json::Map<String, Value>, keys: &[&str]) -> String
 }
 
 pub type SharedMemory = Arc<RwLock<UserMemory>>;
+
+pub struct Store {
+    pub embedder: Arc<dyn Embed>,
+    users: Mutex<HashMap<String, SharedMemory>>,
+}
