@@ -413,3 +413,4 @@ pub const RESEARCH_SEND_NOTE: &str = "This request has two parts: first look up 
 their email from the records. Do both, and in your reply state the figure you sent and to whom.";
 
 static RS_WHICH: LazyLock<PyRe> = LazyLock::new(|| re(r"\s*(?:for \w+ contact l\w+:\s*)?w\w{1,3}ch\b"));
+static RS_BELONGS: LazyLock<PyRe> = LazyLock::new(|| re(r"b\w{1,3}ongs to|email do i have"));
