@@ -20,3 +20,5 @@ use crate::text::tokenize;
 use indexmap::IndexMap;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::sync::LazyLock;
+
+pub static JOINT_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\b([A-Z][a-z]{1,15}) and I\b"));
