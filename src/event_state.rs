@@ -497,4 +497,51 @@ impl JsonParser<'_> {
             }
         }
     }
+
+    fn number(&self, start: usize) -> Option<(PyVal, usize)> {
+        let digit = |i: usize| self.at(i).is_some_and(|c| c.is_ascii_digit());
+        let mut i = start;
+        if self.at(i) == Some('-') {
+            i += 1;
+        }
+        match self.at(i)? {
+            '1'..='9' => {
+                i += 1;
+                while digit(i) {
+                    i += 1;
+                }
+            }
+            '0' => i += 1,
+            _ => return None,
+        }
+        let mut is_float = false;
+        if self.at(i) == Some('.') && digit(i + 1) {
+            is_float = true;
+            i += 2;
+            while digit(i) {
+                i += 1;
+            }
+        }
+        if matches!(self.at(i), Some('e' | 'E')) {
+            let e_start = i;
+            i += 1;
+            if matches!(self.at(i), Some('-' | '+')) {
+                i += 1;
+            }
+            while digit(i) {
+                i += 1;
+            }
+            if digit(i - 1) {
+                is_float = true;
+            } else {
+                i = e_start;
+            }
+        }
+        let text: String = self.s[start..i].iter().collect();
+        if is_float {
+            Some((PyVal::Float(text.parse().ok()?), i))
+        } else {
+            Some((PyVal::Int(PyInt::parse(&text)?), i))
+        }
+    }
 }
