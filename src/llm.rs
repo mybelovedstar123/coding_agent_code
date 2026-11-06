@@ -33,3 +33,9 @@ pub struct Reply {
     pub usage: Usage,
     pub finish_reason: Value,
 }
+
+impl Reply {
+    pub fn tool_calls(&self) -> Option<&Value> {
+        self.message.get("tool_calls")
+    }
+}
