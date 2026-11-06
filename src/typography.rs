@@ -13,3 +13,7 @@
 
 use crate::pyre::Re;
 use std::sync::LazyLock;
+
+/// A paired strong-emphasis span on one line, not glued to a word on either side, whose text neither starts nor
+/// ends with a space.
+static STRONG: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?<!\w)\*\*(?=\S)([^*\n]+?)(?<=\S)\*\*(?!\w)"));
