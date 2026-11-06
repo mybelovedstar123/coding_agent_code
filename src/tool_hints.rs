@@ -109,3 +109,16 @@ static IMG_POINTED: LazyLock<PyRe> = LazyLock::new(|| {
 });
 static IMG_NEW: LazyLock<PyRe> =
     LazyLock::new(|| re(r"\b(make|create|generate|draw)\s+(?:a|an|me a|me an)\s+(?:new\s+)?(?:image|picture|photo)\b"));
+
+/// A change to an image the user already has (from earlier, the one generated, the latest render), not a new
+/// one.
+pub fn wants_image_edit(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    let image =
+        _any(&w, &["image", "picture", "photo", "render"], 0.8) || has_word(&w, "pic") || IMG_THE_ONE.is_match(&low);
+    let earlier = _any(&w, &["earlier", "previous"], 0.8) || IMG_EARLIER.is_match(&low);
+    let pointed = IMG_POINTED.is_match(&low);
+    let new = (_any(&w, &["create", "generate", "draw"], 0.7) && !pointed) || IMG_NEW.is_match(&low);
+    image && earlier && !new
+}
