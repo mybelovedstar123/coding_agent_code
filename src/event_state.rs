@@ -429,4 +429,22 @@ impl JsonParser<'_> {
             }
         }
     }
+
+    fn array(&mut self, i: usize) -> Option<(PyVal, usize)> {
+        let mut items = Vec::new();
+        let mut i = self.ws(i);
+        if self.at(i) == Some(']') {
+            return Some((PyVal::List(items), i + 1));
+        }
+        loop {
+            let (v, e) = self.value(i)?;
+            items.push(v);
+            i = self.ws(e);
+            match self.at(i)? {
+                ']' => return Some((PyVal::List(items), i + 1)),
+                ',' => i = self.ws(i + 1),
+                _ => return None,
+            }
+        }
+    }
 }
