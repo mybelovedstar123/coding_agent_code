@@ -271,3 +271,18 @@ fn merged_items(mut items: Vec<Value>, records: &[Pair]) -> Vec<Value> {
     keyed.sort_by(|a, b| a.0.cmp(&b.0));
     keyed.into_iter().map(|(_, it)| it).collect()
 }
+
+/// The memory context with `records` added in full (chronological, no duplicates).
+///
+/// Where the Python raises (a payload that is not an object, a non-dict memory item), the context is unchanged.
+pub fn with_records(context: Option<String>, prefix: &str, records: &[Pair]) -> Option<String> {
+    let Some(mut payload) = load_payload(context.as_deref()) else {
+        return context;
+    };
+    let Some(obj) = payload.as_object_mut() else {
+        return context;
+    };
+    let Some(items) = memory_items(obj) else { return context };
+    obj.insert("memories".into(), Value::Array(merged_items(items, records)));
+    Some(dump_context(prefix, &payload))
+}
