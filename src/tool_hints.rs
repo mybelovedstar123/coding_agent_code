@@ -303,3 +303,18 @@ pub fn asks_capability(text: &str) -> bool {
 }
 
 static JUST_TELL_ME: LazyLock<PyRe> = LazyLock::new(|| re(r"\bdon'?t just tell me how\b"));
+
+/// A piece of software work the user wants done rather than explained: "go ahead and refactor …", "write a script to
+/// … — start it", "actually scrape …", "don't just tell me how" (the work verbs tolerate typos).
+pub fn wants_work_done(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    let work_verb = |x: &String| _any(std::slice::from_ref(x), &["refactor", "scrape", "build", "write"], 0.7);
+    let go_ahead =
+        (3..w.len()).any(|i| w[i - 3] == "go" && w[i - 2] == "ahead" && w[i - 1] == "and" && work_verb(&w[i]));
+    let actually = (1..w.len()).any(|i| w[i - 1] == "actually" && work_verb(&w[i]));
+    let start_it = low.contains("start it")
+        && (has_word(&w, "write") || has_word(&w, "build"))
+        && _any(&w, &["script", "tool", "app"], 0.7);
+    go_ahead || actually || start_it || JUST_TELL_ME.is_match(&low)
+}
