@@ -152,3 +152,19 @@ fn appended_note(payload: &Map<String, Value>, extra: &str) -> String {
 fn dump_context(prefix: &str, payload: &Value) -> String {
     format!("{prefix}\n{}", py::dumps(payload, false))
 }
+
+/// The memory context with REMOVAL_NOTE appended to its note (the records are unchanged).
+///
+/// A payload that parses but is not a JSON object raises AttributeError in the Python (never reached: the agent
+/// builds every context as an object); here it leaves the context unchanged.
+pub fn with_removal_note(context: Option<String>, prefix: &str) -> Option<String> {
+    let Some(mut payload) = load_payload(context.as_deref()) else {
+        return context;
+    };
+    let Some(obj) = payload.as_object_mut() else {
+        return context;
+    };
+    let note = appended_note(obj, REMOVAL_NOTE);
+    obj.insert("note".into(), Value::String(note));
+    Some(dump_context(prefix, &payload))
+}
