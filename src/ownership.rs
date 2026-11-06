@@ -33,3 +33,9 @@ responsible accountable point things stand moment these days now give tell me wh
 everyone something anything nobody";
 
 pub static STOP: LazyLock<HashSet<&'static str>> = LazyLock::new(|| py::split_ws(STOP_WORDS).into_iter().collect());
+
+pub static OWNERSHIP: LazyLock<Re> = LazyLock::new(|| {
+    Re::new(
+        r"(?i)\b(owns?|owner|owned|holding|holds|held|in charge|on point|took over|taken over|takes over|picked up|passed|handed|the handoff on|moved to|hands? (?:it )?(?:over|off)|now runs|running it|holding the thread|'s now|off it|accountable|responsible|person to ask|took it on|stepped back|in the lead|leads it)\b",
+    )
+});
