@@ -74,3 +74,13 @@ pub fn build_index(pairs: &[&Pair]) -> Index {
 fn is_word_char(c: char) -> bool {
     c == '_' || c.is_alphanumeric()
 }
+
+/// `re.search(rf"\b{name}\b", text)` for a joint-mention name (`[A-Z][a-z]{1,15}`, so its occurrences never overlap
+/// and both its ends are word characters), without compiling a pattern per name and anchor.
+fn names_word(text: &str, name: &str) -> bool {
+    text.match_indices(name).any(|(at, _)| {
+        let before = text[..at].chars().next_back();
+        let after = text[at + name.len()..].chars().next();
+        !before.is_some_and(is_word_char) && !after.is_some_and(is_word_char)
+    })
+}
