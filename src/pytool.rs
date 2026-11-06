@@ -15,3 +15,5 @@ use std::sync::LazyLock;
 use std::time::Duration;
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWriteExt};
 use tokio::process::Command;
+
+pub const TOOL_NAME: &str = "run_python";
