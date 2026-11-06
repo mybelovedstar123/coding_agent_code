@@ -536,3 +536,16 @@ pub fn with_ownership(
     payload.insert("ownership".into(), Value::Object(own));
     Some(format!("{prefix}\n{}", py::dumps(&Value::Object(payload), false)))
 }
+
+pub static ORG_MARKERS: LazyLock<Vec<Re>> = LazyLock::new(|| {
+    let ws = r"[\s\x1c-\x1f]";
+    vec![
+        Re::new(&format!(
+            r"(?i:\b(?:works?|worked|working) at|\bused to w\w{{1,3}}k at){ws}+{NAME}"
+        )),
+        Re::new(&format!(r"{NAME}{ws}+f\w{{1,3}}l+ through")),
+        Re::new(&format!(
+            r"f\w{{1,3}}l+ through,?{ws}+{NAME}{ws}+(?:took|has taken|picked)"
+        )),
+    ]
+});
