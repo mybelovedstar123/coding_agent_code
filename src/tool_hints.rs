@@ -162,3 +162,5 @@ pub fn wants_arithmetic(text: &str) -> bool {
 static JOB_STATUS: LazyLock<PyRe> = LazyLock::new(|| {
     re(r"\b(status|how's|how is|where do things stand|options|my (?:recent |running |current )?b\w{2,4}k\w*nd)\b")
 });
+static JOB_START: LazyLock<PyRe> =
+    LazyLock::new(|| re(r"\b(launch|start|kick off|queue up|fire off|spin up|run|delegate|send|have|do)\b"));
