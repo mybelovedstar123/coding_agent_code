@@ -68,3 +68,34 @@ pub fn request_body(messages: Vec<Value>, tools: Option<&[Value]>, effort: Optio
     }
     Value::Object(body)
 }
+
+/// A usable reply from a 200 body, or why it is not one.
+pub fn parse_reply(data: &Value) -> Result<Reply, String> {
+    let Some(obj) = data.as_object() else {
+        return Err("response body is not a JSON object".into());
+    };
+    if let Some(err) = obj.get("error").filter(|e| crate::store::truthy(e)) {
+        return Err(crate::py::head(&crate::py::str_value(err), 300).to_string());
+    }
+    let first = obj.get("choices").and_then(Value::as_array).and_then(|c| c.first());
+    match first.and_then(Value::as_object) {
+        Some(choice) => {
+            let message = match choice.get("message") {
+                None | Some(Value::Null) => Some(Map::new()),
+                Some(Value::Object(m)) => Some(m.clone()),
+                Some(v) if !crate::store::truthy(v) => Some(Map::new()),
+                Some(_) => None,
+            };
+            let Some(message) = message else {
+                return Err("no usable choice in response".into());
+            };
+            Ok(Reply {
+                content: message.get("content").cloned(),
+                usage: obj.get("usage").and_then(Value::as_object).cloned().unwrap_or_default(),
+                finish_reason: choice.get("finish_reason").cloned().unwrap_or(Value::Null),
+                message,
+            })
+        }
+        None => Err("no usable choice in response".into()),
+    }
+}
