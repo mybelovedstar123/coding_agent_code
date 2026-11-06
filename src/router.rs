@@ -113,3 +113,57 @@ fn names_of(tool_defs: &[Value]) -> HashSet<String> {
 fn content_str(reply: &crate::llm::Reply) -> &str {
     reply.content.as_ref().and_then(Value::as_str).unwrap_or("")
 }
+
+/// The router at low effort; only when it yields no valid decision (an empty or unparseable reply, a shape failure
+/// under W7), ask once more at the relay's default effort. Usage of both calls is summed.
+pub async fn route(
+    chat: &dyn ChatClient,
+    user_input: &str,
+    tool_defs: &[Value],
+    wire_system: &str,
+    case_id: &str,
+    base_url: Option<&str>,
+    deadline: Instant,
+) -> (Option<Decision>, Usage) {
+    let names = names_of(tool_defs);
+    let (decision, usage) = match chat
+        .complete(
+            messages(user_input, tool_defs, wire_system),
+            None,
+            case_id,
+            base_url,
+            deadline,
+            Some("low"),
+        )
+        .await
+    {
+        Err(_) => (None, Usage::default()),
+        Ok(msg) => (parse(content_str(&msg), &names), msg.usage.clone()),
+    };
+    if decision.is_some() {
+        return (decision, usage);
+    }
+    let msg = match chat
+        .complete(
+            messages(user_input, tool_defs, wire_system),
+            None,
+            case_id,
+            base_url,
+            deadline,
+            None,
+        )
+        .await
+    {
+        Err(_) => return (None, usage),
+        Ok(msg) => msg,
+    };
+    let mut total = usage;
+    for (key, value) in &msg.usage {
+        // Python adds only int values: a JSON integer, not a float or bool.
+        if let Some(v) = value.as_i64().filter(|_| value.is_i64() || value.is_u64()) {
+            let cur = total.get(key).and_then(Value::as_i64).unwrap_or(0);
+            total.insert(key.clone(), json!(cur + v));
+        }
+    }
+    (parse(content_str(&msg), &names), total)
+}
