@@ -158,3 +158,7 @@ pub fn wants_arithmetic(text: &str) -> bool {
     );
     nums.len() >= 2 && stat
 }
+
+static JOB_STATUS: LazyLock<PyRe> = LazyLock::new(|| {
+    re(r"\b(status|how's|how is|where do things stand|options|my (?:recent |running |current )?b\w{2,4}k\w*nd)\b")
+});
