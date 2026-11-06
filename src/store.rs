@@ -138,3 +138,16 @@ impl Pair {
         py::strip(&format!("{}\n{}", self.prompt, self.response)).to_string()
     }
 }
+
+pub fn render_pair(pair: &Pair) -> String {
+    let mut parts = Vec::new();
+    let prompt = py::strip(&pair.prompt);
+    if !prompt.is_empty() {
+        parts.push(format!("User: {prompt}"));
+    }
+    let response = py::strip(&pair.response);
+    if !response.is_empty() {
+        parts.push(format!("Ditto: {response}"));
+    }
+    parts.join("\n")
+}
