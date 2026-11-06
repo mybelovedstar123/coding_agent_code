@@ -310,3 +310,17 @@ pub fn possessive_nicknames(mem: &UserMemory, question: &str) -> IndexMap<String
     }
     out
 }
+
+/// Records declaring the full name behind each nickname (store.alias_declaration), oldest first.
+pub fn identity_records(mem: &UserMemory, nicknames: &IndexMap<String, String>) -> Vec<Pair> {
+    let out = mem
+        .pairs
+        .values()
+        // A declaration of one of the nicknames quotes it: prompts without any of them are skipped before the
+        // (costly) declaration parse.
+        .filter(|p| nicknames.keys().any(|n| p.prompt.contains(n.as_str())))
+        .filter(|p| alias_declaration(&p.prompt).is_some_and(|d| nicknames.contains_key(&d.1)))
+        .cloned()
+        .collect();
+    oldest_first(out)
+}
