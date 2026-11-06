@@ -94,3 +94,20 @@ pub static FALLBACK_DEFS: LazyLock<Vec<(&'static str, Value)>> = LazyLock::new(|
         ),
     ]
 });
+
+fn list_arg(args: &Map<String, Value>, names: &[&str]) -> Vec<String> {
+    for name in names {
+        match args.get(*name) {
+            Some(Value::String(s)) if !py::strip(s).is_empty() => return vec![s.clone()],
+            Some(Value::Array(items)) => {
+                return items
+                    .iter()
+                    .map(py::str_value)
+                    .filter(|v| !py::strip(v).is_empty())
+                    .collect();
+            }
+            _ => {}
+        }
+    }
+    Vec::new()
+}
