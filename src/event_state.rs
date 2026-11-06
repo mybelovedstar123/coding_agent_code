@@ -372,4 +372,8 @@ impl JsonParser<'_> {
         }
         i
     }
+
+    fn lit(&self, i: usize, word: &str) -> bool {
+        word.chars().enumerate().all(|(k, c)| self.at(i + k) == Some(c))
+    }
 }
