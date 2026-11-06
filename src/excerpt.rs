@@ -111,3 +111,14 @@ pub struct Idf<'a> {
     pub df: &'a IndexMap<String, i64>,
     pub n: usize,
 }
+
+impl Idf<'_> {
+    pub fn get(&self, tok: &str) -> f64 {
+        if self.n == 0 {
+            return 1.0;
+        }
+        let d = *self.df.get(tok).unwrap_or(&0) as f64;
+        let n = self.n as f64;
+        (1.0 + (n - d + 0.5) / (d + 0.5)).ln()
+    }
+}
