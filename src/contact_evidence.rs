@@ -237,3 +237,14 @@ pub fn context_texts(context: Option<&str>) -> String {
         _ => String::new(),
     }
 }
+
+/// `list(payload.get("memories") or [])` when every element is a dict; None where the Python raises (a later
+/// `it.get(...)` sort key on a non-dict element, or `list()` of a number).
+fn memory_items(payload: &Map<String, Value>) -> Option<Vec<Value>> {
+    match payload.get("memories") {
+        None => Some(Vec::new()),
+        Some(v) if !crate::store::truthy(v) => Some(Vec::new()),
+        Some(Value::Array(items)) if items.iter().all(Value::is_object) => Some(items.clone()),
+        _ => None,
+    }
+}
