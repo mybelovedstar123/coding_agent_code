@@ -324,3 +324,21 @@ pub async fn validate(code: &str) -> Option<String> {
         _ => Some("the program could not be validated".into()),
     }
 }
+
+/// At most READ_LIMIT_BYTES of a stream, and whether more was offered.
+async fn read_bounded<R: AsyncRead + Unpin>(stream: &mut R) -> (Vec<u8>, bool) {
+    let mut buf = Vec::new();
+    let mut chunk = vec![0u8; 65536];
+    loop {
+        match stream.read(&mut chunk).await {
+            Ok(0) | Err(_) => return (buf, false),
+            Ok(n) => {
+                buf.extend_from_slice(&chunk[..n]);
+                if buf.len() > READ_LIMIT_BYTES {
+                    buf.truncate(READ_LIMIT_BYTES);
+                    return (buf, true);
+                }
+            }
+        }
+    }
+}
