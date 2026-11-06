@@ -84,3 +84,61 @@ fn names_word(text: &str, name: &str) -> bool {
         !before.is_some_and(is_word_char) && !after.is_some_and(is_word_char)
     })
 }
+
+/// Records reached from the anchors through a person they name; none when no anchor shares a rare phrase.
+pub fn companion_records<'a>(
+    index: &Index,
+    pairs: &'a IndexMap<String, Pair>,
+    request: &str,
+    anchors: &[&Pair],
+    exclude: &HashSet<String>,
+) -> Vec<&'a Pair> {
+    if index.joint.is_empty() {
+        return Vec::new();
+    }
+    let req_phrases = phrases(request);
+    let req_words: HashSet<String> = tokenize(request).into_iter().collect();
+    // Each anchor's rarest phrase shared with the request; only the anchors at the rarest of these take part.
+    let mut rarity: HashMap<&str, usize> = HashMap::new();
+    for anchor in anchors {
+        let anchor_phrases = phrases(&anchor.prompt);
+        let shared = req_phrases.intersection(&anchor_phrases);
+        if let Some(r) = shared
+            .map(|ph| index.phrase_records.get(ph).copied().unwrap_or(0))
+            .min()
+        {
+            rarity.insert(anchor.pair_id.as_str(), r);
+        }
+    }
+    let best = rarity.values().copied().min().unwrap_or(RARE_PHRASE_RECORDS + 1);
+    if best > RARE_PHRASE_RECORDS {
+        return Vec::new();
+    }
+    let mut out: Vec<&'a Pair> = Vec::new();
+    let mut seen: HashSet<String> = exclude.clone();
+    for anchor in anchors {
+        if rarity.get(anchor.pair_id.as_str()) != Some(&best) {
+            continue;
+        }
+        for (name, pids) in &index.joint {
+            if !names_word(&anchor.prompt, name) {
+                continue;
+            }
+            let mut places = proper_words(&anchor.prompt);
+            places.remove(name);
+            for pid in pids {
+                let Some(pair) = pairs.get(pid) else { continue };
+                if seen.contains(pid) || !tokenize(&pair.prompt).iter().any(|t| req_words.contains(t)) {
+                    continue;
+                }
+                if places.is_disjoint(&proper_words(&pair.prompt)) {
+                    continue;
+                }
+                seen.insert(pid.clone());
+                out.push(pair);
+            }
+        }
+    }
+    out.truncate(MAX_RECORDS);
+    out
+}
