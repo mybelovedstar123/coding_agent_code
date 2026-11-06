@@ -515,3 +515,25 @@ workflow is not saved yet, create it under the name agreed for it. If it is a on
 create or run a workflow.";
 
 static START_RE: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(start|kick off|begin|launch)\b"));
+
+/// A request to start something as it was agreed before ("the way we already agreed", "per what we landed on",
+/// "exactly as we settled earlier", "following what we decided"); the agreement word tolerates typos.
+pub fn wants_agreed_start(text: &str) -> bool {
+    let low = text.to_lowercase();
+    if !START_RE.is_match(&low) {
+        return false;
+    }
+    let w = _words(text);
+    (0..w.len()).filter(|&i| w[i] == "we").any(|i| {
+        let j = if w.get(i + 1).is_some_and(|x| x == "already") {
+            i + 2
+        } else {
+            i + 1
+        };
+        w.get(j).is_some_and(|verb| {
+            ["agreed", "settled", "landed", "decided"]
+                .iter()
+                .any(|t| _fuzzy(verb, t, 0.7))
+        })
+    })
+}
