@@ -484,3 +484,18 @@ static EFFORT_HOW_HARD: LazyLock<PyRe> = LazyLock::new(|| re(r"\bhow h\w{2,3}d y
 static EFFORT_LEVEL: LazyLock<PyRe> = LazyLock::new(|| {
     re(r"\b(low|medium|high|deep\w*|careful\w*|balanced|middle|moderate|quick|light|max\w*|minimal)\b")
 });
+
+/// Set reasoning effort / thinking depth to the user's usual, without naming a level.
+pub fn wants_usual_effort(text: &str) -> bool {
+    let low = text.to_lowercase();
+    let w = _words(text);
+    // "reasoning/thinking effort, depth or level", the first word typo-tolerant ("reewoning depth").
+    let fuzzy_effort = (1..w.len()).any(|i| {
+        _any(std::slice::from_ref(&w[i - 1]), &["reasoning", "thinking"], 0.7)
+            && _any(std::slice::from_ref(&w[i]), &["effort", "depth", "level"], 0.7)
+    });
+    let effort = EFFORT_RE.is_match(&low) || EFFORT_HOW_HARD.is_match(&low) || fuzzy_effort;
+    // "Quick one: …" opens a request; it names no level.
+    let level = EFFORT_LEVEL.is_match(&low.replace("quick one", ""));
+    effort && !level
+}
