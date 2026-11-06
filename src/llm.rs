@@ -99,3 +99,7 @@ pub fn parse_reply(data: &Value) -> Result<Reply, String> {
         None => Err("no usable choice in response".into()),
     }
 }
+
+pub struct HttpChat {
+    http: reqwest::Client,
+}
