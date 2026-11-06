@@ -152,3 +152,8 @@ fn preview(pair: &Pair, query: &str, idf: Option<&Idf>) -> Value {
     }
     Value::Object(out)
 }
+
+fn sorted_previews(mut previews: Vec<Value>) -> Value {
+    previews.sort_by(|a, b| a["timestamp"].as_str().cmp(&b["timestamp"].as_str()));
+    json!({"memories": previews})
+}
