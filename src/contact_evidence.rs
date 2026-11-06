@@ -92,3 +92,9 @@ pub fn person_name_forms(mem: &UserMemory, question: &str) -> BTreeSet<String> {
 pub fn names_any(text: &str, forms: &BTreeSet<String>) -> bool {
     forms.iter().any(|f| names_form(f, text))
 }
+
+/// `sorted(out, key=lambda p: (p.ts, p.prompt, p.response))`.
+fn oldest_first(mut out: Vec<Pair>) -> Vec<Pair> {
+    out.sort_by(cmp_content);
+    out
+}
