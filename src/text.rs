@@ -12,3 +12,7 @@ const STOPWORDS: &[&str] = &[
     "whom", "why", "will", "with", "you", "your", "yours", "about", "into", "than", "then", "there", "these", "those",
     "can", "could", "would", "should", "just", "also", "am", "been", "being",
 ];
+
+pub fn is_stopword(t: &str) -> bool {
+    STOPWORDS.contains(&t)
+}
