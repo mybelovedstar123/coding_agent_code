@@ -386,3 +386,5 @@ fn bad_value(entry: &str) -> String {
     let value = entry.split_once('=').map(|(_, v)| v).unwrap_or("");
     py::strip_chars(py::strip(value), "'\"").to_string()
 }
+
+const ID_KEYS: [&str; 6] = ["id", "pair_id", "pairId", "pairID", "memory_id", "memoryId"];
