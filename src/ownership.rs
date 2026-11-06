@@ -76,3 +76,31 @@ pub fn tokens(text: &str) -> Vec<String> {
         .map(|(_, _, t)| t.to_string())
         .collect()
 }
+
+/// Whether `phrase` occurs in the token list, typo-tolerant: an n-token window equal to it, or starting with the
+/// same character and at least `ratio` similar (default 0.82 for 3+ words, 0.88 otherwise; `None` or 0.0 is the
+/// default, as Python's `ratio or ...`).
+pub fn fuzzy_in(phrase: &str, text_tokens: &[String], ratio: Option<f64>) -> bool {
+    let n = py::split_ws(phrase).len();
+    let ratio = match ratio {
+        Some(r) if r != 0.0 => r,
+        _ => {
+            if n >= 3 {
+                0.82
+            } else {
+                0.88
+            }
+        }
+    };
+    if text_tokens.len() < n {
+        return false;
+    }
+    let first = py::head(phrase, 1);
+    for i in 0..text_tokens.len() + 1 - n {
+        let win = text_tokens[i..i + n].join(" ");
+        if win == phrase || (py::head(&win, 1) == first && sequence_ratio(&win, phrase) >= ratio) {
+            return true;
+        }
+    }
+    false
+}
