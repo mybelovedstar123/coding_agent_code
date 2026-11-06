@@ -475,3 +475,8 @@ impl UserMemory {
             .then_with(|| sa.description.cmp(&sb.description))
     }
 }
+
+/// Floats ordered as Python orders them in a sort key (no NaN arises here).
+pub fn cmp_f64(a: f64, b: f64) -> Ordering {
+    a.partial_cmp(&b).unwrap_or(Ordering::Equal)
+}
