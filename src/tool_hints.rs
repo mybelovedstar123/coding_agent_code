@@ -22,3 +22,7 @@ fn re(p: &str) -> PyRe {
 }
 
 static WORDS_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z]+"));
+
+pub fn _words(text: &str) -> Vec<String> {
+    WORDS_RE.findall(&text.to_lowercase())
+}
