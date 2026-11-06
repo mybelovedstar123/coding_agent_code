@@ -680,4 +680,34 @@ impl Store {
             .filter_map(|(pid, score)| mem.pairs.get(&pid).map(|p| (p.clone(), score)))
             .collect())
     }
+
+    /// Hybrid search with alias-aware queries: each query is also searched with the other name form of a person it
+    /// names (UserMemory::alias_queries); all rankings are fused by RRF.
+    pub async fn search(
+        &self,
+        user_id: &str,
+        queries: &[String],
+        top_k: usize,
+        restrict: Option<Vec<String>>,
+        session_id: Option<&str>,
+        deadline: Option<Instant>,
+    ) -> Result<Vec<(Pair, f64)>, EmbedError> {
+        let expanded = {
+            let mem = self.user(user_id);
+            let mem = mem.read().await;
+            let mut expanded: Vec<String> = Vec::new();
+            for q in queries {
+                let mut variants = vec![q.clone()];
+                variants.extend(mem.alias_queries(q));
+                for v in variants {
+                    if !v.is_empty() && !expanded.contains(&v) {
+                        expanded.push(v);
+                    }
+                }
+            }
+            expanded
+        };
+        self.ranked(user_id, expanded, top_k, restrict, session_id, deadline)
+            .await
+    }
 }
