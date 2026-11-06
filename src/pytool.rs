@@ -84,3 +84,33 @@ pub const MAX_OUTPUT_CHARS: usize = 6000;
 pub const WALL_TIMEOUT_S: f64 = 15.0;
 /// Bytes read from each of the program's output streams; anything beyond is never buffered (D25).
 pub const READ_LIMIT_BYTES: usize = 1024 * 1024;
+
+/// The tool as offered to the model (its description lists the original ten modules; the sandbox also allows csv,
+/// textwrap, pprint and copy).
+pub static DEFINITION: LazyLock<Value> = LazyLock::new(|| {
+    json!({
+        "type": "function",
+        "function": {
+            "name": TOOL_NAME,
+            "description": concat!(
+                "Run a short Python 3 program locally for exact counting, arithmetic, dates or ",
+                "structured-data processing over the user's stored memory records (the only ",
+                "code tool with access to those records). ",
+                "Helpers: records(ids) -> list of dicts {'id', 'timestamp', 'user', 'ditto'} ",
+                "for memory pair IDs (from search_memories), where 'user' and 'ditto' are ",
+                "the full texts of the two sides of the stored exchange; ",
+                "extract_json(text) -> list of every JSON array/object embedded in a text ",
+                "(parsed); grep_records(pattern) -> list of pair IDs whose text matches a ",
+                "regular expression. Modules json, re, math, statistics, ",
+                "datetime, collections, itertools, functools, decimal, fractions may be ",
+                "imported. No file or network access. print() the result; the printed ",
+                "output is returned."
+            ),
+            "parameters": {
+                "type": "object",
+                "required": ["code"],
+                "properties": {"code": {"type": "string", "description": "Python 3 source to run."}},
+            },
+        },
+    })
+});
