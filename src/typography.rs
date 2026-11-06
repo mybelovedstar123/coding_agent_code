@@ -30,3 +30,27 @@ pub fn normalize(text: &str) -> String {
     let text: String = text.chars().map(table).collect();
     STRONG.sub_with(&text, |c| c.get(1).map(|m| m.as_str().to_string()).unwrap_or_default())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::normalize;
+
+    #[test]
+    fn paired_markers_go_and_the_rest_stays() {
+        assert_eq!(
+            normalize("The trip totals **17 days** (6 + 5 + 6)."),
+            "The trip totals 17 days (6 + 5 + 6)."
+        );
+        assert_eq!(normalize("is **$14,831.92**."), "is $14,831.92.");
+        for s in [
+            "2 ** 10 = 1024",
+            "run __init__ here",
+            "a *single* one",
+            "**unclosed",
+            "x = a**b**c",
+        ] {
+            assert_eq!(normalize(s), s);
+        }
+        assert_eq!(normalize("INV\u{2011}2024\u{a0}007"), "INV-2024 007");
+    }
+}
