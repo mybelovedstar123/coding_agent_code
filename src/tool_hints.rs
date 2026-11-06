@@ -664,3 +664,5 @@ static CONFIRM_VERIFY: LazyLock<PyRe> = LazyLock::new(|| {
 });
 /// The setting is stated to have a value: "my Ditto accent is ...".
 static CONFIRM_STATED: LazyLock<PyRe> = LazyLock::new(|| re(r"\bmy\b[^.?!]{0,48}?\b(?:is|stays|uses|remains)\b"));
+/// A request to change the setting is a task, not a confirmation.
+static CONFIRM_CHANGE: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(change|switch|set|use|turn|apply|make the|update)\b"));
