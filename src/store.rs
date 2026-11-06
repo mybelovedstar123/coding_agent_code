@@ -176,3 +176,4 @@ pub struct Subject {
 // everyone calls Olivia Cantu). Searches that mention one form also search the other, so records about the same
 // person are found under either name. Retrieval only: it selects evidence, it never writes or picks an answer.
 static ALIAS_QUOTE_RE: LazyLock<Re> = LazyLock::new(|| Re::new("[\u{201c}\"]([A-Z][a-z]{1,15})[.,]?[\u{201d}\"]"));
+static FULL_NAME_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\b([A-Z][a-z]+ [A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)?)\b"));
