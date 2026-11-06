@@ -693,3 +693,12 @@ records who receives it. If they name the recipient and their address, send it w
 records do not hold the content to send, write a short message from what the request and the records say about it \
 and send that, rather than asking the user for the content. If the records say no recipient has been decided for it, \
 do not send anything: ask the user who should receive it, naming the people the records mention.";
+
+pub static _SEND_VERB_RE: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(?:send|forward|get back to|reply to|respond to|fire off|shoot|",
+        r"get (?:it|them|those|these|th\w{1,2}m|the \w+) (?:out|over|across) to|pass (?:it|them|those|these) (?:on|along)|",
+        r"get (?:them|him|her|th\w{1,2}m) (?:the|this|that|my|our) |",
+        r#"get (?:the|this|that|my|our) [\w\s'"-]{1,60}? (?:over |across |out )?to (?:them|him|her|th\w{1,2}m)\b)"#,
+    ))
+});
