@@ -581,3 +581,11 @@ pub const APPROXIMATE_OPTION_NOTE: &str = "The user spells the option they want 
 the configured options, apply the listed option closest to what they wrote: letters may be swapped, doubled or \
 missing, and a variant word they give (condensed, display, slab, a colour shade) belongs to the option. Do not stop \
 because the exact spelling is not in the list.";
+
+static APPROXIMATE_OPTION: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"(spelling (is|may be) (approximate|off|rough)|mangled|botched|my spelling|misspelled|verify the exact option",
+        r"|closest (configured )?option|check which (fonts|accent)|look (up|at) the (available|workspace|configured)",
+        r"|configured appearance options|accent list|look the list up)",
+    ))
+});
