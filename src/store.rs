@@ -343,4 +343,22 @@ impl UserMemory {
             self.pairs.insert(pair.pair_id.clone(), pair);
         }
     }
+
+    pub fn upsert_subjects(&mut self, subjects: Vec<Subject>, vecs: Vec<Vec<f32>>) {
+        for (mut subj, vec) in subjects.into_iter().zip(vecs) {
+            if let Some(existing) = self.subjects.get(&subj.subject_id) {
+                subj.pairs.extend(existing.pairs.iter().cloned());
+                let idx = self
+                    .subj_order
+                    .iter()
+                    .position(|s| *s == subj.subject_id)
+                    .expect("indexed subject");
+                self.subj_vecs[idx] = vec;
+            } else {
+                self.subj_order.push(subj.subject_id.clone());
+                self.subj_vecs.push(vec);
+            }
+            self.subjects.insert(subj.subject_id.clone(), subj);
+        }
+    }
 }
