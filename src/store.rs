@@ -260,4 +260,14 @@ impl UserMemory {
             n: self.n_docs(),
         }
     }
+
+    /// A derived index, built by `make` on first use after the records last changed.
+    pub fn derived<T: Any + Send + Sync>(&self, key: &'static str, make: impl FnOnce() -> T) -> Arc<T> {
+        if let Some(found) = self.derived.lock().expect("derived lock").get::<T>(key) {
+            return found;
+        }
+        let built = Arc::new(make());
+        self.derived.lock().expect("derived lock").put(key, built.clone());
+        built
+    }
 }
