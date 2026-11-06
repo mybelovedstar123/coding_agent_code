@@ -228,3 +228,24 @@ pub struct UserMemory {
     subj_vecs: Vec<Vec<f32>>,
     pub derived: Mutex<Derived>,
 }
+
+impl UserMemory {
+    pub fn new(user_id: &str) -> Self {
+        UserMemory {
+            user_id: user_id.to_string(),
+            pairs: IndexMap::new(),
+            subjects: IndexMap::new(),
+            order: Vec::new(),
+            row: HashMap::new(),
+            vecs: Vec::new(),
+            tf: IndexMap::new(),
+            tlen: HashMap::new(),
+            df: IndexMap::new(),
+            aliases: IndexMap::new(),
+            alias_people: IndexMap::new(),
+            subj_order: Vec::new(),
+            subj_vecs: Vec::new(),
+            derived: Mutex::new(Derived::default()),
+        }
+    }
+}
