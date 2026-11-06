@@ -421,3 +421,18 @@ impl Deref for IndexV2 {
         &self.index
     }
 }
+
+impl IndexV2 {
+    /// Records as (pairID, timestamp text, text).
+    pub fn new(records: &[(String, String, String)]) -> IndexV2 {
+        let mut ordered: Vec<&(String, String, String)> = records.iter().collect();
+        // time, then text: never insertion order (D15)
+        ordered.sort_by(|x, y| (&x.1, &x.2).cmp(&(&y.1, &y.2)));
+        let pairs: Vec<(String, String)> = ordered.iter().map(|(_, ts, t)| (ts.clone(), t.clone())).collect();
+        IndexV2 {
+            index: Index::new(&pairs),
+            pids: ordered.iter().map(|(pid, _, _)| pid.clone()).collect(),
+            orgs: orgs_in(ordered.iter().map(|(_, _, t)| t.as_str())),
+        }
+    }
+}
