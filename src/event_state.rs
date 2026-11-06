@@ -787,3 +787,23 @@ pub fn from_json(text: &str) -> Vec<Event> {
     }
     out
 }
+
+/// None where Python's csv reader raises (a field over `csv.field_size_limit()`), which Python does not catch.
+fn try_from_csv(text: &str) -> Option<Vec<Event>> {
+    let mut out = Vec::new();
+    let lines = splitlines(text);
+    for (i, line) in lines.iter().enumerate() {
+        if line.contains("effective_step") && line.contains(',') {
+            let mut block = vec![*line];
+            for nxt in &lines[i + 1..] {
+                if !nxt.contains(',') {
+                    break;
+                }
+                block.push(nxt);
+            }
+            let rows = csv_dicts(&block.join("\n")).ok()?;
+            out.extend(rows.iter().filter_map(_event));
+        }
+    }
+    Some(out)
+}
