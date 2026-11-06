@@ -157,3 +157,10 @@ pub fn is_change(stmt: &str) -> bool {
     let low = stmt.to_lowercase();
     CHANGE_CUES.iter().any(|c| has_phrase(&low, c))
 }
+
+/// The note itself: the text after the identifier, without wrapping quotes.
+pub fn statement(prompt: &str, ident: &str) -> String {
+    let s = crate::glossary::after_ident(prompt, ident);
+    let s = py::strip(s.trim_start_matches(':'));
+    py::strip(s.trim_matches('"')).to_string()
+}
