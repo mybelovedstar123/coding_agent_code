@@ -24,3 +24,20 @@ pub fn digit_tokens(text: &str) -> Vec<String> {
         .map(|t| py::rstrip_chars(t, ".,;:!?)\"'").to_string())
         .collect()
 }
+
+/// The correction when it differs from the original, keeps every digit-bearing token and stays within 30 % of the
+/// original's length; otherwise "".
+pub fn usable_correction(original: &str, corrected: &str) -> String {
+    let corrected = py::strip(corrected);
+    if corrected.is_empty() || corrected.to_lowercase() == py::strip(original).to_lowercase() {
+        return String::new();
+    }
+    if digit_tokens(corrected) != digit_tokens(original) {
+        return String::new();
+    }
+    let (lc, lo) = (py::len(corrected) as f64, py::len(original) as f64);
+    if (lc - lo).abs() > 0.3 * lo.max(1.0) {
+        return String::new();
+    }
+    corrected.to_string()
+}
