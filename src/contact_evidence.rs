@@ -286,3 +286,27 @@ pub fn with_records(context: Option<String>, prefix: &str, records: &[Pair]) -> 
     obj.insert("memories".into(), Value::Array(merged_items(items, records)));
     Some(dump_context(prefix, &payload))
 }
+
+// ---- contact requests about someone identified through a nicknamed person ("Lucky's colleague")
+
+/// {nickname: full name} for recorded nicknames (with exactly one recorded full name) that the request uses
+/// in possessive form ("Lucky's") while asking for an email or address; empty for any other request.
+///
+/// In `mem.alias_people` insertion order, as the Python dict.
+pub fn possessive_nicknames(mem: &UserMemory, question: &str) -> IndexMap<String, String> {
+    let mut out = IndexMap::new();
+    if question.is_empty() || !EMAIL_REQUEST_RE.is_match(question) {
+        return out;
+    }
+    for (alias, people) in &mem.alias_people {
+        if people.len() == 1
+            && question.contains(alias.as_str())
+            && cached_re(format!(r"\b{}['’]s\b", escape(alias))).is_match(question)
+        {
+            if let Some(full) = people.iter().next() {
+                out.insert(alias.clone(), full.clone());
+            }
+        }
+    }
+    out
+}
