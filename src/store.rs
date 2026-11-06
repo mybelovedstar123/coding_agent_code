@@ -253,4 +253,11 @@ impl UserMemory {
     pub fn n_docs(&self) -> usize {
         self.tf.len()
     }
+
+    pub fn idf(&self) -> Idf<'_> {
+        Idf {
+            df: &self.df,
+            n: self.n_docs(),
+        }
+    }
 }
