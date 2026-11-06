@@ -344,3 +344,14 @@ pub async fn execute(
         other => Ok(error(format!("unknown memory tool {}", py::repr_str(other)))),
     }
 }
+
+/// Arguments that carry opaque record identifiers. Read calls are validated against the user's store before they
+/// execute (reference validation), so a mistyped id gets a clear error instead of an empty result.
+const ID_ARGS: [(&str, &str); 6] = [
+    ("pairIds", "pair"),
+    ("pair_ids", "pair"),
+    ("pair_id", "pair"),
+    ("pairId", "pair"),
+    ("subject_id", "subject"),
+    ("subjectId", "subject"),
+];
