@@ -1,0 +1,340 @@
+//! Change statements in a case file and the earlier statements they supersede.
+//!
+//! A user's notes about one thing are often filed several times (copies, typos), and a later note says that something
+//! changed ("Update — …", "X has taken over …", "Rescheduled: … is now … instead", "Revised list — … is off it, … is on
+//! it", "Changed my mind …"). Copies are refiled, so filing dates do not show which note came last; the change note
+//! itself says it replaces the earlier value. This module groups the notes of the request's identifier records (copies
+//! by text similarity), finds the notes that state a change on the request's topic, and lists each with the earlier
+//! plain notes of that topic it supersedes, so the deciding model sees which statement is current.
+//!
+//! Port of `harness/current_statements.py`.
+
+use crate::difflib::sequence_ratio;
+use crate::py;
+use crate::pyre::{escape, Re};
+use serde_json::{json, Value};
+use std::collections::{HashMap, HashSet};
+use std::sync::LazyLock;
+
+pub const CHANGE_CUES: &[&str] = &[
+    "change of plan",
+    "update",
+    "updated",
+    "revised",
+    "changed hands",
+    "has taken over",
+    "took over",
+    "taken over",
+    "from now on",
+    "going forward",
+    "replacing",
+    "replaces",
+    "replaced",
+    "instead",
+    "scrap the earlier",
+    "final call",
+    "ignore what i said",
+    "gone from what it was",
+    "moves from",
+    "moved from",
+    "no longer",
+    "after all",
+    "rebooked",
+    "new date",
+    "now on the",
+    "now, not",
+    "swapped",
+    "that replaces",
+    "is now",
+    "now cancelled",
+    "now confirmed",
+    "now postponed",
+    "change:",
+    "not the earlier",
+    "changed my mind",
+    "changed the",
+    "as of today",
+    "dropped",
+    "is off it",
+    "is on it",
+    "has changed",
+    "rescheduled",
+    "since last",
+    "stepped back",
+    "new plan",
+    "forget the original",
+    "moved",
+    "old slot",
+    "is gone",
+];
+const STOP_WORDS: &str =
+    "a an the and or but of to in on at for with from by is are was were be been it its this that \
+these those
+my our your their his her we i you they he she me us them now then there here what which who whom whose when where how
+just still also not no yes so as if than too very can will would should could do does did done have has had please
+before after over about into out up down off on is it's i'd i'm we're they're one two";
+pub static STOP: LazyLock<HashSet<&'static str>> = LazyLock::new(|| py::split_ws(STOP_WORDS).into_iter().collect());
+pub const MAX_RECORD_CHARS: usize = 15_000;
+pub const CURRENT_NOTE: &str = concat!(
+    "current_statements: statements among the records for the identifier in the request that describe a change ",
+    "(an update, a revision, a replacement or a handover), each with the earlier statements on the same topic and ",
+    "the records they come from. Copies of a note can be refiled, so their filing dates may not show the order in ",
+    "which things were said. current_list, where given, is a host-side reading of a list after the change and can ",
+    "be wrong; the records themselves decide. When you name the current decision or plan, use the statement's own ",
+    "words and verb form as written (not rephrased into another tense or an -ing form)."
+);
+
+static WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z][a-z'-]+"));
+static TOKEN_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z0-9:'-]+"));
+/// The whole-word pattern of each change and aside cue, compiled once.
+static CUE_RES: LazyLock<HashMap<&'static str, Re>> = LazyLock::new(|| {
+    CHANGE_CUES
+        .iter()
+        .chain(&["separately", "unrelated"])
+        .map(|c| (*c, cue_re(c)))
+        .collect()
+});
+
+fn cue_re(cue: &str) -> Re {
+    Re::new(&format!(r"(?<![a-z]){}(?![a-z])", escape(cue)))
+}
+
+/// `{w for w in re.findall(r"[a-z][a-z'-]+", text.lower()) if w not in STOP and len(w) > 2}`.
+///
+/// A Python set: only intersected and tested for emptiness, so its order never reaches output.
+pub fn words(text: &str) -> HashSet<String> {
+    WORD_RE
+        .findall(&text.to_lowercase())
+        .into_iter()
+        .filter(|w| !STOP.contains(w.as_str()) && py::len(w) > 2)
+        .collect()
+}
+
+/// `cue` in `low` as whole words; a cue of 9+ letters also matches a typo'd form (same first letter, ratio
+/// >= 0.85).
+pub fn has_phrase(low: &str, cue: &str) -> bool {
+    let found = match CUE_RES.get(cue) {
+        Some(re) => re.is_match(low),
+        None => cue_re(cue).is_match(low),
+    };
+    if found {
+        return true;
+    }
+    if py::len(cue) < 9 {
+        return false;
+    }
+    let toks = TOKEN_RE.findall(low);
+    let n = py::split_ws(cue).len();
+    if toks.len() + 1 < n + 1 {
+        return false;
+    }
+    let first = py::head(cue, 1);
+    let cue_len = py::len(cue);
+    for i in 0..(toks.len() + 1 - n) {
+        let win = toks[i..i + n].join(" ");
+        if py::head(&win, 1) != first {
+            continue;
+        }
+        // The ratio is at most 2·min(len)/(len + len) (every match is shared by both texts); a window that cannot
+        // reach the threshold skips the matcher. Exact: the bound uses the ratio's own formula.
+        let win_len = py::len(&win);
+        if 2.0 * win_len.min(cue_len) as f64 / (win_len + cue_len) as f64 >= 0.85 && sequence_ratio(&win, cue) >= 0.85 {
+            return true;
+        }
+    }
+    false
+}
+
+pub fn is_aside(stmt: &str) -> bool {
+    let low = stmt.to_lowercase();
+    has_phrase(py::head(&low, 14), "separately") || has_phrase(py::head(&low, 12), "unrelated")
+}
+
+pub fn is_change(stmt: &str) -> bool {
+    if is_aside(stmt) {
+        return false;
+    }
+    let low = stmt.to_lowercase();
+    CHANGE_CUES.iter().any(|c| has_phrase(&low, c))
+}
+
+/// The note itself: the text after the identifier, without wrapping quotes.
+pub fn statement(prompt: &str, ident: &str) -> String {
+    let s = crate::glossary::after_ident(prompt, ident);
+    let s = py::strip(s.trim_start_matches(':'));
+    py::strip(s.trim_matches('"')).to_string()
+}
+
+/// One distinct note and the pairIDs that carry it.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Note {
+    pub text: String,
+    pub records: Vec<String>,
+}
+
+/// Distinct notes (copies merged by text similarity >= 0.85) with the pairIDs that carry them.
+pub fn notes_of(records: &[(String, String)], ident: &str) -> Vec<Note> {
+    let mut notes: Vec<Note> = Vec::new();
+    for (pid, prompt) in records {
+        let s = statement(prompt, ident);
+        let low = s.to_lowercase();
+        match notes
+            .iter_mut()
+            .find(|n| sequence_ratio(&n.text.to_lowercase(), &low) >= 0.85)
+        {
+            Some(n) => n.records.push(pid.clone()),
+            None => notes.push(Note {
+                text: s,
+                records: vec![pid.clone()],
+            }),
+        }
+    }
+    notes
+}
+
+pub const ADD_PATTERNS: &[&str] = &[
+    r"([a-z][a-z' -]*?) (?:is|are) on it",
+    r"\badded (?:an? |the |some )?([a-z][a-z' -]*?)(?=[.,;]|$| and\b)",
+    r"\bnow [a-z]{3,6} (?:an? |the |some )([a-z][a-z' -]*?)(?=[.,;]|$| and\b)",
+    r"\bplus (?:an? |the |some )?([a-z][a-z' -]*?)(?=[.,;]|$)",
+];
+// Python's `$` also matches before a final newline: `(?=\n?\z)` in the compiled forms.
+static ADD_RES: LazyLock<Vec<Re>> = LazyLock::new(|| {
+    ADD_PATTERNS
+        .iter()
+        .map(|p| Re::new(&p.replace("|$", r"|(?=\n?\z)")))
+        .collect()
+});
+static LIST_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?:—|:|wants:?|needs:?)\s*([^—:]+?)\.?\s*(?=\n?\z)"));
+static LIST_SPLIT_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r",\s*|\s+and\s+"));
+static ARTICLE_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"^(?:an?|the|some)\s+"));
+
+/// Items of a note that is a list ("… list …: a, b, c and d" / "… — a, b, c, d"); empty otherwise.
+pub fn list_items(text: &str) -> Vec<String> {
+    let Some(c) = LIST_RE.captures(text) else {
+        return Vec::new();
+    };
+    let body = c.get(1).map_or("", |m| m.as_str());
+    if !body.contains(',') {
+        return Vec::new();
+    }
+    LIST_SPLIT_RE
+        .split(py::strip(body))
+        .into_iter()
+        .filter(|p| !py::strip(p).is_empty())
+        .map(|p| py::strip(py::strip(p).trim_matches('.')).to_string())
+        .collect()
+}
+
+/// The earlier list with the change applied: items the change names are taken off; items it puts on are added.
+pub fn current_list(earlier: &[String], change: &str) -> Vec<String> {
+    let low = change.to_lowercase();
+    let mut added: Vec<String> = Vec::new();
+    for re in ADD_RES.iter() {
+        for c in re.captures_iter(&low) {
+            let group = c.get(1).map_or("", |m| m.as_str());
+            let item = ARTICLE_RE.sub(py::strip(group), "");
+            if !item.is_empty() && !added.contains(&item) {
+                added.push(item);
+            }
+        }
+    }
+    let kept: Vec<String> = earlier
+        .iter()
+        .filter(|i| {
+            let l = i.to_lowercase();
+            !low.contains(l.as_str()) || added.contains(&l)
+        })
+        .cloned()
+        .collect();
+    let kept_low: Vec<String> = kept.iter().map(|k| k.to_lowercase()).collect();
+    let mut out = kept.clone();
+    out.extend(added.into_iter().filter(|a| !kept_low.contains(a)));
+    out
+}
+
+/// For each change note sharing a topic word with the request: the note and the earlier plain notes of that
+/// topic (not asides) it supersedes. Each entry is `{"current": {"records", "text"}, "supersedes": [{"records",
+/// "text"}, ...]}` plus `"current_list"` when one earlier list changes.
+pub fn current_statements(records: &[(String, String)], ident: &str, request: &str) -> Vec<Value> {
+    let notes = notes_of(records, ident);
+    let req = words(request);
+    // Pure per-note facts, computed once (the Python recomputes them per pair of notes).
+    let changes: Vec<bool> = notes.iter().map(|n| is_change(&n.text)).collect();
+    let asides: Vec<bool> = notes.iter().map(|n| is_aside(&n.text)).collect();
+    let note_words: Vec<HashSet<String>> = notes.iter().map(|n| words(&n.text)).collect();
+    let mut out = Vec::new();
+    for (idx, n) in notes.iter().enumerate() {
+        if !changes[idx] {
+            continue;
+        }
+        let topic: HashSet<String> = note_words[idx].intersection(&req).cloned().collect();
+        if topic.is_empty() {
+            continue;
+        }
+        let older: Vec<&Note> = notes
+            .iter()
+            .enumerate()
+            .filter(|(j, _)| *j != idx && !changes[*j] && !asides[*j] && !note_words[*j].is_disjoint(&topic))
+            .map(|(_, m)| m)
+            .collect();
+        let mut entry = json!({
+            "current": {"records": n.records, "text": n.text},
+            "supersedes": older.iter().map(|m| json!({"records": m.records, "text": m.text})).collect::<Vec<_>>(),
+        });
+        let lists: Vec<Vec<String>> = older
+            .iter()
+            .map(|m| list_items(&m.text))
+            .filter(|x| !x.is_empty())
+            .collect();
+        if lists.len() == 1 {
+            let updated = current_list(&lists[0], &n.text);
+            let (mut a, mut b) = (updated.clone(), lists[0].clone());
+            a.sort();
+            b.sort();
+            if a != b {
+                entry["current_list"] = json!(updated);
+            }
+        }
+        out.push(entry);
+    }
+    out
+}
+
+/// The memory context with `current_statements` and CURRENT_NOTE added when the identifier records (short
+/// notes, not long histories) hold a change statement on the request's topic; unchanged otherwise.
+///
+/// A payload that parses but is not a JSON object raises in the Python (never reached); here it is unchanged.
+pub fn with_current_statements(
+    context: Option<String>,
+    prefix: &str,
+    items: &[(String, String)],
+    ident: &str,
+    user_input: &str,
+) -> Option<String> {
+    let Some(ctx) = context.as_deref() else { return context };
+    if ctx.is_empty() || !ctx.contains('\n') || items.iter().map(|(_, p)| py::len(p)).sum::<usize>() > MAX_RECORD_CHARS
+    {
+        return context;
+    }
+    let found = current_statements(items, ident, user_input);
+    if found.is_empty() {
+        return context;
+    }
+    let Some((_, body)) = ctx.split_once('\n') else {
+        return context;
+    };
+    let Ok(mut payload) = serde_json::from_str::<Value>(body) else {
+        return context;
+    };
+    let Some(obj) = payload.as_object_mut() else {
+        return context;
+    };
+    let note = obj.get("note").map(py::str_value).unwrap_or_default();
+    obj.insert(
+        "note".into(),
+        Value::String(py::strip(&format!("{note} {CURRENT_NOTE}")).to_string()),
+    );
+    obj.insert("current_statements".into(), Value::Array(found));
+    Some(format!("{prefix}\n{}", py::dumps(&payload, false)))
+}

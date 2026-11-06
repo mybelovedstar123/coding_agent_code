@@ -5,6 +5,7 @@
 //! `py` and `pyre` hold the Python semantics that guarantee it.
 
 pub mod config;
+pub mod current_statements;
 pub mod difflib;
 pub mod embed;
 pub mod event_state;
