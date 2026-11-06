@@ -40,3 +40,24 @@ static WORD_CHAR_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"\A\w\z"));
 fn is_word(c: Option<char>) -> bool {
     c.is_some_and(|c| WORD_CHAR_RE.is_match(c.encode_utf8(&mut [0u8; 4])))
 }
+
+/// `re.search(rf"\b{re.escape(form)}\b", text)`: some occurrence of the literal form (overlapping ones included)
+/// with a word boundary at both ends. Checked per occurrence instead of by running the pattern over the whole
+/// text: the Unicode `\b` keeps the regex off its fast engines, and the scans over long records dominated.
+fn names_form(form: &str, text: &str) -> bool {
+    let (Some(first), Some(last)) = (form.chars().next(), form.chars().next_back()) else {
+        return cached_re(format!(r"\b{}\b", escape(form))).is_match(text);
+    };
+    let (first_word, last_word) = (is_word(Some(first)), is_word(Some(last)));
+    let mut from = 0;
+    while let Some(i) = text[from..].find(form) {
+        let start = from + i;
+        let end = start + form.len();
+        if is_word(text[..start].chars().next_back()) != first_word && is_word(text[end..].chars().next()) != last_word
+        {
+            return true;
+        }
+        from = start + first.len_utf8();
+    }
+    false
+}
