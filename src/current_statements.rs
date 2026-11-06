@@ -75,3 +75,11 @@ just still also not no yes so as if than too very can will would should could do
 before after over about into out up down off on is it's i'd i'm we're they're one two";
 pub static STOP: LazyLock<HashSet<&'static str>> = LazyLock::new(|| py::split_ws(STOP_WORDS).into_iter().collect());
 pub const MAX_RECORD_CHARS: usize = 15_000;
+pub const CURRENT_NOTE: &str = concat!(
+    "current_statements: statements among the records for the identifier in the request that describe a change ",
+    "(an update, a revision, a replacement or a handover), each with the earlier statements on the same topic and ",
+    "the records they come from. Copies of a note can be refiled, so their filing dates may not show the order in ",
+    "which things were said. current_list, where given, is a host-side reading of a list after the change and can ",
+    "be wrong; the records themselves decide. When you name the current decision or plan, use the statement's own ",
+    "words and verb form as written (not rephrased into another tense or an -ing form)."
+);
