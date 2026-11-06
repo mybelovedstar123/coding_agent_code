@@ -103,3 +103,9 @@ pub fn parse_reply(data: &Value) -> Result<Reply, String> {
 pub struct HttpChat {
     http: reqwest::Client,
 }
+
+impl HttpChat {
+    pub fn new(http: reqwest::Client) -> Self {
+        HttpChat { http }
+    }
+}
