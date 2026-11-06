@@ -20,3 +20,10 @@ pub const MEMORY_TOOLS: [&str; 5] = [
     "search_subjects",
     "search_memories_in_subjects",
 ];
+
+pub const READ_TOOLS: [&str; 4] = [
+    "search_memories",
+    "fetch_memories",
+    "search_subjects",
+    "search_memories_in_subjects",
+];
