@@ -549,3 +549,19 @@ pub static ORG_MARKERS: LazyLock<Vec<Re>> = LazyLock::new(|| {
         )),
     ]
 });
+
+/// Names the records mark as organisations ("works at X", "after X fell through", "took over … from X" for a
+/// supplier swap).
+pub fn orgs_in<'a>(texts: impl IntoIterator<Item = &'a str>) -> HashSet<String> {
+    let mut out = HashSet::new();
+    for t in texts {
+        for pat in ORG_MARKERS.iter() {
+            for c in pat.captures_iter(t) {
+                if let Some(m) = c.get(1) {
+                    out.insert(m.as_str().to_string());
+                }
+            }
+        }
+    }
+    out
+}
