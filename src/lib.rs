@@ -10,6 +10,7 @@ pub mod difflib;
 pub mod embed;
 pub mod event_state;
 pub mod glossary;
+pub mod named_tool;
 pub mod policy;
 pub mod prompts;
 pub mod py;
