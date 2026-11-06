@@ -197,4 +197,41 @@ impl PyInt {
         let t = x.trunc();
         Some(PyInt::new(t < 0.0, &format!("{:.0}", t.abs())))
     }
+
+    /// `int(s)` for a str (base 10): Unicode decimal digits and whitespace, one sign, single underscores between
+    /// digits; None where Python raises ValueError.
+    pub fn parse(s: &str) -> Option<PyInt> {
+        // _PyUnicode_TransformDecimalAndSpaceToASCII, then PyLong_FromString.
+        let mapped: String = s
+            .chars()
+            .map(|c| {
+                if py::is_space(c) {
+                    ' '
+                } else if let Some(d) = decimal_value(c) {
+                    char::from(b'0' + d as u8)
+                } else if c.is_ascii() {
+                    c
+                } else {
+                    '?'
+                }
+            })
+            .collect();
+        let t = mapped.trim_matches(|c: char| matches!(c, ' ' | '\t' | '\n' | '\r' | '\x0b' | '\x0c'));
+        let (neg, body) = match t.as_bytes().first() {
+            Some(b'-') => (true, &t[1..]),
+            Some(b'+') => (false, &t[1..]),
+            _ => (false, t),
+        };
+        if body.is_empty() || body.starts_with('_') || body.ends_with('_') || body.contains("__") {
+            return None;
+        }
+        if !body.chars().all(|c| c.is_ascii_digit() || c == '_') {
+            return None;
+        }
+        let digits: String = body.chars().filter(|&c| c != '_').collect();
+        if digits.len() > INT_MAX_STR_DIGITS {
+            return None;
+        }
+        Some(PyInt::new(neg, &digits))
+    }
 }
