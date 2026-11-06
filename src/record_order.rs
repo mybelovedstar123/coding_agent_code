@@ -16,3 +16,5 @@ pub static WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z0-9]{3,}"));
 
 /// A record as (pairID, timestamp text, timestamp, prompt).
 pub type Record = (String, String, DateTime<Utc>, String);
+/// A copy as (pairID, timestamp text, timestamp).
+pub type Copy = (String, String, DateTime<Utc>);
