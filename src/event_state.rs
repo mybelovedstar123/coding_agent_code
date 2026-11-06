@@ -303,3 +303,21 @@ pub enum PyVal {
     List(Vec<PyVal>),
     Dict(IndexMap<String, PyVal>),
 }
+
+impl PyVal {
+    /// `repr(v)`.
+    fn repr(&self) -> String {
+        match self {
+            PyVal::Str(s) => py::repr_str(s),
+            PyVal::List(items) => format!("[{}]", items.iter().map(PyVal::repr).collect::<Vec<_>>().join(", ")),
+            PyVal::Dict(m) => format!(
+                "{{{}}}",
+                m.iter()
+                    .map(|(k, v)| format!("{}: {}", py::repr_str(k), v.repr()))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+            other => other.str(),
+        }
+    }
+}
