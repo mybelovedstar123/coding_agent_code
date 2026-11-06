@@ -666,3 +666,15 @@ static CONFIRM_VERIFY: LazyLock<PyRe> = LazyLock::new(|| {
 static CONFIRM_STATED: LazyLock<PyRe> = LazyLock::new(|| re(r"\bmy\b[^.?!]{0,48}?\b(?:is|stays|uses|remains)\b"));
 /// A request to change the setting is a task, not a confirmation.
 static CONFIRM_CHANGE: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(change|switch|set|use|turn|apply|make the|update)\b"));
+
+/// A request to confirm that the user's own Ditto appearance setting (accent, colour, font, typeface, mode) has a
+/// value they name ("make sure my Ditto accent is ..."), as opposed to a request to change it.
+pub fn asks_to_confirm_preference(text: &str) -> bool {
+    let w = _words(text);
+    let low = text.to_lowercase();
+    names_appearance_setting(&w, &low)
+        && PREF_OWN.is_match(&low)
+        && CONFIRM_VERIFY.is_match(&low)
+        && CONFIRM_STATED.is_match(&low)
+        && !CONFIRM_CHANGE.is_match(&low)
+}
