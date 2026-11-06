@@ -101,3 +101,9 @@ static IMG_EARLIER: LazyLock<PyRe> = LazyLock::new(|| {
         r"(?:that|the) (?:latest|last) \w+)\b",
     ))
 });
+static IMG_POINTED: LazyLock<PyRe> = LazyLock::new(|| {
+    re(concat!(
+        r"\b(you (?:just )?(?:g\w{4,9}d|m\w{1,3}de|cr\w{3,6}d)|from earlier|from before|",
+        r"(?:the one|it) you (?:just )?\w+)\b",
+    ))
+});
