@@ -513,3 +513,5 @@ pub const AGREED_START_NOTE: &str = "The user asks to start something the way it
 what was agreed. If it is a saved workflow, list the saved workflows first and run the one that matches; if the agreed \
 workflow is not saved yet, create it under the name agreed for it. If it is a one-off job, dispatch the job and do not \
 create or run a workflow.";
+
+static START_RE: LazyLock<PyRe> = LazyLock::new(|| re(r"\b(start|kick off|begin|launch)\b"));
