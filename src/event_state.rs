@@ -447,4 +447,12 @@ impl JsonParser<'_> {
             }
         }
     }
+
+    fn hex4(&self, i: usize) -> Option<u32> {
+        let mut v = 0;
+        for k in 0..4 {
+            v = v * 16 + self.at(i + k)?.to_digit(16)?;
+        }
+        Some(v)
+    }
 }
