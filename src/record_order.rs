@@ -9,3 +9,5 @@ use crate::pyre::Re;
 use chrono::{DateTime, Utc};
 use std::collections::{BTreeSet, HashSet};
 use std::sync::LazyLock;
+
+pub const COPY_JACCARD: f64 = 0.7;
