@@ -480,3 +480,4 @@ names).";
 static EFFORT_RE: LazyLock<PyRe> = LazyLock::new(|| {
     re(r"\b(r\w{0,2}[ae]\w{0,2}s\w{0,2}n\w{0,3}g|th\w{0,2}nk\w{0,3}g)\s+(ef\w{1,4}t|d\w{1,3}th|l\w{1,3}l)\b")
 });
+static EFFORT_HOW_HARD: LazyLock<PyRe> = LazyLock::new(|| re(r"\bhow h\w{2,3}d you t\w{2,4}k\b"));
