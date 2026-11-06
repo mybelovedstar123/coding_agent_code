@@ -18,3 +18,16 @@ pub static WORD_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"[a-z0-9]{3,}"));
 pub type Record = (String, String, DateTime<Utc>, String);
 /// A copy as (pairID, timestamp text, timestamp).
 pub type Copy = (String, String, DateTime<Utc>);
+
+/// The statement a record files under the identifier: the text after `<ident>:` up to the end of its line.
+pub fn statement(text: &str, ident: &str) -> String {
+    let low = text.to_lowercase();
+    let needle = format!("{ident}:");
+    match low.find(&needle) {
+        None => String::new(),
+        Some(at) => {
+            let rest = &low[at + needle.len()..];
+            rest.split('\n').next().unwrap_or("").to_string()
+        }
+    }
+}
