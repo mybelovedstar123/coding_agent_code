@@ -161,3 +161,11 @@ pub fn content_key(pair: &Pair) -> (DateTime<Utc>, &str, &str) {
 pub fn cmp_content(a: &Pair, b: &Pair) -> Ordering {
     content_key(a).cmp(&content_key(b))
 }
+
+#[derive(Debug, Clone)]
+pub struct Subject {
+    pub subject_id: String,
+    pub text: String,
+    pub description: String,
+    pub pairs: BTreeSet<String>,
+}
