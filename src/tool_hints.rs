@@ -648,3 +648,9 @@ pub fn preference_note(user_input: &str) -> String {
         String::new()
     }
 }
+
+pub const CONFIRM_PREFERENCE_NOTE: &str = "The user asks you to confirm that one of their own Ditto settings has the \
+value they name. Their stored preference for that setting is in their records. Compare the two: if the records \
+already give that same value, do not call any tool (not even one that lists settings or options); reply that it is \
+already set to that value, citing the record. If the records give a different value, or none, set the value the user \
+named with that setting's tool.";
