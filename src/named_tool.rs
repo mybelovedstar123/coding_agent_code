@@ -41,3 +41,15 @@ fn tool_name(t: &Value) -> String {
         .unwrap_or("")
         .to_string()
 }
+
+/// Offered tools whose brand word the request uses as a name.
+pub fn named_tools(user_input: &str, tool_defs: &[Value]) -> Vec<String> {
+    tool_defs
+        .iter()
+        .map(tool_name)
+        .filter(|n| {
+            let b = brand(n);
+            !b.is_empty() && named_in(user_input, &b)
+        })
+        .collect()
+}
