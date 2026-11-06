@@ -34,3 +34,4 @@ static ARTIFACT_RE: LazyLock<Re> =
     LazyLock::new(|| Re::new(r"<\|(?:start|end|channel|message|call|constrain|return)\|>"));
 pub const MAX_TURNS: usize = 12;
 pub const CONTEXT_MEMORIES: usize = 10;
+pub const CONTEXT_TOP_FULL: usize = 4;
