@@ -270,3 +270,9 @@ static TEAM_FEEDBACK: LazyLock<PyRe> = LazyLock::new(|| {
         r"|to the ditto t\w{2,3}m|whoever (builds|makes) (this|it|t\w{2,3})|tell the (devs?|developers?|ditto t\w{2,3}m))\b",
     ))
 });
+
+/// Feedback meant for the people who build Ditto ("let the team know …", "report to the devs …", "send this to the
+/// Ditto team", "forward this to whoever builds this").
+pub fn wants_team_feedback(text: &str) -> bool {
+    TEAM_FEEDBACK.is_match(&text.to_lowercase())
+}
