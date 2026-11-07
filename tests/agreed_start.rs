@@ -72,3 +72,22 @@ fn team_feedback_requests_fire() {
         assert!(!th::wants_team_feedback(text), "should not fire: {text}");
     }
 }
+
+#[test]
+fn chat_tool_preference_requests_fire() {
+    for text in [
+        "Change my chat tools so you enable image tools.",
+        "Change my chat tools so you turn off agent jobs.",
+        "From now on, allow only memory tuols in our chats.",
+        "Going forward, tjrn off agent jobs — lock that in.",
+    ] {
+        assert!(th::wants_chat_tool_prefs(text), "should fire: {text}");
+    }
+    for text in [
+        "Is there a way to turn on dark mode?",
+        "Send an agent off to build a small Flask app that serves a health check asynchronously.",
+        "Make the app accent sllate ble-ish.",
+    ] {
+        assert!(!th::wants_chat_tool_prefs(text), "should not fire: {text}");
+    }
+}
