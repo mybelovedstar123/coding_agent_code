@@ -10,3 +10,32 @@ call and an unmeasured behaviour change. The port is proven by replaying cached 
 1. **One Python module, one Rust module**, with the same name and the same public functions (snake_case, same
    argument order). Constants keep their names (`UPPER_CASE`). Docstrings become `///` doc comments; keep the
    explanatory comments.
+2. **Behaviour, not style, is ported.** Where Python and Rust differ, follow Python:
+   - **Lengths and slices count code points.** Use `py::len`, `py::head`, `py::tail` and `py::slice`, never
+     `str::len` or byte slicing on text.
+   - **Whitespace is Python's.** Use `py::strip`/`lstrip`/`rstrip`, `py::split_ws` (`str.split()`) and
+     `py::squash_ws` (`" ".join(s.split())`).
+   - `str.lower()` is `to_lowercase()`.
+   - **`repr()` and `{x!r}`:** `py::repr_str`, or `py::repr_value` for JSON values.
+   - **`json.dumps`:** `py::dumps(&value, ensure_ascii)`. Python's default is `ensure_ascii=True`; pass `false`
+     only where the Python passes `ensure_ascii=False`. Use `serde_json::json!` / `Value` with `preserve_order`,
+     so object keys keep insertion order as Python dicts do.
+   - **Float text:** `py::float_repr`; `round(x, n)` is `py::round`.
+   - **Regex:** `pyre::Re` (fancy-regex: lookaround works). Rewrite only what differs:
+     - Python's `$` also matches before a final newline; write `(?=\n?\z)` when that matters.
+     - `re.match` is `Re::match_start`; `re.findall` with one group or none is `Re::findall`, with more groups
+       `findall_groups`.
+     - `re.sub` with a function is `sub_with`; `re.escape` is `pyre::escape`.
+     - Compile each pattern once, in a `static LazyLock<Re>`.
+   - **Ordering:**
+     - A Python `dict` iterates in insertion order; use `IndexMap`.
+     - `sorted()` is stable; use `sort_by` (stable) with the same key, and `py`-compatible float comparison
+       (`store::cmp_f64`).
+     - String comparison is code-point order, which Rust's `str` `Ord` already is.
+   - **Python sets.** A Python `set` of strings iterates in an order that varies between processes. When a set's
+     iteration order reaches a prompt in the Python code, say so in a comment `// PY-SET-ORDER:` and in your
+     report; do not invent an order. Where Python sorts it, sort the same way.
+   - **Truthiness.** Python's `if x:` on strings, lists, dicts and numbers means non-empty or non-zero
+     (`store::truthy` for JSON values).
+   - **Exceptions.** Where the Python raises (for example `json.loads` on bad text), mirror the observable outcome
+     (the caller's `except` path) with `Option`/`Result`. Never panic on input data.
