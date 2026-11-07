@@ -113,3 +113,39 @@ def edge():
     cases.append(outputs(big, ident, MINIMAL) | {"context": MINIMAL})
     cases.append(outputs(items[1:], ident, MINIMAL) | {"context": MINIMAL})
     return {"texts": texts, "statements": stmts, "glossed": glossed, "cases": cases}
+
+
+def main():
+    datasets = []
+    totals = {"requests": 0, "requests_firing": 0, "sweep": 0, "sweep_firing": 0}
+    for path in R.DATASETS:
+        name, mem, flat, requests = R.load(path)
+        req_cases = []
+        by_id = {pid: p.prompt for pid, p in mem.pairs.items()}
+        for category, q in requests:
+            ident, ident_records = R.request_identifier(mem, q)
+            if not ident:
+                continue
+            ctx, spec = R.build_context(mem, q, ident_records)
+            items = [(p.pair_id, p.prompt) for p in ident_records]
+            c = outputs(items, ident, ctx, by_id) | {"category": category, "question": q, "context_spec": spec, "context_digest": R.digest(ctx)}
+            req_cases.append(c)
+        idents = sorted({t.lower() for p in mem.pairs.values() for t in R.IDENT_RE.findall(f"{p.prompt}\n{p.response}")})
+        sweep = []
+        for ident in idents:
+            found, records = R.request_identifier(mem, ident)
+            if found != ident or not records or len(records) > SWEEP_MAX:
+                continue
+            items = [(p.pair_id, p.prompt) for p in records]
+            sweep.append(outputs(items, ident, MINIMAL, by_id) | {"context": MINIMAL})
+        totals["requests"] += len(req_cases)
+        totals["requests_firing"] += sum(fires(c) for c in req_cases)
+        totals["sweep"] += len(sweep)
+        totals["sweep_firing"] += sum(fires(c) for c in sweep)
+        print(f"{name}: {len(req_cases)} identifier requests ({sum(fires(c) for c in req_cases)} firing), "
+              f"{len(sweep)} sweep identifiers ({sum(fires(c) for c in sweep)} firing)", file=sys.stderr)
+        datasets.append({"name": name, "user_id": mem.user_id, "records": flat, "requests": req_cases, "sweep": sweep})
+    e = edge()
+    print(f"edge: {len(e['texts'])} texts, {len(e['cases'])} context cases", file=sys.stderr)
+    path = R.write("glossary", {"prefix": PREFIX, "datasets": datasets, "edge": e})
+    print(f"wrote {path}: {totals}", file=sys.stderr)
