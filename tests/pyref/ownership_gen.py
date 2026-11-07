@@ -68,3 +68,27 @@ def load(path):
 
 def chain_list(ch):
     return [[ts, s] for ts, s in ch]
+
+
+def make_context(pairs, request, k=8, note=True, cut=None):
+    """A retrieved-record context: the k records sharing the most request tokens, oldest first, some excerpted."""
+    want = set(ownership.tokens(request)) - ownership.STOP
+    scored = []
+    for i, (pid, p) in enumerate(pairs.items()):
+        score = len(want & set(ownership.tokens(p.prompt)))
+        if score:
+            scored.append((-score, i, pid))
+    scored.sort()
+    items = []
+    for rank, (_, _, pid) in enumerate(scored[:k]):
+        p = pairs[pid]
+        text = store.render_pair(p)
+        if cut and rank % 2 == 1:
+            text = text[:cut] + " …"
+        items.append({"pairID": pid, "timestamp": store.fmt_ts(p.ts), "text": text})
+    items.sort(key=lambda it: it["timestamp"])
+    payload = {}
+    if note:
+        payload["note"] = "Records retrieved for this request, oldest first."
+    payload["memories"] = items
+    return PREFIX + "\n" + json.dumps(payload, ensure_ascii=False)
