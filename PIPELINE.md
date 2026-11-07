@@ -70,3 +70,5 @@ refusal state appears.
   was added a further failed model call ends the loop. When only the 60 s answer
   reserve is left, the deciding loop ends and a final stage writes the answer
   from the transcript: when no reply exists yet, recovery (c).
+- Turns: the deciding loop runs at most 12 model turns; after that the stages
+  above (final check, recovery) write the reply from the transcript.
