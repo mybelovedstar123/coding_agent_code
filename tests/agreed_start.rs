@@ -110,3 +110,21 @@ fn capability_questions_fire() {
         assert!(!th::asks_capability(text), "should not fire: {text}");
     }
 }
+
+#[test]
+fn work_requests_fire() {
+    for text in [
+        "Go ahead and refactor the utils file to remove dupliacitln for me as son as you can.",
+        "I want you to write a scrmit to ddepue my CSV export. Start it.",
+        "Please actually srcape the latest headlines, don't just tell me how.",
+    ] {
+        assert!(th::wants_work_done(text), "should fire: {text}");
+    }
+    for text in [
+        "Remember Sunny's thing, transaero side ledger? Who is actually running it now?",
+        "Don't build anything — just do the arithmdtic: what's the copmund total of 1,024, 51.2, and 74?",
+        "This is a one-off calculation, not a coding job: normalize 48.5, 277, and 310 to sum to 1.",
+    ] {
+        assert!(!th::wants_work_done(text), "should not fire: {text}");
+    }
+}
