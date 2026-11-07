@@ -71,3 +71,8 @@ call and an unmeasured behaviour change. The port is proven by replaying cached 
      - cargo runs through
        `wsl -d Ubuntu -- bash /mnt/c/Users/alchemist/AppData/Local/Temp/claude/c--alchemist-bittensor-sn-118/1cba4adf-c6cb-4d73-a102-5f35c587b82b/scratchpad/cargo.sh <args>`
        (the target directory is on the WSL filesystem), with `MSYS_NO_PATHCONV=1` set when calling from Git Bash.
+7. **Scope.**
+   - Edit only your own modules' files under `src/`, your `tests/<module>.rs`, your fixtures and generators.
+   - Do not edit `lib.rs`, `py.rs`, `pyre.rs`, `store.rs` or other modules. If you need a helper there, put a
+     private one in your module and mention it in your report.
+   - Never modify anything in `submit/build-agent`.
