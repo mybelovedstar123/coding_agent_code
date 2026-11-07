@@ -261,3 +261,10 @@ add_call("edge-big", base_ctx, ["q"], "", [HEAD + "\n" + rows_json(12, step_of=l
 add_call("edge-big-neg", base_ctx, ["q"], "", [HEAD + "\n" + rows_json(12, step_of=lambda i: -(10**30) - i)])
 
 keys = ["Effective Step", "<b>Entity</b>", "  OPERATION:  ", "__x__", "Ünïcode Key", "a<b>c</b>d", "<>", "<a>", "--"]
+cells = [" `x` ", "<code>a</code>", "`` y ``", " z ", "a<b", "`\x1c q \x1c`", ""]
+fixture = {
+    "constants": {"EVENT_STATE_NOTE": event_state.EVENT_STATE_NOTE, "MIN_EVENTS": event_state.MIN_EVENTS, "Q": event_state.Q},
+    "norm_key": [[k, event_state._norm_key(k)] for k in keys],
+    "cell": [[c, event_state._cell(c)] for c in cells],
+    "texts": list(texts_seen.values()),
+    "calls": calls,
