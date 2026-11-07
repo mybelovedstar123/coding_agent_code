@@ -24,3 +24,32 @@ from harness import current_statements as cs  # noqa: E402
 PREFIX = R.PREFIX
 SWEEP_MAX = 40
 MINIMAL = PREFIX + "\n" + '{"note": "Stored records.", "memories": []}'
+
+
+def outputs(items, ident, request, context, by_id):
+    """Every function's output. The direct calls are made only on short identifier records (the agent reaches them
+    only through with_current_statements, which skips records over MAX_RECORD_CHARS); long ones keep null there."""
+    short = sum(len(p) for _, p in items) <= cs.MAX_RECORD_CHARS
+    notes = cs.notes_of(items, ident) if short else []
+    return {
+        "ident": ident,
+        "request": request,
+        "items": [pid if by_id.get(pid) == prompt else [pid, prompt] for pid, prompt in items],
+        "words": sorted(cs.words(request)),
+        "notes": [
+            {
+                "text": n["text"],
+                "records": n["records"],
+                "is_change": cs.is_change(n["text"]),
+                "is_aside": cs.is_aside(n["text"]),
+                "list_items": cs.list_items(n["text"]),
+                "words": sorted(cs.words(n["text"])),
+            }
+            for n in notes
+        ],
+        "short": short,
+        "current_statements": cs.current_statements(items, ident, request) if short else None,
+        "with_current_statements": R.changed(
+            context, cs.with_current_statements(context, PREFIX, items, ident, request), full=True
+        ),
+    }
