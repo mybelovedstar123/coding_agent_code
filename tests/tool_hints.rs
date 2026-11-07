@@ -58,3 +58,7 @@ const EFFORT_WIDENED: &[&str] = &[
     "For planning context caae4db14610d268b: When you get a sec, dial in my reasoning ecfort the way I lioe it.",
     "For planning context c7f0276a3ea7b669d: Sort out your rasojing depth for me.",
 ];
+
+fn effort_widened(text: &str, name: &str) -> bool {
+    matches!(name, "wants_usual_effort" | "effort_note") && EFFORT_WIDENED.contains(&text)
+}
