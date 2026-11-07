@@ -68,3 +68,42 @@ fn from_added_rule(note: &str) -> bool {
     let prefix = &th::TOOL_HINT_NOTE[..th::TOOL_HINT_NOTE.find("{tool}").expect("placeholder")];
     ADDED_RULES.iter().any(|t| note.starts_with(&format!("{prefix}{t} ")))
 }
+
+#[test]
+fn constants_and_rules_match() {
+    let fx = fixture();
+    let c = &fx["constants"];
+    for (name, value) in [
+        ("TOOL_HINT_NOTE", th::TOOL_HINT_NOTE),
+        ("RESEARCH_SEND_NOTE", th::RESEARCH_SEND_NOTE),
+        ("EFFORT_NOTE", th::EFFORT_NOTE),
+        ("PREFERENCE_NOTE", th::PREFERENCE_NOTE),
+        ("SEND_ON_RECORD_NOTE", th::SEND_ON_RECORD_NOTE),
+        ("EXACT_VALUE_NOTE", th::EXACT_VALUE_NOTE),
+    ] {
+        assert_eq!(value, s(&c[name]), "{name}");
+    }
+    let rules: Vec<(String, String)> = fx["rules"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| (s(&r[0]).to_string(), s(&r[1]).to_string()))
+        .collect();
+    assert_eq!(rules.len() + ADDED_RULES.len(), th::RULES.len());
+    for ((tool, _), added) in th::RULES[rules.len()..].iter().zip(ADDED_RULES) {
+        assert_eq!(tool, added);
+    }
+    for ((tool, test), (want_tool, want_test)) in th::RULES.iter().zip(&rules) {
+        assert_eq!(tool, want_tool);
+        let f = WANTS.iter().find(|(n, _)| n == want_test).expect("known test").1;
+        assert!(std::ptr::fn_addr_eq(*test, f), "{tool}: {want_test}");
+    }
+    let extra = fx["rule_extra"].as_object().unwrap();
+    assert_eq!(
+        extra.len(),
+        th::RULE_EXTRA.iter().filter(|(t, _)| !ADDED_RULES.contains(t)).count()
+    );
+    for (tool, text) in th::RULE_EXTRA.iter().filter(|(t, _)| !ADDED_RULES.contains(t)) {
+        assert_eq!(*text, s(&extra[*tool]), "{tool}");
+    }
+}
