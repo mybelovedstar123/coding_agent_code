@@ -72,3 +72,7 @@ def load(path):
     requests = [(c.get("question_type") or "", c["question"]) for c in d["memory_cases"]]
     requests += [("tool:" + (c.get("category") or ""), c["prompt"]) for c in d["tool_cases"]]
     return path.rsplit("/", 1)[-1], mem, flat, requests
+
+
+def item(p):
+    return {"pairID": p.pair_id, "timestamp": fmt_ts(p.ts), "text": render_pair(p)}
