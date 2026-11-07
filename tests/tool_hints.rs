@@ -149,3 +149,30 @@ fn triggers_match() {
     );
     assert!(reqs.len() > 1000);
 }
+
+#[test]
+fn notes_match() {
+    let fx = fixture();
+    let reqs = fx["requests"].as_array().unwrap();
+    let cats: Vec<Vec<Value>> = fx["catalogs"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|c| c["tool_defs"].as_array().unwrap().clone())
+        .collect();
+    let mut fired = 0;
+    for row in fx["notes"].as_array().unwrap() {
+        let text = s(&reqs[row["req"].as_u64().unwrap() as usize]["text"]);
+        let defs = &cats[row["cat"].as_u64().unwrap() as usize];
+        for (name, f) in WITH_TOOLS {
+            let got = f(text, defs);
+            fired += usize::from(!got.is_empty());
+            let want = s(&row[*name]);
+            if want.is_empty() && (*name == "tool_hint_note" && from_added_rule(&got) || effort_widened(text, name)) {
+                continue;
+            }
+            assert_eq!(got, want, "{name}({text:?}) on catalog {}", row["cat"]);
+        }
+    }
+    assert!(fired > 600, "{fired} notes fired");
+}
