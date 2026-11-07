@@ -428,3 +428,10 @@ fn fill_two_drafts(a: &str, b: &str) -> String {
     let (mid, tail) = rest.split_once("{b}").expect("{b} in the note");
     format!("{head}{a}{mid}{b}{tail}")
 }
+
+fn reply_text(reply: &Reply) -> String {
+    match &reply.content {
+        Some(Value::String(s)) => s.clone(),
+        _ => String::new(),
+    }
+}
