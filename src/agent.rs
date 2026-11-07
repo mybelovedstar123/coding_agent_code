@@ -344,3 +344,22 @@ async fn parse_json_args(raw: Option<&Value>) -> (Map<String, Value>, Option<Str
         ),
     }
 }
+
+/// Model-authored tool arguments as a JSON object, or ({}, reason) when they are not a JSON object string (NaN/Infinity
+/// are rejected as they are not JSON). For the program tool, arguments sent as bare program text instead of a JSON
+/// object (some providers emit the code channel that way) are taken as {"code": text}, so the model's own program runs
+/// and any error it has is reported as a program error.
+async fn parse_tool_args(raw: Option<&Value>, name: &str) -> (Map<String, Value>, Option<String>) {
+    let (args, bad) = parse_json_args(raw).await;
+    if bad.is_some() && name == pytool::TOOL_NAME {
+        if let Some(Value::String(s)) = raw {
+            let first = py::lstrip(s).chars().next();
+            if !py::strip(s).is_empty() && !matches!(first, Some('{') | Some('[') | Some('"')) {
+                let mut m = Map::new();
+                m.insert("code".into(), Value::String(s.clone()));
+                return (m, None);
+            }
+        }
+    }
+    (args, bad)
+}
