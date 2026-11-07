@@ -43,3 +43,8 @@ def load(path):
     }
     requests = [m["question"] for m in d["memory_cases"]] + [t["prompt"] for t in d["tool_cases"]]
     return pairs, list(dict.fromkeys(requests))
+
+
+def records_for(pairs, ident):
+    found = [p for p in pairs.values() if ident in f"{p.prompt}\n{p.response}".lower()]
+    return sorted(found, key=store.content_key)
