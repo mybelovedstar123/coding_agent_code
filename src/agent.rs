@@ -48,3 +48,5 @@ pub const NOT_DELIVERED: &str = "tool call not delivered (not executed)";
 pub const OUTCOME_UNKNOWN: &str = "outcome unknown";
 pub const REFUSED: &str = "tool call refused by the endpoint (not executed)";
 pub const ROUTER_BUDGET_S: f64 = 40.0;
+/// No tool call starts with less than this left in the case budget (D19).
+pub const TOOL_CALL_RESERVE_S: f64 = 15.0;
