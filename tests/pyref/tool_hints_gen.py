@@ -284,3 +284,24 @@ fuzzy = [
     for w, t in ratio_pairs[:4000]
     for r in (0.6, 0.7, 0.8)
 ]
+
+fixture = {
+    "constants": {
+        k: getattr(tool_hints, k)
+        for k in (
+            "TOOL_HINT_NOTE",
+            "RESEARCH_SEND_NOTE",
+            "EFFORT_NOTE",
+            "PREFERENCE_NOTE",
+            "SEND_ON_RECORD_NOTE",
+            "EXACT_VALUE_NOTE",
+        )
+    },
+    "rules": [[t, f.__name__] for t, f in tool_hints.RULES],
+    "rule_extra": tool_hints.RULE_EXTRA,
+    "catalogs": catalogs,
+    "requests": wants,
+    "notes": notes,
+    "ratios": ratios,
+    "fuzzy": fuzzy,
+}
