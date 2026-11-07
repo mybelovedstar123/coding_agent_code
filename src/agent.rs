@@ -116,3 +116,10 @@ fn secs(x: f64) -> Duration {
 
 /// A call the model made: its id, the tool name, the parsed arguments, and why it may not run (if so).
 type ModelCall = (Value, String, Map<String, Value>, Option<String>);
+
+/// An executed call, reported in `tool_calls`.
+struct Call {
+    name: String,
+    args: Map<String, Value>,
+    hop: i64,
+}
