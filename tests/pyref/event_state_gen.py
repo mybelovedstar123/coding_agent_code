@@ -6,3 +6,8 @@ the records carry, with that identifier's records chosen as agent.request_identi
 (MEMORY_CONTEXT_PREFIX + "\\n" + json.dumps({"note", "memories": [{pairID, timestamp, text}]}, ensure_ascii=False)).
 Plus synthetic edge cases derived from the code (JSON quirks, csv quoting, markdown, sentence roles, step parsing,
 context shapes). Writes tests/fixtures/event_state.json."""
+
+import glob
+import json
+import os
+import sys
