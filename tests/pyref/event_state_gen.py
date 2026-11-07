@@ -268,3 +268,5 @@ fixture = {
     "cell": [[c, event_state._cell(c)] for c in cells],
     "texts": list(texts_seen.values()),
     "calls": calls,
+}
+with open(OUT, "w", encoding="utf-8") as fh:
