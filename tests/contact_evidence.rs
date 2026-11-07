@@ -185,3 +185,50 @@ fn edge_cases() {
     let (_, f) = run_cases(&mem, e["cases"].as_array().expect("cases"), "edge");
     assert!(f > 50);
 }
+
+/// Every context shape, including the ones the Python raises on (a payload that is not an object, a non-dict
+/// memory item): there the port leaves the context unchanged (and context_texts is "").
+#[test]
+fn context_shapes() {
+    let fx = load("contact_evidence");
+    let e = &fx["edge"];
+    let mem = memory("miner", &e["records"]);
+    let some = vec![
+        mem.pairs["e06"].clone(),
+        mem.pairs["e02"].clone(),
+        mem.pairs["e14"].clone(),
+    ];
+    let mut raised = 0;
+    for shape in e["shapes"].as_array().expect("shapes") {
+        let ctx = shape["context"].as_str().map(String::from);
+        let got: [(&str, Value); 6] = [
+            ("with_removal_note", ce::with_removal_note(ctx.clone(), PREFIX).into()),
+            ("context_texts", ce::context_texts(ctx.as_deref()).into()),
+            ("with_records", ce::with_records(ctx.clone(), PREFIX, &some).into()),
+            ("with_records_empty", ce::with_records(ctx.clone(), PREFIX, &[]).into()),
+            (
+                "with_records_and_note",
+                ce::with_records_and_note(ctx.clone(), PREFIX, &some, "Extra note.").into(),
+            ),
+            (
+                "with_records_and_note_empty",
+                ce::with_records_and_note(ctx.clone(), PREFIX, &[], "").into(),
+            ),
+        ];
+        for (what, value) in got {
+            let want = &shape[what];
+            if want.get("raises").is_some() {
+                raised += 1;
+                let fallback: Value = if what == "context_texts" {
+                    "".into()
+                } else {
+                    ctx.clone().into()
+                };
+                assert_eq!(value, fallback, "{what} fallback on {ctx:?}");
+            } else {
+                assert_eq!(value, want["value"], "{what} on {ctx:?}");
+            }
+        }
+    }
+    assert!(raised > 0);
+}
