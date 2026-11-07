@@ -410,3 +410,11 @@ The program tool's `records(ids)` returns, per record, `id`, `timestamp`,
 `user`, `ditto`, and also `pairID` and `text` exactly as the memory context
 shows the record.
 
+## Environment (declared)
+
+`PORT` (default 8080) and an optional `--env-file`; `DITTOBENCH_MODEL`;
+`OLLAMA_BASE_URL` (embeddings); `DITTOBENCH_PROVIDER` with
+`DITTOBENCH_INFERENCE_BASE_URL` / `CHUTES_BASE_URL` / `CHUTES_API_KEY`, or
+`OPENROUTER_BASE_URL` / `OPENROUTER_API_KEY` for local practice. A per-request
+`inference_base_url` from the scorer always takes precedence. No other
+environment is read.
