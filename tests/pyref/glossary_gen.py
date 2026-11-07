@@ -19,3 +19,5 @@ import ce_records as R  # noqa: E402
 from harness import glossary as g  # noqa: E402
 
 PREFIX = R.PREFIX
+# Identifiers carried by more records than this are not case files (the sweep skips them).
+SWEEP_MAX = 40
