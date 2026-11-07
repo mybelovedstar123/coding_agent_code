@@ -8,3 +8,21 @@ from pathlib import Path
 REF = "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent"
 sys.path.insert(0, REF)
 from harness import agent, policy, router  # noqa: E402
+
+TEXTS = [
+    ("MEMORY_GUIDANCE", policy.MEMORY_GUIDANCE, "Guidance for requests handled from memory (and general conversation)."),
+    ("TOOL_GUIDANCE", policy.TOOL_GUIDANCE, "Guidance for requests that act through the app tools."),
+    ("ROUTER_PROMPT", router.ROUTER_PROMPT, "The router's system prompt."),
+    ("WRAP_UP_NOTE", agent.WRAP_UP_NOTE, "Added once when the case budget is nearly spent (advisory; tools stay offered)."),
+    ("FINAL_CHECK_NOTE", agent.FINAL_CHECK_NOTE, "Stage 3b note with one draft."),
+    ("SECOND_DRAFT_NOTE", agent.SECOND_DRAFT_NOTE, "Stage 3a note: an independent second draft."),
+    (
+        "FINAL_CHECK_TWO_DRAFTS_NOTE",
+        agent.FINAL_CHECK_TWO_DRAFTS_NOTE,
+        "Stage 3b note with two drafts ({a} and {b} are filled in).",
+    ),
+    ("FINAL_ANSWER_NOTE", agent.FINAL_ANSWER_NOTE, "The last resort's note (4c)."),
+    ("MODEL_FAILURE_NOTE", agent.MODEL_FAILURE_NOTE, "After a failed model call (4d)."),
+    ("PROGRAM_RECORDS_NOTE", agent.PROGRAM_RECORDS_NOTE, "Long identifier event histories: how to read them with run_python."),
+    ("REPEAT_NOTE", agent.REPEAT_NOTE, "A repeated call to a tool that already returned a result ({name} is filled in)."),
+]
