@@ -235,3 +235,4 @@ synthetic_catalog = [
         ("list_schedules", "Second definition replaces the first."),
     ]
 ] + [{"type": "function", "function": None}, {"type": "function"}, {"type": "function", "function": {"name": None}}]
+catalogs.append({"name": "synthetic", "tool_defs": synthetic_catalog})
