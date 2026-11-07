@@ -137,3 +137,13 @@ fn run_case(mem: &UserMemory, c: &Value) -> Vec<String> {
     }
     bad
 }
+
+fn fires(c: &Value) -> bool {
+    let non_empty = |k: &str| c[k].as_array().is_some_and(|a| !a.is_empty());
+    non_empty("channel_records")
+        || c["has_removal_instruction"] == true
+        || (c["asks_owner_contact"] == true && non_empty("email_records"))
+        || non_empty("possessive_nicknames")
+        || c["removed_handle_note"] != ""
+        || c["pipeline"].get("digest").is_some()
+}
