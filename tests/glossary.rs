@@ -98,3 +98,34 @@ fn datasets() {
     );
     assert!(n > 1000 && firing >= 60, "coverage {n} / {firing}");
 }
+
+#[test]
+fn edge_cases() {
+    let fx = load("glossary");
+    let e = &fx["edge"];
+    for t in e["texts"].as_array().expect("texts") {
+        assert_eq!(
+            pairs_json(&g::definitions(s(&t["text"]))),
+            t["definitions"],
+            "{}",
+            t["text"]
+        );
+    }
+    for t in e["statements"].as_array().expect("statements") {
+        assert_eq!(g::statement(s(&t["prompt"]), s(&t["ident"])), s(&t["statement"]), "{t}");
+    }
+    for t in e["glossed"].as_array().expect("glossed") {
+        let terms: IndexMap<String, String> = t["terms"]
+            .as_array()
+            .expect("terms")
+            .iter()
+            .map(|kv| (s(&kv[0]).into(), s(&kv[1]).into()))
+            .collect();
+        assert_eq!(g::glossed(s(&t["text"]), &terms), s(&t["value"]), "{t}");
+    }
+    let mut failures = Vec::new();
+    for c in e["cases"].as_array().expect("cases") {
+        failures.extend(run_case(None, c));
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+}
