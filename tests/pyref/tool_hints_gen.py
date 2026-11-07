@@ -19,3 +19,4 @@ from harness import pytool, tool_hints  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "fixtures", "tool_hints.json")
+REF = "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent"
