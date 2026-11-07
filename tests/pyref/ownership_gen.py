@@ -429,3 +429,7 @@ def main():
     totals["holder_requests"] = len(extra_holder)
     totals["holder_requests_true"] = sum(1 for c in extra_holder if c["asks_holder"])
     print(json.dumps(totals))
+
+
+if __name__ == "__main__":
+    main()
