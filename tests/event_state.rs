@@ -45,3 +45,28 @@ fn keys_and_cells_match() {
         assert_eq!(es::_cell(s(&case[0])), s(&case[1]), "{:?}", case[0]);
     }
 }
+
+#[test]
+fn table_readers_match() {
+    let fx = fixture();
+    let texts = fx["texts"].as_array().unwrap();
+    let mut events = 0;
+    for t in texts {
+        let text = s(&t["text"]);
+        for (name, f) in [
+            ("from_json", es::from_json as fn(&str) -> Vec<Event>),
+            ("from_csv", es::from_csv),
+            ("from_markdown", es::from_markdown),
+            ("from_sentences", es::from_sentences),
+        ] {
+            let got = f(text);
+            events += got.len();
+            assert_eq!(evs_value(&got), t[name], "{name} on {text:?}");
+        }
+    }
+    assert!(
+        texts.len() > 700 && events > 1000,
+        "{} texts, {events} events",
+        texts.len()
+    );
+}
