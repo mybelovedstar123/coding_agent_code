@@ -29,3 +29,7 @@ NOTE = "Stored records for the identifier in the request (oldest first)."
 class Mem:
     def __init__(self):
         self.pairs = {}
+
+
+def evs_out(evs):
+    return [[str(s), op, e, f, v] for s, op, e, f, v in evs]
