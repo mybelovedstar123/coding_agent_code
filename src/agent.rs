@@ -581,4 +581,23 @@ impl Agent {
         )
         .await
     }
+
+    /// The note added to the final check for two request classes, or empty: an email/address request about someone
+    /// identified through a nicknamed person gets the grounded-decline form (`contact_evidence::related_person_note`);
+    /// a handle request whose records include a removal instruction gets the removed-handle note
+    /// (`contact_evidence::removed_handle_note`).
+    async fn request_class_note(&self, user_id: &str, user_input: &str) -> String {
+        let mem = self.store.user(user_id);
+        let mem = mem.read().await;
+        let named = contact_evidence::possessive_nicknames(&mem, user_input);
+        let note = if named.is_empty() {
+            String::new()
+        } else {
+            contact_evidence::related_person_note(&named)
+        };
+        if !note.is_empty() {
+            return note;
+        }
+        contact_evidence::removed_handle_note(&mem, user_input)
+    }
 }
