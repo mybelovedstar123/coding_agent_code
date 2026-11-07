@@ -264,3 +264,5 @@ for ci, cat in enumerate(catalogs):
             notes.append(row)
         else:
             notes.append({"req": ri, "cat": ci})
+
+rng = random.Random(118)
