@@ -8,3 +8,8 @@ Cases:
 - difflib ratios over record statements (pairs, typo'd copies, 200+ character texts for the autojunk rule), the
   fuzzy cue matcher on typo'd cues, and synthetic list changes.
 Writes tests/fixtures/current_statements.json."""
+
+import difflib
+import os
+import random
+import sys
