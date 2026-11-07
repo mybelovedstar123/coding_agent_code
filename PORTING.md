@@ -47,3 +47,5 @@ call and an unmeasured behaviour change. The port is proven by replaying cached 
 
    Helpers: `store::render_pair`, `store::fmt_ts`, `store::content_key`/`cmp_content`, and
    `config::MEMORY_CONTEXT_PREFIX`.
+4. **A context is `Option<String>`.** It is the memory context string (prefix line plus JSON payload), as the
+   Python `str | None`. A function that returns `""` for "no note" returns an empty `String`.
