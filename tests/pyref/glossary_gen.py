@@ -47,3 +47,26 @@ def outputs(items, ident, context, by_id=None):
 
 def fires(c):
     return "digest" in c["with_glossary"]
+
+
+EDGE_TEXTS = [
+    "Local field conventions here: jorailset designates a workstream; lumauset names the accountable owner.",
+    "Before the data lands, note that aroilpath records the pending action; eriynnode names the person, "
+    "voraenpath is the project.",
+    "note that beluxwire is the party that pays us for it; quindle0 stands for the invoice total.",
+    "Within this file, alphaone is the first; betatwo means the second; gammathree refers to the third.",
+    "For the record, alphaone is the first; betatwo means the second.",
+    "In short alphaone is x, betatwo holds y, gammathree tracks z",
+    "alphaone is x; betatwo holds y; gammathree tracks z.",
+    "alphaone is x; betatwo holds y",
+    "Glossary: Alphaone is x; betatwo holds y; gammathree tracks z",
+    "Schema: alphaone is x\nbetatwo holds y; gammathree tracks: z.",
+    "Field meanings: alphaone is the first, betatwo designates the second, gammathree marks the third.",
+    "field meanings — alphaone is; betatwo is ",
+    "under the hood: alphaone is the first; alphaone is again; betatwo labels second",
+    "For voraenpath the beluxwire on record is Copperfield Systems",
+    "Conventions here: x: alphaone is the first: really; betatwo captures é—ü stuff.",
+    "",
+    "   ",
+    "note that",
+]
