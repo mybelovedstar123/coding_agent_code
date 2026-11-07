@@ -39,3 +39,9 @@ call and an unmeasured behaviour change. The port is proven by replaying cached 
      (`store::truthy` for JSON values).
    - **Exceptions.** Where the Python raises (for example `json.loads` on bad text), mirror the observable outcome
      (the caller's `except` path) with `Option`/`Result`. Never panic on input data.
+3. **The memory model.** It is `store::UserMemory`:
+   - `pairs: IndexMap<String, Pair>` in insertion order, as `mem.pairs`;
+   - `aliases` / `alias_people`;
+   - `df` (`mem._df`), and `idf()` as `idf_fn(mem._df, len(mem._tf))`;
+   - `derived(key, make)` for the lazily built indexes (`mem.derived`).
+
