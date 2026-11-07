@@ -279,3 +279,8 @@ ratio_pairs += [["", ""], ["a", ""], ["", "abc"], ["abcd", "dcba"], ["été", "e
 import difflib  # noqa: E402
 
 ratios = [[a, b, difflib.SequenceMatcher(None, a, b).ratio()] for a, b in ratio_pairs]
+fuzzy = [
+    [w, t, r, tool_hints._fuzzy(w, t, r), tool_hints._has([w], t, ratio=r)]
+    for w, t in ratio_pairs[:4000]
+    for r in (0.6, 0.7, 0.8)
+]
