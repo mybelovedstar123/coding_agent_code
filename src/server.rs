@@ -110,3 +110,12 @@ async fn run(State(app): State<App>, body: axum::body::Bytes) -> Response {
         }
     }
 }
+
+pub fn router(app: App) -> Router {
+    Router::new()
+        .route("/health", get(health))
+        .route("/seed", post(seed))
+        .route("/run", post(run))
+        .layer(DefaultBodyLimit::max(256 * 1024 * 1024))
+        .with_state(app)
+}
