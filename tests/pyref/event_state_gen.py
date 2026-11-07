@@ -40,3 +40,11 @@ def safe(fn, *a):
         return {"ok": fn(*a)}
     except Exception as exc:  # noqa: BLE001
         return {"raises": type(exc).__name__}
+
+
+def context_for(records, note=NOTE):
+    payload = {
+        "note": note,
+        "memories": [{"pairID": p.pair_id, "timestamp": fmt_ts(p.ts), "text": render_pair(p)} for p in records],
+    }
+    return PREFIX + "\n" + json.dumps(payload, ensure_ascii=False)
