@@ -20,3 +20,5 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ce_records as R  # noqa: E402
 
 from harness import current_statements as cs  # noqa: E402
+
+PREFIX = R.PREFIX
