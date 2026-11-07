@@ -7,3 +7,7 @@ use ditto_agent::store::{cmp_content, Pair};
 use indexmap::IndexMap;
 use serde_json::{json, Value};
 use std::collections::{BTreeSet, HashSet};
+
+fn s(v: &Value) -> &str {
+    v.as_str().unwrap_or_else(|| panic!("string expected, got {v}"))
+}
