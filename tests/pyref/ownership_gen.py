@@ -169,3 +169,27 @@ HOLDERISH = [
     "whose", "whole", "while", "whip", "wham", "whoze", "whosee", "intrnal", "internaly", "interal", "intern",
     "interesting", "integral", "responsibly", "accountably", "Owner", "OWNS", "Running", "running's",
 ]
+
+
+def holder_requests():
+    out = []
+    frames = [
+        "Who is {w} for the moto rollout?", "{w} it?", "Is the plan {w}?", "I {w} the thread", "the {w} one",
+        "Who's {w} the bakery job now?", "who {w} the kiln repair these days?", "{w}",
+    ]
+    for w in HOLDERISH:
+        for f in frames:
+            out.append(f.format(w=w))
+    for _ in range(300):
+        w = typo(rng.choice(HOLDERISH[:9]))
+        out.append(rng.choice(frames).format(w=w))
+    out += [
+        "Who is on point for the fit-out now?", "who's on poiint for it", "Who has it now?", "Who has the keys now?",
+        "Who do I chase about the invoice?", "whose is it anyway", "who owes it", "who hoolds it", "who heads it",
+        "The present owner of the gallery job?", "the currnt ownr", "the prsent owner", "Who, as things stand, runs it?",
+        "Whoever holds the lease at this point?", "who are we waiting on at the moment", "Whom do we ask today",
+        "the person holding it", "the person accountible", "the person running it", "who is responsibile",
+        "who's acountable", "who ruinning it", "who owns it", "who ons it", "Who? now", "who is it now?",
+        "Who is it? now", "", "WHO OWNS IT NOW", "whoever, these days", "who…now", "who\nnow",
+    ]
+    return out
