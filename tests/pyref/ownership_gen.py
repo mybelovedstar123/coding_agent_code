@@ -64,3 +64,7 @@ def load(path):
             pairs[p["pair_id"]] = P(p)
     requests = [m["question"] for m in d["memory_cases"]] + [t["prompt"] for t in d["tool_cases"]]
     return pairs, list(dict.fromkeys(requests))
+
+
+def chain_list(ch):
+    return [[ts, s] for ts, s in ch]
