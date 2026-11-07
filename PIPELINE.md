@@ -142,3 +142,5 @@ refusal state appears.
 - The no-tool final stages (memory final check, last resort)
   offer no tools; any call such a stage still emits is listed in
   `blocked_tool_calls` as `blocked_before_execution`.
+- No other host-side de-duplication: apart from the identical-call rule above,
+  every allowed call the model issues is executed.
