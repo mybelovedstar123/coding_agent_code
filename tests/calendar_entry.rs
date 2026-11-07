@@ -42,3 +42,11 @@ fn other_requests_do_not_fire() {
         assert!(!th::wants_named_calendar_entry(text), "should not fire: {text}");
     }
 }
+
+#[test]
+fn needs_the_create_tool() {
+    assert_eq!(
+        th::calendar_entry_note(NAMED[0], &catalog(&["calendar_search_events"])),
+        ""
+    );
+}
