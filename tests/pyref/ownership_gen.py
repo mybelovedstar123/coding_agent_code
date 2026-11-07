@@ -273,3 +273,50 @@ def holder_chains(pairs, idx):
             }
         )
     return res
+
+
+def ownership_cases(pairs, idx, requests, full):
+    """with_ownership over each request with a retrieved-record context; variants on the firing ones."""
+    cases = []
+    fired = 0
+    variant_budget = 12
+    for r in requests:
+        if IDENT_RE.search(r):
+            continue
+        phrase, chain = idx.best_chain(r)
+        holder = ownership.asks_holder(r)
+        if not chain and rng.random() > (0.15 if holder else 0.03):
+            continue
+        ctxs = [make_context(pairs, r, k=6, cut=160)]
+        if chain:
+            fired += 1
+            if fired % 3 == 0:
+                ctxs.append(make_context(pairs, r, k=3, note=False))
+            if variant_budget > 0:
+                variant_budget -= 1
+                src = idx.sources(phrase)
+                base = json.loads(ctxs[0].split("\n", 1)[1])
+                weird = dict(base)
+                weird["memories"] = list(base["memories"]) + [
+                    "not a dict",
+                    {"timestamp": "2024-01-01T00:00:00Z", "text": "no id"},
+                    {"pairID": 7, "timestamp": None, "text": "numeric id"},
+                    {"pairID": src[0], "text": "stale excerpt without timestamp"},
+                ]
+                ctxs.append(PREFIX + "\n" + json.dumps(weird, ensure_ascii=False))
+                ctxs.append(PREFIX + "\n" + json.dumps({"ownership": "old", "note": None}, ensure_ascii=False))
+                ctxs.append(PREFIX + "\n" + json.dumps({"note": 3.5, "memories": {"a": 1}}))
+                ctxs.append(PREFIX + "\n" + json.dumps({"memories": [], "note": "x"}, ensure_ascii=True))
+                ctxs.append(PREFIX + "\n{not json")
+                ctxs.append(PREFIX + "\n" + json.dumps({"note": "dup"}) + "  ")
+                ctxs.append("no newline here")
+                ctxs.append("")
+                ctxs.append(None)
+                ctxs.append("custom prefix\n" + json.dumps({"memories": base["memories"][:1]}))
+        for ctx in ctxs:
+            out = ownership.with_ownership(ctx, PREFIX, idx, r, lambda pid: full[pid])
+            case = {"request": r, "context": ctx, "same": out == ctx}
+            if out != ctx:
+                case["out"] = out
+            cases.append(case)
+    return cases, fired
