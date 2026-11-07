@@ -307,3 +307,5 @@ fixture = {
 }
 with open(OUT, "w", encoding="utf-8") as fh:
     json.dump(fixture, fh, ensure_ascii=False, indent=0)
+
+print(f"requests={len(requests)} catalogs={len(catalogs)} note_rows={len(notes)} ratios={len(ratios)} fuzzy={len(fuzzy)}")
