@@ -266,3 +266,48 @@ fn remote_state(result: &Value) -> (&'static str, bool) {
     }
     ("completed", true)
 }
+
+/// CPython's `json.loads(raw, parse_constant=reject)` outcome for text serde_json rejects: the exact error message
+/// the reference reports, or the object Python parsed. Runs CPython (present in the image for the program tool).
+async fn python_json_args(raw: &str) -> Result<Value, String> {
+    const SCRIPT: &str = r#"
+import json, sys
+def _reject(v):
+    raise ValueError(f"{v} is not valid JSON")
+try:
+    v = json.loads(sys.stdin.read(), parse_constant=_reject)
+    sys.stdout.write(json.dumps({"ok": v}))
+except (TypeError, ValueError) as err:
+    sys.stdout.write(json.dumps({"error": str(err)}))
+"#;
+    let python = if std::path::Path::new("/usr/local/bin/python3").exists() {
+        "/usr/local/bin/python3"
+    } else {
+        "python3"
+    };
+    let child = tokio::process::Command::new(python)
+        .args(["-I", "-S", "-c", SCRIPT])
+        .env_clear()
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::null())
+        .kill_on_drop(true)
+        .spawn();
+    let Ok(mut child) = child else {
+        return Err("Expecting value: line 1 column 1 (char 0)".into());
+    };
+    if let Some(mut stdin) = child.stdin.take() {
+        use tokio::io::AsyncWriteExt;
+        let _ = stdin.write_all(raw.as_bytes()).await;
+    }
+    let out = tokio::time::timeout(Duration::from_secs(10), child.wait_with_output()).await;
+    let Ok(Ok(out)) = out else {
+        return Err("Expecting value: line 1 column 1 (char 0)".into());
+    };
+    let parsed: Value = serde_json::from_slice(&out.stdout).unwrap_or(Value::Null);
+    match (parsed.get("ok"), parsed.get("error")) {
+        (Some(v), _) => Ok(v.clone()),
+        (_, Some(e)) => Err(py::str_value(e)),
+        _ => Err("Expecting value: line 1 column 1 (char 0)".into()),
+    }
+}
