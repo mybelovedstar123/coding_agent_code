@@ -33,3 +33,4 @@ from aiohttp import web, ClientSession, ClientTimeout
 
 PY_REF = "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent"
 RS_BIN = os.path.expanduser("~/.cache/ditto-agent-target/release/ditto-agent")
+DIM = 768
