@@ -60,3 +60,10 @@ def tool_defs_for(catalog):
 
 
 requests, seen = [], set()
+
+
+def add_request(text, source):
+    if text in seen:
+        return
+    seen.add(text)
+    requests.append({"text": text, "source": source})
