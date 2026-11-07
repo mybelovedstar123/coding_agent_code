@@ -237,3 +237,9 @@ synthetic_catalog = [
 ] + [{"type": "function", "function": None}, {"type": "function"}, {"type": "function", "function": {"name": None}}]
 catalogs.append({"name": "synthetic", "tool_defs": synthetic_catalog})
 catalogs.append({"name": "empty", "tool_defs": []})
+catalogs.append(
+    {
+        "name": "send-only",
+        "tool_defs": [{"type": "function", "function": {"name": "gmail_send"}}],
+    }
+)
