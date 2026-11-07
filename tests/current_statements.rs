@@ -137,3 +137,22 @@ fn edge_cases() {
         );
     }
 }
+
+#[test]
+fn sequence_ratios() {
+    let fx = load("current_statements");
+    let mut bad = Vec::new();
+    for r in fx["edge"]["ratios"].as_array().expect("ratios") {
+        let want = r["ratio"].as_f64().expect("ratio");
+        let got = ditto_agent::difflib::sequence_ratio(s(&r["a"]), s(&r["b"]));
+        if got != want {
+            bad.push(format!("{:?} / {:?}: want {want} got {got}", r["a"], r["b"]));
+        }
+    }
+    assert!(
+        bad.is_empty(),
+        "{} mismatches:\n{}",
+        bad.len(),
+        bad[..bad.len().min(10)].join("\n")
+    );
+}
