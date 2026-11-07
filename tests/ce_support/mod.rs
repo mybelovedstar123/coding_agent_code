@@ -61,3 +61,37 @@ pub fn digest(text: Option<&str>) -> Value {
         Some(t) => json!({"len": py::len(t), "fnv": fnv(t)}),
     }
 }
+
+/// The case's context: given directly, or rebuilt from its spec as the generator built it (checked by digest).
+pub fn context(mem: &UserMemory, case: &Value) -> Option<String> {
+    let ctx = match &case["context_spec"] {
+        Value::Null => case["context"].as_str().map(String::from),
+        spec => {
+            let items: Vec<Value> = spec["items"]
+                .as_array()
+                .expect("items")
+                .iter()
+                .map(|it| {
+                    let p = &mem.pairs[s(&it[0])];
+                    let text = render_pair(p);
+                    let text = match it[1].as_u64() {
+                        Some(limit) => py::head(&text, limit as usize).to_string(),
+                        None => text,
+                    };
+                    json!({"pairID": p.pair_id, "timestamp": fmt_ts(&p.ts), "text": text})
+                })
+                .collect();
+            let payload = json!({"note": spec["note"], "memories": items});
+            Some(format!("{MEMORY_CONTEXT_PREFIX}\n{}", py::dumps(&payload, false)))
+        }
+    };
+    if case.get("context_digest").is_some() {
+        assert_eq!(
+            digest(ctx.as_deref()),
+            case["context_digest"],
+            "context rebuild for {:?}",
+            case["question"]
+        );
+    }
+    ctx
+}
