@@ -266,3 +266,4 @@ for ci, cat in enumerate(catalogs):
             notes.append({"req": ri, "cat": ci})
 
 rng = random.Random(118)
+words = sorted({w for r in requests for w in tool_hints._words(r["text"])})
