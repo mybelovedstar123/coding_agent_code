@@ -220,3 +220,16 @@ long_sent = " ".join(
 )
 mixed = [HEAD + "\n" + rows_json(4), long_csv, long_md, long_sent]
 ids = ["c1", "c2", "c3", "c4"]
+base_ctx = PREFIX + "\n" + json.dumps({"note": "Records.", "memories": []}, ensure_ascii=False)
+for ui in [
+    "What is the state at step 3?",
+    "What is it at STEP 0 now",
+    "state at step 99",
+    "state at step 0002?",
+    "state at step ٣?",
+    "no step named",
+    "Step 4́ please",
+    "after step-3",
+    "at step 123456789012345678901234567890",
+    "at step -3",
+]:
