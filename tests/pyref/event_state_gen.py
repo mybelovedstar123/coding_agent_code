@@ -260,3 +260,4 @@ add_call("edge-quirks", base_ctx, ["q"], "step 1", json_quirks + csv_quirks + md
 add_call("edge-big", base_ctx, ["q"], "", [HEAD + "\n" + rows_json(12, step_of=lambda i: 10**30 + i)])
 add_call("edge-big-neg", base_ctx, ["q"], "", [HEAD + "\n" + rows_json(12, step_of=lambda i: -(10**30) - i)])
 
+keys = ["Effective Step", "<b>Entity</b>", "  OPERATION:  ", "__x__", "Ünïcode Key", "a<b>c</b>d", "<>", "<a>", "--"]
