@@ -215,3 +215,5 @@ synthetic = [
     "Run the checksum in the saßbox",
     "İ want the exact value",
 ]
+for t in synthetic:
+    add_request(t, "synthetic")
