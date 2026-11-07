@@ -13,3 +13,4 @@ import random
 import sys
 
 sys.dont_write_bytecode = True
+sys.path.insert(0, "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent")
