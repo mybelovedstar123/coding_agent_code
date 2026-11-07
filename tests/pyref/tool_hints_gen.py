@@ -256,3 +256,11 @@ for r in requests:
     wants.append(row)
 
 notes = []
+for ci, cat in enumerate(catalogs):
+    for ri, r in enumerate(requests):
+        row = {fn: getattr(tool_hints, fn)(r["text"], cat["tool_defs"]) for fn in CATALOG_NOTES}
+        if any(row.values()) or ci < len(DATASETS):
+            row.update({"req": ri, "cat": ci})
+            notes.append(row)
+        else:
+            notes.append({"req": ri, "cat": ci})
