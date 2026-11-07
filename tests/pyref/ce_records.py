@@ -19,3 +19,5 @@ from harness import config, contact_evidence, store  # noqa: E402
 from harness.agent import IDENT_RE, request_identifier  # noqa: E402
 from harness.store import Pair, UserMemory, content_key, fmt_ts, render_pair  # noqa: E402
 from harness.text import tokenize  # noqa: E402
+
+DATASETS = sorted(glob.glob("/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/case/datasets/v13-full-*.json"))
