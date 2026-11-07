@@ -45,3 +45,12 @@ pub fn memory(user_id: &str, records: &Value) -> UserMemory {
     mem.upsert_pairs(pairs, vecs);
     mem
 }
+
+pub fn fnv(text: &str) -> String {
+    let mut h: u64 = 0xcbf29ce484222325;
+    for b in text.as_bytes() {
+        h ^= *b as u64;
+        h = h.wrapping_mul(0x100000001b3);
+    }
+    format!("{h:016x}")
+}
