@@ -106,3 +106,23 @@ def typo(word):
     if op == 2 and i < len(word) - 1:
         return word[:i] + word[i + 1] + word[i] + word[i + 2 :]
     return word[:i] + rng.choice("aeiourstln") + word[i + 1 :]
+
+
+HOLDER_TEMPLATES = [
+    "Who owns the {p} now?",
+    "who's holding the {p} these days",
+    "Remind me who is running the {p} at the moment.",
+    "The {p} thing - who has it now? I need their email.",
+    "Who is accountable for the {p} as things stand?",
+    "whose is the {p} now",
+    "Who ended up with the {p}?",
+    "Who do i chase about the {p}?",
+    "Quick one: the {p} saga, who's the current owner and their work email?",
+    "Who is {h} the {p} thread now?",
+    "Which person is {h} for the {p} right now?",
+    "The {p} - {w} it now?",
+    "Who's on point for {p} today?",
+    "Tell me who took over the {p} project.",
+    "Who is the internal owner of the {p}?",
+    "Who is the intrnal lead on {p} now?",
+]
