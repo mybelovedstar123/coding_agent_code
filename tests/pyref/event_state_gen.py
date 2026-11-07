@@ -114,3 +114,6 @@ for path in DATASETS:
             q,
             [p.prompt for p in records],
         )
+
+# --------------------------------------------------------------------------------------------------- edge cases
+HEAD = "Case file x. Apply events by effective_step, not document order."
