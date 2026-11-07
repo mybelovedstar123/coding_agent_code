@@ -16,3 +16,11 @@ from harness import contact_evidence as ce  # noqa: E402
 from harness.store import fmt_ts, render_pair  # noqa: E402
 
 PREFIX = R.PREFIX
+
+
+def attempt(fn):
+    """{"value": result} or {"raises": exception type} (the Rust port documents its fallback for these)."""
+    try:
+        return {"value": fn()}
+    except Exception as err:  # noqa: BLE001
+        return {"raises": type(err).__name__}
