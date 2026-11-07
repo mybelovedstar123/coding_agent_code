@@ -150,3 +150,22 @@ fn py_int(v: &Value) -> Option<i64> {
         _ => None,
     }
 }
+
+impl CaseTrace {
+    /// Token usage of one model call; a malformed usage block counts as zero (D21).
+    fn add_usage(&mut self, usage: &Usage) {
+        for (attr, key) in [
+            (&mut self.prompt_tokens, "prompt_tokens"),
+            (&mut self.output_tokens, "completion_tokens"),
+        ] {
+            match usage.get(key).filter(|v| truthy(v)) {
+                None => {}
+                Some(v) => {
+                    if let Some(n) = py_int(v) {
+                        *attr += n;
+                    }
+                }
+            }
+        }
+    }
+}
