@@ -148,3 +148,63 @@ def crafted(joint=True):
         "cases": cases,
         "proper_words": [[t, sorted(companions.proper_words(t))] for _, _, t in rows],
     }
+
+
+def main():
+    sets = []
+    totals = {"cases": 0, "fired": 0}
+    for path in DATASETS:
+        pairs, requests = load(path)
+        _FEATURES.clear()
+        ordered = sorted(pairs.values(), key=store.content_key)
+        index = companions.build_index(ordered)
+        cases = []
+        plans = [(r, None) for r in requests] + joint_requests(pairs, index, 150)
+        for r, seed in plans:
+            k = rng.choice([4, 8, 8, 12])
+            anchors = ranked(pairs, r, k)
+            if seed is not None and seed not in anchors:
+                anchors.insert(rng.randrange(len(anchors) + 1), seed)
+            mode = rng.random()
+            if mode < 0.6:
+                exclude = list(anchors)
+            elif mode < 0.8:
+                exclude = []
+            else:
+                exclude = anchors[: len(anchors) // 2] + ["not-a-pair"]
+            out = companions.companion_records(index, pairs, r, [pairs[a] for a in anchors], set(exclude))
+            cases.append(
+                {
+                    "request": r,
+                    "anchors": anchors,
+                    "exclude": exclude,
+                    "out": [p.pair_id for p in out],
+                    "phrases": sorted(list(ph) for ph in companions.phrases(r)),
+                    "phrase_counts": sorted(
+                        [list(ph), index.phrase_records[ph]] for ph in companions.phrases(r) if ph in index.phrase_records
+                    ),
+                }
+            )
+        # proper_words over every record prompt and the requests.
+        proper = [[t, sorted(companions.proper_words(t))] for t in [p.prompt for p in pairs.values()][:300] + requests[:100]]
+        sets.append(
+            {
+                "dataset": os.path.basename(path),
+                "records": [[p.pair_id, p.ts.isoformat(), p.prompt, p.response] for p in pairs.values()],
+                "sorted": [p.pair_id for p in ordered],
+                "joint": index.joint,
+                "phrase_records_len": len(index.phrase_records),
+                "phrase_records_total": sum(index.phrase_records.values()),
+                "cases": cases,
+                "proper_words": proper,
+            }
+        )
+        totals["cases"] += len(cases)
+        totals["fired"] += sum(1 for c in cases if c["out"])
+    sets.append(crafted())
+    sets.append(crafted(joint=False))
+    totals["fired"] += sum(1 for s in sets[-2:] for c in s["cases"] if c["out"])
+    totals["cases"] += sum(len(s["cases"]) for s in sets[-2:])
+    with open(OUT, "w", encoding="utf-8") as f:
+        json.dump({"datasets": sets}, f, ensure_ascii=False)
+    print(json.dumps(totals))
