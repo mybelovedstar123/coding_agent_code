@@ -251,3 +251,5 @@ contexts = [
     PREFIX + '\n  {"memories": [{"x": 1.0, "y": 10000000000000000000000, "z": "é\\u2028"}], "note": "n"}  ',
     PREFIX + "\nline two\n" + json.dumps({"memories": []}),
     "Other prefix\n" + json.dumps({"memories": [], "note": "é"}),
+]
+for c in contexts:
