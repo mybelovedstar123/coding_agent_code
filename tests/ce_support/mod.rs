@@ -8,3 +8,9 @@ use ditto_agent::py;
 use ditto_agent::store::{fmt_ts, parse_ts, render_pair, Pair, UserMemory};
 use serde_json::{json, Value};
 use std::collections::BTreeSet;
+
+pub fn load(name: &str) -> Value {
+    let path = format!("{}/tests/fixtures/{name}.json", env!("CARGO_MANIFEST_DIR"));
+    let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{path}: {e} (run tests/pyref/{name}_gen.py)"));
+    serde_json::from_str(&text).expect("fixture json")
+}
