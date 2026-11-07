@@ -50,3 +50,5 @@ pub const REFUSED: &str = "tool call refused by the endpoint (not executed)";
 pub const ROUTER_BUDGET_S: f64 = 40.0;
 /// No tool call starts with less than this left in the case budget (D19).
 pub const TOOL_CALL_RESERVE_S: f64 = 15.0;
+const NUDGE: &str = "Your last message was empty. Continue: write your reply to the user now, based on what you found \
+     (use a tool first only if you still need one).";
