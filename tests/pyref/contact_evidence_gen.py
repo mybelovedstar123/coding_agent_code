@@ -24,3 +24,24 @@ def attempt(fn):
         return {"value": fn()}
     except Exception as err:  # noqa: BLE001
         return {"raises": type(err).__name__}
+
+
+def pipeline(mem, q, context):
+    """The contact add-ons in agent._memory_context order."""
+    if ce.has_removal_instruction(ce.channel_records(mem, q)):
+        context = ce.with_removal_note(context, PREFIX)
+    if ce.asks_owner_contact(q):
+        forms = ce.people_named(mem, ce.context_texts(context))
+        records = ce.email_records(mem, forms) if forms else []
+        if records:
+            context = ce.with_records(context, PREFIX, records, render_pair, fmt_ts)
+    named = ce.possessive_nicknames(mem, q)
+    records = ce.identity_records(mem, named) if named else []
+    if records:
+        context = ce.with_records_and_note(
+            context, PREFIX, records, ce.related_person_note(named), render_pair, fmt_ts
+        )
+    note = ce.removed_handle_note(mem, q)
+    if note:
+        context = ce.with_records_and_note(context, PREFIX, [], note, render_pair, fmt_ts)
+    return context
