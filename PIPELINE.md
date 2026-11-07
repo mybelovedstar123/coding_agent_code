@@ -374,3 +374,14 @@ which records (pairIDs, filing times) are copies of one note; it gives no
 reading instruction. The notes restate public answer forms and product rules; none
 names an answer.
 
+Named-tool note (advisory, appended to the system prompt; `src/named_tool.rs`):
+when the request uses an offered tool's distinctive first name word (e.g.
+`lalabi` of `lalabi_unit_converter`, at least four letters, from a multi-word
+tool name) capitalized as a name inside a sentence, the note says the user asked
+for that tool by name and to call it with the item the request names as its
+input, since the tool's result is where the value comes from, without looking
+elsewhere or asking the user for missing details first (a detail the request
+does not give is left unspecified). Decided from the
+request and the offered catalog only; it names no value and never changes the
+reply.
+
