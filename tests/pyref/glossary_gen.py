@@ -7,3 +7,6 @@ Cases:
   minimal context: the sweep that reaches every glossary-defining case file;
 - synthetic edge texts and contexts.
 Writes tests/fixtures/glossary.json."""
+
+import os
+import sys
