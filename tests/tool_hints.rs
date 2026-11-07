@@ -35,3 +35,9 @@ const PLAIN: &[(&str, Plain)] = &[
     ("exact_value_note", th::exact_value_note),
     ("preference_note", th::preference_note),
 ];
+const WITH_TOOLS: &[(&str, WithTools)] = &[
+    ("research_send_note", th::research_send_note),
+    ("effort_note", th::effort_note),
+    ("tool_hint_note", th::tool_hint_note),
+    ("send_on_record_note", th::send_on_record_note),
+];
