@@ -173,3 +173,14 @@ refusal state appears.
   local execution, never sent to the endpoint, and reported in order with the
   other executed calls (it does not consume an endpoint hop position).
 
+## Output normalization (W8)
+
+`src/typography.rs` (version 2): a fixed, request-independent
+normalization applied to `final_text` only. It maps typographic hyphen and
+space variants (U+2010, U+2011, U+00A0, U+2007, U+2009, U+202F) to their plain
+equivalents, and it removes markdown strong-emphasis markers from paired spans
+on one line and set off from the surrounding words (`**17 days**` becomes
+`17 days`), keeping the span's text as written. Other asterisks (operators,
+code) and all underscores (identifiers) are left alone. Nothing else is changed: no digit, sign,
+word, unit or identifier letter.
+
