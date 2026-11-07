@@ -12,3 +12,5 @@ import random
 import re
 import sys
 from datetime import datetime, timedelta, timezone
+
+sys.dont_write_bytecode = True
