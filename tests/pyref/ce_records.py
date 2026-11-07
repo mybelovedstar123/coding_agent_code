@@ -135,3 +135,7 @@ def changed(before, after, full=False):
     if full:
         out["value"] = after
     return out
+
+
+def ids(records):
+    return [p.pair_id for p in records]
