@@ -157,3 +157,10 @@ async def start_fakes(fakes: Fakes, port: int) -> web.AppRunner:
     await runner.setup()
     await web.TCPSite(runner, "127.0.0.1", port).start()
     return runner
+
+
+# ------------------------------------------------------------------ capture
+def agent_cmd(kind: str, port: int) -> tuple[list[str], str | None]:
+    if kind == "py":
+        return [sys.executable, "-m", "harness.server", "--port", str(port)], PY_REF
+    return [RS_BIN, "--port", str(port)], None
