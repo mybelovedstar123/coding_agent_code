@@ -5,3 +5,7 @@ exactly as harness.store.MemoryStore.seed does (one batch per wave / per tool ca
 Requests are memory_cases[].question plus tool_cases[].prompt. Contexts are built the way the agent builds them
 (MEMORY_CONTEXT_PREFIX + "\\n" + json.dumps({"note", "memories": [{pairID, timestamp, text}]}, ensure_ascii=False)),
 with a lexical top-k standing in for the embedding retrieval (only the add-ons are under test)."""
+
+import glob
+import json
+import sys
