@@ -208,3 +208,7 @@ def main():
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump({"datasets": sets}, f, ensure_ascii=False)
     print(json.dumps(totals))
+
+
+if __name__ == "__main__":
+    main()
