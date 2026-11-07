@@ -277,3 +277,5 @@ for n in (5, 50, 199, 200, 201, 250, 400):
         ratio_pairs.append([a, b])
 ratio_pairs += [["", ""], ["a", ""], ["", "abc"], ["abcd", "dcba"], ["été", "ete"]]
 import difflib  # noqa: E402
+
+ratios = [[a, b, difflib.SequenceMatcher(None, a, b).ratio()] for a, b in ratio_pairs]
