@@ -31,3 +31,7 @@ const WANTS: &[(&str, Want)] = &[
     ("wants_send_on_record", th::wants_send_on_record),
     ("wants_exact_value", th::wants_exact_value),
 ];
+const PLAIN: &[(&str, Plain)] = &[
+    ("exact_value_note", th::exact_value_note),
+    ("preference_note", th::preference_note),
+];
