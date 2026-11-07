@@ -26,3 +26,12 @@ fn catalog(names: &[&str]) -> Vec<Value> {
         .map(|n| json!({"type": "function", "function": {"name": n, "description": "", "parameters": {}}}))
         .collect()
 }
+
+#[test]
+fn named_calendar_requests_fire() {
+    let tools = catalog(&["calendar_search_events", "calendar_create_event"]);
+    for text in NAMED {
+        assert!(th::wants_named_calendar_entry(text), "should fire: {text}");
+        assert_eq!(th::calendar_entry_note(text, &tools), th::CALENDAR_ENTRY_NOTE);
+    }
+}
