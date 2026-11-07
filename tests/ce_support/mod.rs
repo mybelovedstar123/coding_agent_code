@@ -54,3 +54,10 @@ pub fn fnv(text: &str) -> String {
     }
     format!("{h:016x}")
 }
+
+pub fn digest(text: Option<&str>) -> Value {
+    match text {
+        None => Value::Null,
+        Some(t) => json!({"len": py::len(t), "fnv": fnv(t)}),
+    }
+}
