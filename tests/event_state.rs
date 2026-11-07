@@ -25,3 +25,12 @@ fn evs_value(evs: &[Event]) -> Value {
             .collect(),
     )
 }
+
+#[test]
+fn constants_match() {
+    let fx = fixture();
+    let c = &fx["constants"];
+    assert_eq!(es::EVENT_STATE_NOTE, s(&c["EVENT_STATE_NOTE"]));
+    assert_eq!(es::MIN_EVENTS as u64, c["MIN_EVENTS"].as_u64().unwrap());
+    assert_eq!(es::Q, s(&c["Q"]));
+}
