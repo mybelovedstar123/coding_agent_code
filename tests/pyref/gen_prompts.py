@@ -28,3 +28,19 @@ TEXTS = [
 ]
 
 BACKSLASH = chr(92)
+
+
+def lit(s: str) -> str:
+    out = []
+    for ch in s:
+        if ch == BACKSLASH:
+            out.append(BACKSLASH * 2)
+        elif ch == '"':
+            out.append(BACKSLASH + '"')
+        elif ch == "\n":
+            out.append(BACKSLASH + "n")
+        elif ord(ch) < 0x20 or ord(ch) > 0x7E:
+            out.append(BACKSLASH + "u{%x}" % ord(ch))
+        else:
+            out.append(ch)
+    return '"' + "".join(out) + '"'
