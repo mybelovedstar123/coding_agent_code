@@ -66,3 +66,24 @@ def ranked(pairs, request, k):
             scored.append((-ph, -w, i, pid))
     scored.sort()
     return [pid for _, _, _, pid in scored[:k]]
+
+
+def joint_requests(pairs, index, n):
+    """Requests made from records that name a joint-mention person: a span of the record's words."""
+    named = []
+    for pid, p in pairs.items():
+        for name in index.joint:
+            if name in p.prompt:
+                named.append(pid)
+                break
+    rng.shuffle(named)
+    out = []
+    for pid in named[:n]:
+        words = pairs[pid].prompt.split()
+        if len(words) < 4:
+            continue
+        i = rng.randrange(max(1, len(words) - 10))
+        span = " ".join(words[i : i + rng.randrange(4, 14)])
+        q = rng.choice(["What's the latest on {s}?", "{s} - where did that land?", "Remind me: {s}", "{s}"])
+        out.append((q.format(s=span), pid))
+    return out
