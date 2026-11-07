@@ -53,3 +53,15 @@ fn other_requests_do_not_fire() {
         assert_eq!(th::confirm_preference_note(text), "");
     }
 }
+
+#[test]
+fn own_preference_questions_are_unchanged() {
+    // The shared setting test was factored out of asks_own_preference; its answers stay the same.
+    assert!(th::asks_own_preference(
+        "If you configured my Ditto appearance now, which mode would you set?"
+    ));
+    assert!(th::asks_own_preference(
+        "Suppose you were configuring my Ditto look today — what accent should you apply?"
+    ));
+    assert!(!th::asks_own_preference("Make sure my Ditto accent is velvet for me."));
+}
