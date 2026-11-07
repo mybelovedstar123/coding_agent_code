@@ -233,3 +233,35 @@ async def capture(kind: str, dataset: str, out: str, limit: int, fake_port: int,
         proc.wait(timeout=10)
         await runner.cleanup()
     print(f"captured {n} cases from the {kind} agent into {out}")
+
+
+def compare(a_path: str, b_path: str) -> int:
+    a = {r["case"]: r for r in map(json.loads, open(a_path, encoding="utf-8"))}
+    b = {r["case"]: r for r in map(json.loads, open(b_path, encoding="utf-8"))}
+    # The router and spelling calls are concurrent in both agents, so requests are compared as a sorted multiset.
+    def norm(r):
+        reqs = sorted(json.dumps(q, sort_keys=True, ensure_ascii=False) for q in r.get("requests", []))
+        return {**r, "requests": [json.loads(q) for q in reqs]}
+
+    a = {c: norm(r) for c, r in a.items()}
+    b = {c: norm(r) for c, r in b.items()}
+    differ = []
+    for c, ra in a.items():
+        rb = b.get(c)
+        if rb is None or json.dumps(ra, sort_keys=True) != json.dumps(rb, sort_keys=True):
+            differ.append(c)
+    print(f"cases {len(a)} vs {len(b)}; different: {len(differ)}")
+    for c in differ[:8]:
+        ra, rb = a[c], b.get(c) or {}
+        for i, (qa, qb) in enumerate(zip(ra["requests"], rb.get("requests", []))):
+            if qa != qb:
+                sa, sb = json.dumps(qa, sort_keys=True, ensure_ascii=False), json.dumps(qb, sort_keys=True, ensure_ascii=False)
+                k = next((j for j in range(min(len(sa), len(sb))) if sa[j] != sb[j]), min(len(sa), len(sb)))
+                print(f"\n## {c} ({ra['kind']}) request {i} differs at char {k}\n  py: {sa[max(0, k - 160):k + 200]!r}\n  rs: {sb[max(0, k - 160):k + 200]!r}")
+                break
+        else:
+            if len(ra["requests"]) != len(rb.get("requests", [])):
+                print(f"\n## {c}: {len(ra['requests'])} vs {len(rb.get('requests', []))} requests")
+            else:
+                print(f"\n## {c}: responses differ\n  py: {json.dumps(ra['response'], ensure_ascii=False)[:400]}\n  rs: {json.dumps(rb.get('response'), ensure_ascii=False)[:400]}")
+    return 1 if differ else 0
