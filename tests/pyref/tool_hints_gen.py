@@ -219,3 +219,19 @@ for t in synthetic:
     add_request(t, "synthetic")
 
 long_desc = "  Lists the saved schedules. " + "x" * 230 + ".. "
+synthetic_catalog = [
+    {"type": "function", "function": {"name": n, "description": desc}}
+    for n, desc in [
+        ("list_schedules", long_desc),
+        ("edit_image", "Edit an image the user already has... "),
+        ("run_code", " Run code in a sandbox.\n"),
+        ("execute_agent_job", None),
+        ("calendar_create_event", ""),
+        ("list_agent_jobs", "List background jobs ."),
+        ("update_memory", "Update a stored memory. {desc} {tool}"),
+        ("gmail_send", "Send an email."),
+        ("search_web", "Search the web."),
+        ("set_reasoning_effort", "Set the reasoning effort."),
+        ("list_schedules", "Second definition replaces the first."),
+    ]
+] + [{"type": "function", "function": None}, {"type": "function"}, {"type": "function", "function": {"name": None}}]
