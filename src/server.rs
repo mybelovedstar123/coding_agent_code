@@ -70,3 +70,7 @@ fn py_len(v: &Value) -> usize {
         _ => 0,
     }
 }
+
+async fn health() -> Response {
+    Json(json!({"status": "ok"})).into_response()
+}
