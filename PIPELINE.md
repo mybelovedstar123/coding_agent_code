@@ -184,3 +184,14 @@ on one line and set off from the surrounding words (`**17 days**` becomes
 code) and all underscores (identifiers) are left alone. Nothing else is changed: no digit, sign,
 word, unit or identifier letter.
 
+## Context construction
+
+Memory records are retrieved by embedding similarity and a typo-tolerant BM25
+index. When the request names an identifier (for example a case or order
+number), every record carrying it is pre-loaded in full, oldest first, with no
+size cap (never an excerpt or an id-only pointer), and other retrieval hits are
+not added. Other retrieved records are
+shown as excerpts; the context note calls all pre-loaded records excerpts,
+including identifier records shown in full. An excerpt's full text is one
+`fetch_memories` call away.
+
