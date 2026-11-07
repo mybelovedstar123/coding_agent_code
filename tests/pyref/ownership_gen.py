@@ -28,3 +28,16 @@ rng = random.Random(118)
 # only a sample of them is run through best_chain.
 IDENT_RE = re.compile(r"\b(?=[A-Za-z0-9-]*\d)(?=[A-Za-z0-9-]*[A-Za-z])[A-Za-z0-9][A-Za-z0-9-]{7,}\b")
 IDENT_SAMPLE = 6
+
+
+def memo_best_chain(idx):
+    """best_chain memoised per request (same results; it is a pure function of the index and the request)."""
+    orig = idx.best_chain
+    cache = {}
+
+    def best_chain(request):
+        if request not in cache:
+            cache[request] = orig(request)
+        return cache[request]
+
+    idx.best_chain = best_chain
