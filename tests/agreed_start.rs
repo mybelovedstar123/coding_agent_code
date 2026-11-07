@@ -30,3 +30,12 @@ fn catalog(names: &[&str]) -> Vec<Value> {
         .map(|n| json!({"type": "function", "function": {"name": n, "description": "", "parameters": {}}}))
         .collect()
 }
+
+#[test]
+fn agreed_start_requests_fire() {
+    let tools = catalog(&["list_workflows", "run_workflow", "create_workflow"]);
+    for text in AGREED {
+        assert!(th::wants_agreed_start(text), "should fire: {text}");
+        assert_eq!(th::agreed_start_note(text, &tools), th::AGREED_START_NOTE);
+    }
+}
