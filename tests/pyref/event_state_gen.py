@@ -117,3 +117,15 @@ for path in DATASETS:
 
 # --------------------------------------------------------------------------------------------------- edge cases
 HEAD = "Case file x. Apply events by effective_step, not document order."
+
+
+def rows_json(n, step_of=lambda i: i % 4, extra=""):
+    return (
+        "[\n"
+        + ",\n".join(
+            f'{{"entity": "e{i % 3}", "field": "{"members" if i % 2 else "owner"}", "value": "v{i}", '
+            f'"effective_step": {step_of(i)}, "operation": "{"add" if i % 2 else "assign"}"{extra}}}'
+            for i in range(n)
+        )
+        + "\n]"
+    )
