@@ -22,3 +22,4 @@ from harness.store import Pair, fmt_ts, render_pair  # noqa: E402
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "fixtures", "event_state.json")
 DATASETS = sorted(glob.glob("/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/case/datasets/v13-full-*.json"))
+PREFIX = config.MEMORY_CONTEXT_PREFIX
