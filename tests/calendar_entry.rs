@@ -11,3 +11,11 @@ const NAMED: &[&str] = &[
     "Maie sure the \"uclouvain brook workstream\" review is on my caldndar for Thursday.",
     "Get the \"cray cross workstream\" review ogto my calendar for Tuesday afternoon.",
 ];
+
+const OTHER: &[&str] = &[
+    "For planning context c31354f0f0bce5f60: Ok so, stick it on my calendar.",
+    "Add team offsite to my calendar.",
+    "Find the quantum computing event on my calendar.",
+    "Schedule dentist appointment on my calendar.",
+    "Check the schedules on my workflows — how many runs has the one that goes each weekday at 07:15 logged so far?",
+];
