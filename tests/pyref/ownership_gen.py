@@ -41,3 +41,11 @@ def memo_best_chain(idx):
         return cache[request]
 
     idx.best_chain = best_chain
+
+
+class P:
+    def __init__(self, d):
+        self.pair_id = d["pair_id"]
+        self.ts = store.parse_ts(d.get("timestamp"))
+        self.prompt = d.get("prompt") or ""
+        self.response = d.get("response") or ""
