@@ -133,3 +133,6 @@ refusal state appears.
   (timeout, HTTP 5xx or an unreadable body after sending). Only a
   connection that failed before sending is retried; a delivery-unknown call is
   never replayed. The validator's endpoint ledger is authoritative.
+- `hop` is the call's position: it advances for every call that was reported
+  or may have crossed the endpoint boundary (not for not-delivered or blocked
+  calls), and is the value sent to the endpoint; reported hops are unique.
