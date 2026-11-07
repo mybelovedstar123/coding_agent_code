@@ -46,3 +46,6 @@ def load(path):
     }
     requests = [m["question"] for m in d["memory_cases"]] + [t["prompt"] for t in d["tool_cases"]]
     return pairs, list(dict.fromkeys(requests))
+
+
+_FEATURES = {}
