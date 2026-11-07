@@ -12,3 +12,9 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde_json::{json, Value};
 use std::sync::Arc;
+
+#[derive(Clone)]
+pub struct App {
+    pub store: Arc<Store>,
+    pub agent: Arc<Agent>,
+}
