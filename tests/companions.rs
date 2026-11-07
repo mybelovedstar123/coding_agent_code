@@ -15,3 +15,9 @@ fn s(v: &Value) -> &str {
 fn strings(v: &Value) -> Vec<String> {
     v.as_array().expect("array").iter().map(|x| s(x).to_string()).collect()
 }
+
+fn ts(text: &str) -> DateTime<Utc> {
+    DateTime::parse_from_rfc3339(text)
+        .expect("isoformat timestamp")
+        .with_timezone(&Utc)
+}
