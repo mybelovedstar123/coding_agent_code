@@ -88,3 +88,7 @@ refusal state appears.
   action taken for the user: reply if the results answer the request, call
   again only for something they do not contain. Nothing is blocked, the full
   catalog stays offered, and a request to do something again gets no note.
+- Model client: each call has a 75 s timeout within the request budget and is
+  retried (up to 8 attempts, with backoff) only on transport failures, HTTP
+  408/409/425/429/5xx-gateway statuses, or an HTTP 200 body that carries an
+  `error` field or no usable choice; it never retries a valid completion.
