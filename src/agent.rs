@@ -600,4 +600,15 @@ impl Agent {
         }
         contact_evidence::removed_handle_note(&mem, user_input)
     }
+
+    /// A memory tool against the user's local store; a failure is the call's error result, never the case's.
+    async fn memory_tool(&self, user_id: &str, name: &str, args: &Map<String, Value>, deadline: Instant) -> Value {
+        match memtools::execute(&self.store, user_id, name, args, Some(deadline - secs(5.0))).await {
+            Ok(v) => v,
+            Err(kind) => {
+                tracing::warn!("memory tool {name} failed: {kind}");
+                json!({"error": format!("the {name} call failed ({kind}); try again or answer from what you have")})
+            }
+        }
+    }
 }
