@@ -60,3 +60,15 @@ def build_mem(batches, user_id="miner"):
                 }
             )
     return mem, flat
+
+
+def load(path):
+    """(name, mem, records, requests [(category, text)]) for one dataset."""
+    d = json.load(open(path, encoding="utf-8"))
+    primary = d["memory_waves"][0]["user_id"]
+    batches = [w.get("pairs") or [] for w in d["memory_waves"] if w.get("user_id") == primary]
+    batches += [c.get("prerequisite_pairs") or [] for c in d["tool_cases"]]
+    mem, flat = build_mem(batches, primary)
+    requests = [(c.get("question_type") or "", c["question"]) for c in d["memory_cases"]]
+    requests += [("tool:" + (c.get("category") or ""), c["prompt"]) for c in d["tool_cases"]]
+    return path.rsplit("/", 1)[-1], mem, flat, requests
