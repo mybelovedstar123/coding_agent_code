@@ -14,3 +14,7 @@ import sys
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent")
+
+from harness import config, event_state, store  # noqa: E402
+from harness.agent import request_identifier  # noqa: E402
+from harness.store import Pair, fmt_ts, render_pair  # noqa: E402
