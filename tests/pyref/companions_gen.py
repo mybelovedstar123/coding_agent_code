@@ -107,3 +107,19 @@ CRAFTED = [
     ("a4", "2025-01-04T09:00:00Z", "The clay plan with (Sparky) in Porto, Braga."),
     ("a5", "2025-01-05T09:00:00Z", "Sparky: the glaze plan in Porto."),
 ]
+CRAFTED_REQUESTS = [
+    ("How many days was the honeymoon trip, the grape track?", ["a1"], []),
+    ("How many days was the honeymoon trip, the grape track?", ["a1", "x1"], ["a1"]),
+    ("How many days was the honeymoon trip, the grape track?", ["x1", "a1", "a2"], ["c2"]),
+    ("What changed on the olive route, the Lisbon weekend?", ["a2"], []),
+    ("What changed on the olive route weekend trip?", ["a2", "a1"], ["a2", "a1"]),
+    ("Grape track trip: what is booked?", ["c3", "a1"], []),
+    ("grape track", ["a1"], ["c1", "c2", "c3", "c4", "c5"]),
+    ("Nothing shared here at all", ["a1", "a2"], []),
+    ("honeymoon trip", [], []),
+    ("honeymoon trip grape track olive route", ["a1", "a2", "c1"], []),
+    ("What about the kiln plan trip?", ["a3"], []),
+    ("What about the clay plan trip?", ["a4"], []),
+    ("What about the glaze plan trip?", ["a5"], []),
+    ("kiln plan clay plan glaze plan trip", ["a3", "a4", "a5"], []),
+]
