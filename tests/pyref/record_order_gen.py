@@ -24,3 +24,22 @@ DATASETS = sorted(glob.glob("/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/subm
 # agent.py
 rng = random.Random(118)
 IDENT_RE = re.compile(r"\b(?=[A-Za-z0-9-]*\d)(?=[A-Za-z0-9-]*[A-Za-z])[A-Za-z0-9][A-Za-z0-9-]{7,}\b")
+
+
+def load(path):
+    with open(path, encoding="utf-8") as f:
+        d = json.load(f)
+    raw = {}
+    for w in d["memory_waves"]:
+        if w.get("user_id") == "miner":
+            for p in w.get("pairs") or []:
+                raw[p["pair_id"]] = p
+    for t in d["tool_cases"]:
+        for p in t.get("prerequisite_pairs") or []:
+            raw[p["pair_id"]] = p
+    pairs = {
+        pid: store.Pair(pid, "", store.parse_ts(p.get("timestamp")), p.get("prompt") or "", p.get("response") or "")
+        for pid, p in raw.items()
+    }
+    requests = [m["question"] for m in d["memory_cases"]] + [t["prompt"] for t in d["tool_cases"]]
+    return pairs, list(dict.fromkeys(requests))
