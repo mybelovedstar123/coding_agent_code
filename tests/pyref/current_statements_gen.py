@@ -125,3 +125,23 @@ def lists():
         out.append({"earlier": earlier, "change": change, "list_items": items, "change_items": cs.list_items(change),
                     "current_list": cs.current_list(items, change)})
     return out
+
+
+def edge(by_id):
+    ident = "case-0002y"
+    items = [
+        ("p1", f'Case file {ident}: "Packing list: tent, stove, rope and maps."'),
+        ("p2", f"Case file {ident}: Packing list: tent, stove, rope and maps"),
+        ("p3", f"Case file {ident}: Update — the packing list changed: stove is off it, a lantern is on it."),
+        ("p4", f"Case file {ident}: Separately, the packing for the boat is done."),
+        ("p5", f"Case file {ident}: Unrelated: dinner is at eight."),
+        ("p6", f"Case file {ident}: Rescheudled: the packing trip is now Friday instead of Monday."),
+    ]
+    request = "What is on the packing list now?"
+    contexts = [None, "", "no newline", PREFIX + "\n{bad", MINIMAL, PREFIX + "\n" + '{"note": null, "x": [1.0]}']
+    cases = [outputs(items, ident, request, ctx, by_id) | {"context": ctx} for ctx in contexts]
+    cases.append(outputs(items + [("p7", "y" * 15_000)], ident, request, MINIMAL, by_id) | {"context": MINIMAL})
+    cases.append(outputs(items, ident, "unrelated question", MINIMAL, by_id) | {"context": MINIMAL})
+    stmts = [{"prompt": p, "ident": i, "statement": cs.statement(p, i)} for p, i in [
+        (f'Case file {ident}: "quoted" ', ident), (f"{ident.upper()}:: x}}", ident), ("none", ident), ("", ident)]]
+    return {"cases": cases, "statements": stmts}
