@@ -13,3 +13,4 @@ fn s(v: &Value) -> &str {
 }
 
 type Want = fn(&str) -> bool;
+type Plain = fn(&str) -> String;
