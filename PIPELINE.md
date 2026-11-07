@@ -298,3 +298,12 @@ more than one item, each with its own value; report the value the result gives f
 user named, copied exactly as written, and leave out the other items and their values. It names
 no item or value; the model reads the result and writes the reply.
 
+Send requests (both paths): when the request is an instruction, not a question, to send, forward or reply
+something to a person it points to by pronoun or name, and `gmail_send` is offered, the system prompt gets
+one line: find in the request or the records who receives it; when they name the recipient and their
+address, send it with `gmail_send` to that address (if the records do not hold the content to send, write a
+short message from what the request and the records say about it and send that, rather than asking the user
+for the content); when the records say no recipient has been decided, send nothing and ask the user who
+should receive it, naming the people the records mention. Requests to look a
+figure up first get the look-up-and-send note below instead. Advisory; the model makes every call.
+
