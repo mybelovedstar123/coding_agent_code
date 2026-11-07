@@ -51,3 +51,23 @@ call and an unmeasured behaviour change. The port is proven by replaying cached 
    Python `str | None`. A function that returns `""` for "no note" returns an empty `String`.
 5. **Formatting and lints.** `cargo fmt` (the repo's `rustfmt.toml`, width 120) and
    `cargo clippy --all-targets -- -D warnings` must be clean for your files. No `unsafe`.
+6. **Differential tests are required.** For every public function, generate fixtures from the Python reference and
+   assert equality in Rust:
+   - **Generator:** `tests/pyref/<module>_gen.py` imports the reference
+     (`sys.path.insert(0, "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent")`). It runs
+     the Python functions over realistic inputs and writes `tests/fixtures/<module>.json` (inputs and expected
+     outputs).
+   - **Inputs.** Take them from the real datasets in `/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/case/datasets/v13-full-*.json`:
+     - `memory_cases[].question` and `tool_cases[].prompt` (requests);
+     - `memory_waves[].pairs` plus every `tool_cases[].prerequisite_pairs` (records);
+     - `catalog` (tool definitions).
+     Add edge cases you derive from the code.
+   - **Coverage.** Include the inputs where a function fires (returns a note or changes the context), not only
+     the quiet ones; aim for every branch.
+   - **Test:** `tests/<module>.rs` reads the fixture, builds what the function needs (for a `UserMemory`:
+     `UserMemory::new` plus `upsert_pairs` with dummy 768-dim vectors), and asserts equality.
+   - **Running them:**
+     - the generator runs with `python3` in WSL (it needs only the stdlib and numpy, which are installed);
+     - cargo runs through
+       `wsl -d Ubuntu -- bash /mnt/c/Users/alchemist/AppData/Local/Temp/claude/c--alchemist-bittensor-sn-118/1cba4adf-c6cb-4d73-a102-5f35c587b82b/scratchpad/cargo.sh <args>`
+       (the target directory is on the WSL filesystem), with `MSYS_NO_PATHCONV=1` set when calling from Git Bash.
