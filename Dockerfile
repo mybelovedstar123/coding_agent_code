@@ -12,3 +12,4 @@ RUN mkdir src \
     && printf '\n' > src/lib.rs \
     && cargo build --locked --release \
     && rm -rf src
+COPY src ./src
