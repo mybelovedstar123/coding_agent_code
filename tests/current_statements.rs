@@ -82,3 +82,30 @@ fn run_case(mem: Option<&UserMemory>, c: &Value) -> Vec<String> {
         .map(|b| format!("{ident} {:?}: {b}", c.get("category")))
         .collect()
 }
+
+#[test]
+fn datasets() {
+    let fx = load("current_statements");
+    let (mut n, mut firing) = (0, 0);
+    let mut failures = Vec::new();
+    for ds in fx["datasets"].as_array().expect("datasets") {
+        let mem = memory(s(&ds["user_id"]), &ds["records"]);
+        for c in ds["requests"]
+            .as_array()
+            .expect("requests")
+            .iter()
+            .chain(ds["sweep"].as_array().expect("sweep"))
+        {
+            failures.extend(run_case(Some(&mem), c));
+            n += 1;
+            firing += c["with_current_statements"].get("digest").is_some() as usize;
+        }
+    }
+    assert!(
+        failures.is_empty(),
+        "{} mismatches:\n{}",
+        failures.len(),
+        failures[..failures.len().min(10)].join("\n")
+    );
+    assert!(n > 500 && firing >= 200, "coverage {n} / {firing}");
+}
