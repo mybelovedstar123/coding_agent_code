@@ -26,3 +26,59 @@ fn items(mem: Option<&UserMemory>, v: &Value) -> Vec<(String, String)> {
         })
         .collect()
 }
+
+fn run_case(mem: Option<&UserMemory>, c: &Value) -> Vec<String> {
+    let ident = s(&c["ident"]);
+    let request = s(&c["request"]);
+    let items = items(mem, &c["items"]);
+    let ctx = match mem {
+        Some(m) => context(m, c),
+        None => c["context"].as_str().map(String::from),
+    };
+    let mut bad = Vec::new();
+    if sorted_words(cs::words(request)) != c["words"] {
+        bad.push(format!(
+            "words(request): want {} got {}",
+            c["words"],
+            sorted_words(cs::words(request))
+        ));
+    }
+    if c["short"] == true {
+        let notes: Vec<Value> = cs::notes_of(&items, ident)
+            .into_iter()
+            .map(|n| {
+                json!({
+                    "text": n.text,
+                    "records": n.records,
+                    "is_change": cs::is_change(&n.text),
+                    "is_aside": cs::is_aside(&n.text),
+                    "list_items": cs::list_items(&n.text),
+                    "words": sorted_words(cs::words(&n.text)),
+                })
+            })
+            .collect();
+        let want = c["notes"].as_array().expect("notes");
+        if notes.len() != want.len() {
+            bad.push(format!("notes: want {} got {}", want.len(), notes.len()));
+        }
+        for (got, want) in notes.iter().zip(want) {
+            if got != want {
+                bad.push(format!("note: want {want} got {got}"));
+            }
+        }
+        let found = Value::from(cs::current_statements(&items, ident, request));
+        if found != c["current_statements"] {
+            bad.push(format!(
+                "current_statements: want {} got {found}",
+                c["current_statements"]
+            ));
+        }
+    }
+    let out = cs::with_current_statements(ctx.clone(), PREFIX, &items, ident, request);
+    if let Some(err) = check_step(ctx.as_deref(), out.as_deref(), &c["with_current_statements"]) {
+        bad.push(format!("with_current_statements: {err}"));
+    }
+    bad.into_iter()
+        .map(|b| format!("{ident} {:?}: {b}", c.get("category")))
+        .collect()
+}
