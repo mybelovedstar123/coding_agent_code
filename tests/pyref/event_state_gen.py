@@ -270,3 +270,4 @@ fixture = {
     "calls": calls,
 }
 with open(OUT, "w", encoding="utf-8") as fh:
+    json.dump(fixture, fh, ensure_ascii=False, indent=0)
