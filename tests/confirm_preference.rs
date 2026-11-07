@@ -37,3 +37,11 @@ const OTHER: &[&str] = &[
     "Run the Tiru checksum routine through Code Mode and tell me precisely what it outputs.",
     "Check the agent jobs I dispatched: what's the precise item count the finished Filisit rebuild job reports?",
 ];
+
+#[test]
+fn confirm_requests_fire() {
+    for text in CONFIRM {
+        assert!(th::asks_to_confirm_preference(text), "should fire: {text}");
+        assert_eq!(th::confirm_preference_note(text), th::CONFIRM_PREFERENCE_NOTE);
+    }
+}
