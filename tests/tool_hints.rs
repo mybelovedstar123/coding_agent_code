@@ -11,3 +11,5 @@ fn fixture() -> Value {
 fn s(v: &Value) -> &str {
     v.as_str().unwrap_or("")
 }
+
+type Want = fn(&str) -> bool;
