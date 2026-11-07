@@ -522,4 +522,63 @@ impl Agent {
         }
         text
     }
+
+    /// Stages 3a/3b on the memory path: an independent second draft, then the final check over one or both drafts.
+    /// The request-class note, when there is one, is appended to the 3b note.
+    #[allow(clippy::too_many_arguments)]
+    async fn final_stages(
+        &self,
+        skip: bool,
+        context: Option<&str>,
+        messages: &[Value],
+        final_text: &str,
+        trace: &mut CaseTrace,
+        case_id: &str,
+        base_url: Option<&str>,
+        deadline: Instant,
+        user_id: &str,
+        class_note: &str,
+    ) -> String {
+        let suffix = if class_note.is_empty() {
+            String::new()
+        } else {
+            format!("\n\n{class_note}")
+        };
+        let runs = !(skip || py::strip(final_text).is_empty() || Instant::now() >= deadline - secs(60.0));
+        if runs {
+            let other = self
+                .second_draft(messages, context, user_id, trace, case_id, base_url, deadline)
+                .await;
+            if !py::strip(&other).is_empty() && py::strip(&other) != py::strip(final_text) {
+                let note = fill_two_drafts(py::strip(final_text), py::strip(&other));
+                return self
+                    .final_check_with_note(
+                        skip,
+                        context,
+                        messages,
+                        final_text,
+                        trace,
+                        case_id,
+                        base_url,
+                        deadline,
+                        user_id,
+                        &(note + &suffix),
+                    )
+                    .await;
+            }
+        }
+        self.final_check_with_note(
+            skip,
+            context,
+            messages,
+            final_text,
+            trace,
+            case_id,
+            base_url,
+            deadline,
+            user_id,
+            &format!("{FINAL_CHECK_NOTE}{suffix}"),
+        )
+        .await
+    }
 }
