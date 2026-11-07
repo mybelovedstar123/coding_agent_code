@@ -14,3 +14,19 @@ usage:
   python equiv.py capture --agent py|rs --dataset D.json --out OUT.jsonl [--limit N]
   python equiv.py compare A.jsonl B.jsonl
 """
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import hashlib
+import json
+import os
+import re
+import struct
+import subprocess
+import sys
+import time
+from collections import defaultdict
+
+from aiohttp import web, ClientSession, ClientTimeout
