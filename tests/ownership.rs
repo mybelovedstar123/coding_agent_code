@@ -48,3 +48,18 @@ fn report(name: &str, total: usize, bad: &[String]) {
     }
     assert!(bad.is_empty(), "{name}: {} of {total} cases differ", bad.len());
 }
+
+#[test]
+fn sequence_ratio_matches_difflib() {
+    let cases = FIXTURE["sequence_ratio"].as_array().expect("cases");
+    let mut bad = Vec::new();
+    for c in cases {
+        let (a, b) = (s(&c[0]), s(&c[1]));
+        let want = c[2].as_f64().expect("ratio");
+        let got = ditto_agent::difflib::sequence_ratio(a, b);
+        if got.to_bits() != want.to_bits() {
+            bad.push(format!("{a:?} / {b:?}: want {want} got {got}"));
+        }
+    }
+    report("sequence_ratio", cases.len(), &bad);
+}
