@@ -217,3 +217,4 @@ long_sent = " ".join(
     if i % 3
     else f'For "e{i % 2}", the value of "owner" becomes "p{i}" at effective step {i % 7}.'
     for i in range(15)
+)
