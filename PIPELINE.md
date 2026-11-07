@@ -72,3 +72,13 @@ refusal state appears.
   from the transcript: when no reply exists yet, recovery (c).
 - Turns: the deciding loop runs at most 12 model turns; after that the stages
   above (final check, recovery) write the reply from the transcript.
+- An identical call runs once per request (`REPEAT_NOTE`, `call_key`,
+  `repeat_exempt`): a call with the same tool name and the same arguments
+  (object keys sorted) as a call that already returned a result in this
+  request is not executed; the model is told so and to use the result it has
+  or call a different tool. The call is recorded as blocked
+  (`blocked_tool_calls`), not reported as executed. A call with different
+  arguments always runs. When the user asks for something to be done again
+  (again, another, once more, repeat), no call is blocked. A call that returned
+  an error does not count, so it can be retried. The memory read tools and
+  tools named `read_*` or `fetch_*` are exempt.
