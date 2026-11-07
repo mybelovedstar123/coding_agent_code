@@ -343,3 +343,7 @@ them and writes the reply.
 Request-derived additions (retrieval only; each is decided from the request and
 the user's own records, never from a reply, and no record text is changed):
 
+- Handle requests (the request asks for a messaging handle): every record that
+  names the person asked about (any recorded name form) together with the
+  channel is added in full, including later corrections and removal
+  instructions (typo-tolerant channel match).
