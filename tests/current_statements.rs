@@ -156,3 +156,11 @@ fn sequence_ratios() {
         bad[..bad.len().min(10)].join("\n")
     );
 }
+
+#[test]
+fn phrases() {
+    let fx = load("current_statements");
+    for p in fx["edge"]["phrases"].as_array().expect("phrases") {
+        assert_eq!(cs::has_phrase(s(&p["low"]), s(&p["cue"])), p["value"] == true, "{p}");
+    }
+}
