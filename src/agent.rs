@@ -311,3 +311,36 @@ except (TypeError, ValueError) as err:
         _ => Err("Expecting value: line 1 column 1 (char 0)".into()),
     }
 }
+
+/// Whether a parsed value holds a NaN/Infinity constant (serde_json never produces one; kept for symmetry).
+async fn parse_json_args(raw: Option<&Value>) -> (Map<String, Value>, Option<String>) {
+    let text = match raw {
+        Some(Value::Object(m)) => py::dumps(&Value::Object(m.clone()), true),
+        None | Some(Value::Null) => "{}".into(),
+        Some(Value::String(s)) if s.is_empty() => "{}".into(),
+        Some(Value::String(s)) => s.clone(),
+        Some(_) => {
+            return (
+                Map::new(),
+                Some("tool arguments must be a JSON object; send them again as a JSON object".into()),
+            )
+        }
+    };
+    let parsed = match serde_json::from_str::<Value>(&text) {
+        Ok(v) => Ok(v),
+        Err(_) => python_json_args(&text).await,
+    };
+    match parsed {
+        Err(err) => (
+            Map::new(),
+            Some(format!(
+                "tool arguments were not valid JSON ({err}); send the arguments again as a JSON object"
+            )),
+        ),
+        Ok(Value::Object(m)) => (m, None),
+        Ok(_) => (
+            Map::new(),
+            Some("tool arguments must be a JSON object; send them again as a JSON object".into()),
+        ),
+    }
+}
