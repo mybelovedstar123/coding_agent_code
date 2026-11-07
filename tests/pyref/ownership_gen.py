@@ -193,3 +193,37 @@ def holder_requests():
         "Who is it? now", "", "WHO OWNS IT NOW", "whoever, these days", "who…now", "who\nnow",
     ]
     return out
+
+
+def sm_cases(pairs, requests):
+    toks = sorted({t for p in pairs.values() for t in ownership.tokens(p.prompt)})
+    out = []
+    for _ in range(1500):
+        a, b = rng.choice(toks), rng.choice(toks)
+        if rng.random() < 0.5:
+            b = typo(a)
+        out.append((a, b))
+    texts = [p.prompt[: rng.randrange(150, 1200)] for p in pairs.values()]
+    for _ in range(250):
+        a, b = rng.choice(texts), rng.choice(texts)
+        if rng.random() < 0.3:
+            b = a[rng.randrange(len(a) // 2 + 1):] + " " + b[:200]
+        out.append((a, b))
+    for _ in range(100):
+        a = rng.choice(texts)
+        b = "".join(typo(w) + " " for w in a.split())
+        out.append((a, b))
+    for _ in range(100):
+        a = rng.choice(requests)
+        b = rng.choice(texts)
+        out.append((a, b))
+    for n in (199, 200, 201, 250, 300, 450, 1000):
+        a = "".join(rng.choice("ab c") for _ in range(n))
+        b = "".join(rng.choice("abc d") for _ in range(n))
+        out.append((a, b))
+        out.append((b, a))
+        out.append(("a" * n, "a" * (n // 2) + "b" * (n // 2)))
+        out.append(("x" + "a" * n, "a" * n + "x"))
+    out += [("", ""), ("", "a"), ("a", ""), ("abc", "abc"), ("é—x", "e—x"), ("😀a", "a😀"), ("owner", "owners")]
+    out += [(w, h) for w in HOLDERISH for h in ownership.HOLDER_WORDS + ("whose", "internal", "internally")]
+    return [[a, b, difflib.SequenceMatcher(None, a, b).ratio()] for a, b in out]
