@@ -164,3 +164,15 @@ def agent_cmd(kind: str, port: int) -> tuple[list[str], str | None]:
     if kind == "py":
         return [sys.executable, "-m", "harness.server", "--port", str(port)], PY_REF
     return [RS_BIN, "--port", str(port)], None
+
+
+async def wait_health(session: ClientSession, url: str) -> None:
+    for _ in range(200):
+        try:
+            async with session.get(url + "/health") as r:
+                if r.status == 200:
+                    return
+        except Exception:  # noqa: BLE001
+            pass
+        await asyncio.sleep(0.1)
+    raise RuntimeError("agent did not start")
