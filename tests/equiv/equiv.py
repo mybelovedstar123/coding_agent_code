@@ -51,3 +51,12 @@ def unit_vector(text: str) -> list[float]:
         vals[i] += 2.0
     n = sum(v * v for v in vals) ** 0.5 or 1.0
     return [v / n for v in vals]
+
+
+def context_ids(messages: list[dict]) -> list[str]:
+    ids = []
+    for m in messages:
+        c = m.get("content") or ""
+        if isinstance(c, str):
+            ids += re.findall(r'"(?:pairID|id)": "([^"]+)"', c)
+    return ids
