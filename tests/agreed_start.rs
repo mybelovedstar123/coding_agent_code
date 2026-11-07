@@ -128,3 +128,22 @@ fn work_requests_fire() {
         assert!(!th::wants_work_done(text), "should not fire: {text}");
     }
 }
+
+#[test]
+fn approximate_option_requests_fire() {
+    for text in [
+        "Use the condensed edition of Dira Sasn for chat. Verify the exact option name against the workspace's fonts.",
+        "Change the chat typefaase to Qlfa Sla OOne-ish — check which fonts this workspace has configured before setting it.",
+        "Set the chat font to Teo, or the configured option closest to that; look the list up first, I may have botched it.",
+        "Change the accent colour to mraoon. Spelling is approximate, so confirm it against the options this workspace lists.",
+    ] {
+        assert!(th::names_option_approximately(text), "should fire: {text}");
+    }
+    for text in [
+        "Make sure my Ditto accent is velvet for me.",
+        "Is there a way to turn on dark mode?",
+        "Set my theme to dark.",
+    ] {
+        assert!(!th::names_option_approximately(text), "should not fire: {text}");
+    }
+}
