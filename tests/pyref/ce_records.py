@@ -9,3 +9,5 @@ with a lexical top-k standing in for the embedding retrieval (only the add-ons a
 import glob
 import json
 import sys
+
+sys.dont_write_bytecode = True
