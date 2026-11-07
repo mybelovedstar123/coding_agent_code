@@ -21,3 +21,11 @@ fn a_named_tool_gets_the_note() {
     assert!(note.contains("lamuket_focus_timer"), "{note}");
     assert!(note.contains("do not ask the user for them first"), "{note}");
 }
+
+#[test]
+fn no_named_tool_no_note() {
+    let tools = catalog(&["search_web", "lamuket_focus_timer"]);
+    assert_eq!(named_tool_note("Start a focus timer for my work please.", &tools), "");
+    // The brand as the first word of a sentence is not a name.
+    assert_eq!(named_tool_note("Lamuket.", &catalog(&["search_web"])), "");
+}
