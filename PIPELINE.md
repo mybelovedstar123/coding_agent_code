@@ -232,3 +232,15 @@ member; state persists until changed). It is labelled as an unverified
 candidate, not an answer, that can be wrong; the records decide. The records
 stay in the context unchanged; the model reads both and writes the reply.
 
+Change notes: when the request's identifier records are short notes (up to
+15,000 characters) and one of them says that something changed on the
+request's topic (an update, a revision, a take-over, a rescheduling, a
+replacement of an earlier value; copies with typos are grouped by text
+similarity), the context also carries `current_statements`: that note with the
+earlier plain notes of the same topic it supersedes, because refiled copies'
+filing dates do not show which note came last. Asides ("Separately, …",
+"Unrelated: …") are never listed. The note also asks the model to name the
+current decision with the statement's own words and verb form (not rephrased into
+another tense). The records stay unchanged; the model reads them and writes the
+reply.
+
