@@ -70,3 +70,8 @@ EDGE_TEXTS = [
     "   ",
     "note that",
 ]
+EDGE_GLOSSED = [
+    ("For voraenpath the beluxwire on record is Copperfield Systems; beluxwire2 is not.", {"beluxwire": "is the payer", "voraenpath": "names the project"}),
+    ("alphaone alphaonex alphaone. betatwo", {"alphaone": "is x", "alphaonex": "is longer", "betatwo": "holds y"}),
+    ("nothing here", {"alphaone": "is x"}),
+]
