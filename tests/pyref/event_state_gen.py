@@ -33,3 +33,10 @@ class Mem:
 
 def evs_out(evs):
     return [[str(s), op, e, f, v] for s, op, e, f, v in evs]
+
+
+def safe(fn, *a):
+    try:
+        return {"ok": fn(*a)}
+    except Exception as exc:  # noqa: BLE001
+        return {"raises": type(exc).__name__}
