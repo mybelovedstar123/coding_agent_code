@@ -53,3 +53,7 @@ def outputs(items, ident, request, context, by_id):
             context, cs.with_current_statements(context, PREFIX, items, ident, request), full=True
         ),
     }
+
+
+def fires(c):
+    return "digest" in c["with_current_statements"]
