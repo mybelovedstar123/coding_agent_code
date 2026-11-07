@@ -45,3 +45,11 @@ fn confirm_requests_fire() {
         assert_eq!(th::confirm_preference_note(text), th::CONFIRM_PREFERENCE_NOTE);
     }
 }
+
+#[test]
+fn other_requests_do_not_fire() {
+    for text in OTHER {
+        assert!(!th::asks_to_confirm_preference(text), "should not fire: {text}");
+        assert_eq!(th::confirm_preference_note(text), "");
+    }
+}
