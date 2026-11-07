@@ -205,3 +205,6 @@ sent_quirks = [
 for group in (json_quirks, csv_quirks, md_quirks, sent_quirks):
     add_texts(group)
 
+edge_texts = [HEAD + "\n" + rows_json(12)]
+long_csv = "entity,field,value,effective_step,operation\n" + "\n".join(
+    f"e{i % 2},{'tags' if i % 3 else 'owner'},v{i},{(i * 7) % 5},{['add', 'remove', 'assign'][i % 3]}" for i in range(14)
