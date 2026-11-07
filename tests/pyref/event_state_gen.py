@@ -174,3 +174,11 @@ csv_quirks = [
     'entity,field,value,effective_step,operation\n"a, inc",f,"say ""hi""",1,assign\nb,f,"multi\nline,2",2,add\n'
     'c,"x""y"z,w,3,add',
     ' x,effective_step\n"open, never closed\nmore, text\n',
+]
+md_quirks = [
+    "| Entity | Field | Value | Effective step | Operation |\n|---|---|---|---|---|\n| a | f | v | 1 | assign |\n"
+    "| <code>b</code> | `f` | ` w ` | 2 | ADD |\n| | | | | |\n| c | f | x | three | assign |",
+    "  | entity | field |\n| a | b |\nplain line\n| entity | field | value | effective_step | operation |\n"
+    "| a | f | v | 1 | remove | extra |\n| a | f |",
+    "| entity | entity | field | value | effective_step | operation |\n| :-: | --- |\n| a | b | f | v | 1 | assign |",
+    "|entity|field|value|effective_step|operation\n|a|f|v|0|assign",
