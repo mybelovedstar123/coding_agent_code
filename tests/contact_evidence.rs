@@ -54,3 +54,86 @@ fn named_map(v: &Value) -> IndexMap<String, String> {
         .map(|kv| (s(&kv[0]).to_string(), s(&kv[1]).to_string()))
         .collect()
 }
+
+/// Every public function on one case; returns the mismatches.
+fn run_case(mem: &UserMemory, c: &Value) -> Vec<String> {
+    let q = s(&c["question"]);
+    let ctx = context(mem, c);
+    let mut bad = Vec::new();
+    let mut eq = |what: &str, got: Value, want: &Value| {
+        if got != *want {
+            bad.push(format!("{what}: want {want} got {got}"));
+        }
+    };
+    eq("asks_for_handle", ce::asks_for_handle(q).into(), &c["asks_for_handle"]);
+    eq(
+        "asks_owner_contact",
+        ce::asks_owner_contact(q).into(),
+        &c["asks_owner_contact"],
+    );
+    eq(
+        "person_name_forms",
+        sorted(ce::person_name_forms(mem, q)).into(),
+        &c["person_name_forms"],
+    );
+    let channel = ce::channel_records(mem, q);
+    eq("channel_records", ids(&channel).into(), &c["channel_records"]);
+    eq(
+        "has_removal_instruction",
+        ce::has_removal_instruction(&channel).into(),
+        &c["has_removal_instruction"],
+    );
+    let texts = ce::context_texts(ctx.as_deref());
+    eq(
+        "context_texts.digest",
+        digest(Some(&texts)),
+        &c["context_texts"]["digest"],
+    );
+    if let Some(v) = c["context_texts"]["value"].as_str() {
+        eq("context_texts", texts.clone().into(), &v.into());
+    }
+    let named_ctx = ce::people_named(mem, &texts);
+    eq("people_named", sorted(named_ctx.clone()).into(), &c["people_named"]);
+    eq(
+        "people_named(question)",
+        sorted(ce::people_named(mem, q)).into(),
+        &c["people_named_question"],
+    );
+    let emails = ce::email_records(mem, &named_ctx);
+    eq("email_records", ids(&emails).into(), &c["email_records"]);
+    let named = ce::possessive_nicknames(mem, q);
+    let named_json: Vec<Value> = named
+        .iter()
+        .map(|(k, v)| Value::from(vec![k.clone(), v.clone()]))
+        .collect();
+    eq("possessive_nicknames", named_json.into(), &c["possessive_nicknames"]);
+    let identity = ce::identity_records(mem, &named);
+    eq("identity_records", ids(&identity).into(), &c["identity_records"]);
+    let related = if named.is_empty() {
+        String::new()
+    } else {
+        ce::related_person_note(&named)
+    };
+    eq("related_person_note", related.clone().into(), &c["related_person_note"]);
+    eq(
+        "removed_handle_note",
+        ce::removed_handle_note(mem, q).into(),
+        &c["removed_handle_note"],
+    );
+    let steps: [(&str, Option<String>); 5] = [
+        ("with_removal_note", ce::with_removal_note(ctx.clone(), PREFIX)),
+        ("with_records_email", ce::with_records(ctx.clone(), PREFIX, &emails)),
+        ("with_records_channel", ce::with_records(ctx.clone(), PREFIX, &channel)),
+        (
+            "with_records_and_note",
+            ce::with_records_and_note(ctx.clone(), PREFIX, &identity, &related),
+        ),
+        ("pipeline", pipeline(mem, q, ctx.clone())),
+    ];
+    for (what, got) in steps {
+        if let Some(err) = check_step(ctx.as_deref(), got.as_deref(), &c[what]) {
+            bad.push(format!("{what}: {err}"));
+        }
+    }
+    bad
+}
