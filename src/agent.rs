@@ -168,4 +168,9 @@ impl CaseTrace {
             }
         }
     }
+
+    fn block(&mut self, name: &str, args: &Map<String, Value>, state: &str) {
+        self.blocked
+            .push(json!({"name": name, "args": Value::Object(args.clone()), "state": state}));
+    }
 }
