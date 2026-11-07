@@ -245,3 +245,12 @@ catalogs.append(
 )
 
 wants = []
+for r in requests:
+    row = {"text": r["text"]}
+    for fn in WANTS:
+        row[fn] = getattr(tool_hints, fn)(r["text"])
+    for fn in PLAIN_NOTES:
+        row[fn] = getattr(tool_hints, fn)(r["text"])
+    row["words"] = tool_hints._words(r["text"])
+    row["numbers"] = tool_hints.NUMBER_RE.findall(r["text"])
+    wants.append(row)
