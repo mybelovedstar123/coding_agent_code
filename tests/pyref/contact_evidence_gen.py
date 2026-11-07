@@ -214,3 +214,26 @@ def edge():
         "email_records": email,
         "removal": removal,
     }
+
+
+def main():
+    datasets = []
+    total = firing = 0
+    for path in R.DATASETS:
+        name, mem, flat, requests = R.load(path)
+        cases = []
+        for category, q in requests:
+            _, ident_records = R.request_identifier(mem, q)
+            ctx, spec = R.build_context(mem, q, ident_records)
+            c = case(mem, category, q, ctx, spec)
+            cases.append(c)
+        n_fire = sum(fires(c) for c in cases)
+        total += len(cases)
+        firing += n_fire
+        print(f"{name}: {len(flat)} records, {len(cases)} cases, {n_fire} firing", file=sys.stderr)
+        datasets.append({"name": name, "user_id": mem.user_id, "records": flat, "cases": cases})
+    e = edge()
+    e_fire = sum(fires(c) for c in e["cases"])
+    print(f"edge: {len(e['cases'])} cases, {e_fire} firing, {len(e['shapes'])} context shapes", file=sys.stderr)
+    path = R.write("contact_evidence", {"prefix": PREFIX, "datasets": datasets, "edge": e})
+    print(f"wrote {path}: {total} dataset cases ({firing} firing)", file=sys.stderr)
