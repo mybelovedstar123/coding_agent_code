@@ -1282,3 +1282,61 @@ impl Agent {
         Value::Object(out)
     }
 }
+
+/// Retrieved records (excerpts) or, when the request names an identifier the records carry, every record that carries
+/// it in full; plus the handle-channel records; oldest first. None when there is nothing.
+fn retrieved_context(
+    mem: &UserMemory,
+    user_input: &str,
+    ident_records: &[Pair],
+    hits: &[(Pair, f64)],
+) -> Option<String> {
+    let channel = contact_evidence::channel_records(mem, user_input);
+    if hits.is_empty() && ident_records.is_empty() && channel.is_empty() {
+        return None;
+    }
+    let idf = mem.idf();
+    let mut items: Vec<(Pair, Value)> = Vec::new();
+    let mut seen: HashSet<String> = HashSet::new();
+    let entry = |p: &Pair, text: String| json!({"pairID": p.pair_id, "timestamp": fmt_ts(&p.ts), "text": text});
+    for pair in ident_records {
+        items.push((pair.clone(), entry(pair, render_pair(pair))));
+        seen.insert(pair.pair_id.clone());
+    }
+    for (rank, (pair, _)) in hits.iter().enumerate() {
+        if seen.contains(&pair.pair_id) {
+            continue;
+        }
+        let budget = if rank < CONTEXT_TOP_FULL {
+            CONTEXT_CHARS_TOP
+        } else {
+            CONTEXT_CHARS
+        };
+        let body = excerpt(&render_pair(pair), user_input, budget, Some(&idf));
+        items.push((pair.clone(), entry(pair, body)));
+    }
+    // Notes that continue a plan through the person it was made with (companions.rs), in full.
+    let index = mem.derived("companions", || {
+        let mut pairs: Vec<&Pair> = mem.pairs.values().collect();
+        pairs.sort_by(|a, b| cmp_content(a, b));
+        companions::build_index(&pairs)
+    });
+    let in_context: HashSet<String> = items.iter().map(|(p, _)| p.pair_id.clone()).collect();
+    let anchors: Vec<&Pair> = ident_records.iter().chain(hits.iter().map(|(p, _)| p)).collect();
+    for pair in companions::companion_records(&index, &mem.pairs, user_input, &anchors, &in_context) {
+        items.push((pair.clone(), entry(pair, render_pair(pair))));
+    }
+    for pair in &channel {
+        if !seen.contains(&pair.pair_id) && items.iter().all(|(p, _)| p.pair_id != pair.pair_id) {
+            items.push((pair.clone(), entry(pair, render_pair(pair))));
+        }
+    }
+    // Chronological order makes "what changed / what is current" visible.
+    items.sort_by(|a, b| cmp_content(&a.0, &b.0));
+    let payload = json!({"note": CONTEXT_NOTE, "memories": items.into_iter().map(|(_, v)| v).collect::<Vec<_>>()});
+    Some(format!(
+        "{}\n{}",
+        config::MEMORY_CONTEXT_PREFIX,
+        py::dumps(&payload, false)
+    ))
+}
