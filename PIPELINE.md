@@ -215,3 +215,9 @@ full, at most 4 per request, with the other pre-loaded records (oldest first).
 The index is built from the records once per user and rebuilt after any
 record changes. It reads only the request and the user's records.
 
+Ordering: every ranking and list that reaches the model is a total order over
+record content. Equal scores, and records filed at the same time, are ordered
+by their text; never by an id (ids are opaque and differ between runs), by the
+order records arrived in, or by set iteration. A record without a usable
+timestamp sorts as the oldest.
+
