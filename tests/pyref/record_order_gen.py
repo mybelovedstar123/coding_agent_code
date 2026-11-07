@@ -48,3 +48,13 @@ def load(path):
 def records_for(pairs, ident):
     found = [p for p in pairs.values() if ident in f"{p.prompt}\n{p.response}".lower()]
     return sorted(found, key=store.content_key)
+
+
+def request_identifier(pairs, user_input):
+    """agent.request_identifier."""
+    best = ("", [])
+    for ident in dict.fromkeys(t.lower() for t in IDENT_RE.findall(user_input)):
+        found = [p for p in pairs.values() if ident in f"{p.prompt}\n{p.response}".lower()]
+        if found and (not best[1] or len(found) < len(best[1])):
+            best = (ident, found)
+    return best[0], sorted(best[1], key=store.content_key)
