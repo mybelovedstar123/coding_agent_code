@@ -92,3 +92,17 @@ def make_context(pairs, request, k=8, note=True, cut=None):
         payload["note"] = "Records retrieved for this request, oldest first."
     payload["memories"] = items
     return PREFIX + "\n" + json.dumps(payload, ensure_ascii=False)
+
+
+def typo(word):
+    if len(word) < 4:
+        return word
+    i = rng.randrange(1, len(word))
+    op = rng.randrange(4)
+    if op == 0:
+        return word[:i] + word[i + 1 :]
+    if op == 1:
+        return word[:i] + rng.choice("aeiourstln") + word[i:]
+    if op == 2 and i < len(word) - 1:
+        return word[:i] + word[i + 1] + word[i] + word[i + 2 :]
+    return word[:i] + rng.choice("aeiourstln") + word[i + 1 :]
