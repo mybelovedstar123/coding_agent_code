@@ -40,3 +40,11 @@ fn chain_json(ch: &[(String, String)]) -> Value {
 fn sorted(set: &HashSet<String>) -> Vec<String> {
     set.iter().cloned().collect::<BTreeSet<_>>().into_iter().collect()
 }
+
+fn report(name: &str, total: usize, bad: &[String]) {
+    eprintln!("{name}: {} of {total} cases equal", total - bad.len());
+    for b in bad.iter().take(10) {
+        eprintln!("  MISMATCH {b}");
+    }
+    assert!(bad.is_empty(), "{name}: {} of {total} cases differ", bad.len());
+}
