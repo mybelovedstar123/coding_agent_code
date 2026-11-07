@@ -70,3 +70,10 @@ def add_request(text, source):
 
 
 catalogs = []
+for path in DATASETS:
+    d = json.load(open(path, encoding="utf-8"))
+    catalogs.append({"name": os.path.basename(path), "tool_defs": tool_defs_for(d["catalog"])})
+    for c in d["tool_cases"]:
+        add_request(c["prompt"], "tool_case")
+    for c in d["memory_cases"]:
+        add_request(c["question"], "memory_case")
