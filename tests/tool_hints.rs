@@ -176,3 +176,29 @@ fn notes_match() {
     }
     assert!(fired > 600, "{fired} notes fired");
 }
+
+#[test]
+fn sequence_matcher_matches() {
+    let fx = fixture();
+    for r in fx["ratios"].as_array().unwrap() {
+        let (a, b) = (s(&r[0]), s(&r[1]));
+        assert_eq!(
+            ditto_agent::difflib::sequence_ratio(a, b),
+            r[2].as_f64().unwrap(),
+            "ratio({a:?}, {b:?})"
+        );
+    }
+    for r in fx["fuzzy"].as_array().unwrap() {
+        let (w, t, ratio) = (s(&r[0]), s(&r[1]), r[2].as_f64().unwrap());
+        assert_eq!(
+            th::_fuzzy(w, t, ratio),
+            r[3].as_bool().unwrap(),
+            "_fuzzy({w:?}, {t:?}, {ratio})"
+        );
+        assert_eq!(
+            th::_has(&[w.to_string()], &[t], ratio),
+            r[4].as_bool().unwrap(),
+            "_has({w:?}, {t:?}, {ratio})"
+        );
+    }
+}
