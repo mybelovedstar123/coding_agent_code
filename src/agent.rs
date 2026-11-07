@@ -138,3 +138,15 @@ struct CaseTrace {
     /// Call key (tool name and sorted arguments, see `call_key`) -> calls that completed without an error.
     completed: HashMap<String, i64>,
 }
+
+/// `int(x)` for a usage field: ints, floats (truncated), numeric strings; None for anything else.
+fn py_int(v: &Value) -> Option<i64> {
+    match v {
+        Value::Number(n) => n
+            .as_i64()
+            .or_else(|| n.as_f64().filter(|f| f.is_finite()).map(|f| f.trunc() as i64)),
+        Value::Bool(b) => Some(*b as i64),
+        Value::String(s) => py::strip(s).replace('_', "").parse().ok(),
+        _ => None,
+    }
+}
