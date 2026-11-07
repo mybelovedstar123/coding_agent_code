@@ -195,3 +195,12 @@ shown as excerpts; the context note calls all pre-loaded records excerpts,
 including identifier records shown in full. An excerpt's full text is one
 `fetch_memories` call away.
 
+Alias-aware search: a record that writes exactly one quoted single name next to
+exactly one full name declares that name as the person's alias; searches that
+mention one form also search the other. With several identifiers in a request,
+identifier retrieval keeps the records of the most specific one (the
+identifier matching the fewest records; equal counts go to the identifier the
+request names first), so records that only share a broader identifier (the
+same entity in another case file) are not pre-loaded. Every note that works
+from the request's identifier uses that same identifier.
+
