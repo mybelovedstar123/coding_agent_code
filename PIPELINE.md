@@ -244,3 +244,15 @@ current decision with the statement's own words and verb form (not rephrased int
 another tense). The records stay unchanged; the model reads them and writes the
 reply.
 
+Tool hints (tool path only): when the request's wording matches what one offered
+tool is specifically for — when saved workflows run, which run on their own or
+how many runs one logged (`list_schedules`); an edit to an image from earlier
+(`edit_image`); arithmetic or statistics on at least two numbers the request
+gives (`run_code`); an explicit request for a worker or background job
+(`execute_agent_job`); a plain request to put something on the calendar that
+names no case identifier (`calendar_create_event`) — and that tool is in the
+live catalog, the system prompt gets one line naming the tool and quoting its
+own catalog description (for the image edit and the calendar entry also how to
+pass what the request gives). The trigger comes from the request and the
+catalog only; the model chooses every call.
+
