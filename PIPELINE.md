@@ -106,3 +106,6 @@ refusal state appears.
   (see Context construction) always in full, with no size cap.
 - Memory tools: search previews are up to 900 characters per record; `topK`
   defaults to 8 and is clamped to 1-25.
+- `run_python`: programs up to 8,000 characters, output truncated at 6,000
+  characters, 15 s wall time, 8 s CPU, 768 MB address space, 3 open files, no
+  child processes.
