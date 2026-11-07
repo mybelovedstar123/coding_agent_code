@@ -232,3 +232,32 @@ fn context_shapes() {
     }
     assert!(raised > 0);
 }
+
+#[test]
+fn helpers() {
+    let fx = load("contact_evidence");
+    let e = &fx["edge"];
+    let mem = memory("miner", &e["records"]);
+    for n in e["notes"].as_array().expect("notes") {
+        let named = named_map(&n["named"]);
+        if !named.is_empty() {
+            assert_eq!(ce::related_person_note(&named), s(&n["related_person_note"]));
+        }
+        assert_eq!(
+            ids(&ce::identity_records(&mem, &named)),
+            strings(&n["identity_records"])
+        );
+    }
+    for c in e["names_any"].as_array().expect("names_any") {
+        let forms: BTreeSet<String> = strings(&c["forms"]).into_iter().collect();
+        assert_eq!(ce::names_any(s(&c["text"]), &forms), c["value"] == true, "{c}");
+    }
+    for c in e["email_records"].as_array().expect("email_records") {
+        let forms: BTreeSet<String> = strings(&c["forms"]).into_iter().collect();
+        assert_eq!(ids(&ce::email_records(&mem, &forms)), strings(&c["records"]), "{c}");
+    }
+    for c in e["removal"].as_array().expect("removal") {
+        let records: Vec<_> = strings(&c["records"]).iter().map(|id| mem.pairs[id].clone()).collect();
+        assert_eq!(ce::has_removal_instruction(&records), c["value"] == true, "{c}");
+    }
+}
