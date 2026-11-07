@@ -208,3 +208,6 @@ for group in (json_quirks, csv_quirks, md_quirks, sent_quirks):
 edge_texts = [HEAD + "\n" + rows_json(12)]
 long_csv = "entity,field,value,effective_step,operation\n" + "\n".join(
     f"e{i % 2},{'tags' if i % 3 else 'owner'},v{i},{(i * 7) % 5},{['add', 'remove', 'assign'][i % 3]}" for i in range(14)
+)
+long_md = "| entity | field | value | effective_step | operation |\n|---|---|---|---|---|\n" + "\n".join(
+    f"| e{i % 2} | tags | v{i % 4} | {i % 6} | {['add', 'remove'][i % 2]} |" for i in range(12)
