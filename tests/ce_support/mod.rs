@@ -95,3 +95,17 @@ pub fn context(mem: &UserMemory, case: &Value) -> Option<String> {
     }
     ctx
 }
+
+/// Checks a context step against its compact expectation ({"same"}, or {"digest", "value"?}); returns a mismatch
+/// description.
+pub fn check_step(before: Option<&str>, after: Option<&str>, want: &Value) -> Option<String> {
+    if want.get("same").is_some() {
+        return (after != before).then(|| format!("expected unchanged, got {after:?}"));
+    }
+    if let Some(v) = want.get("value") {
+        if v.as_str() != after {
+            return Some(format!("value differs:\n want {}\n got  {after:?}", v));
+        }
+    }
+    (digest(after) != want["digest"]).then(|| format!("digest differs: want {} got {after:?}", want["digest"]))
+}
