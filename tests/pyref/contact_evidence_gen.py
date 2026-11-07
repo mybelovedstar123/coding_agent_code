@@ -97,3 +97,23 @@ def fires(c):
         or c["removed_handle_note"]
         or "digest" in c["pipeline"]
     )
+
+
+# ---- a small crafted memory for the branches the datasets reach rarely or never
+EDGE_PAIRS = [
+    {"pair_id": "e01", "timestamp": "2025-01-02T09:00:00Z", "prompt": "My cousin Olivia Cantu goes by “Ollie” with everyone.", "response": "Noted."},
+    {"pair_id": "e02", "timestamp": "2025-01-03T09:00:00Z", "prompt": "Ollie's Signal handle is @ollie.c — use it for quick pings.", "response": "Saved."},
+    {"pair_id": "e03", "timestamp": "2025-02-03T09:00:00Z", "prompt": "Please remove Ollie's old handle @ollie.c, she retired it.", "response": "Done."},
+    {"pair_id": "e04", "timestamp": "2025-01-05T09:00:00+02:00", "prompt": "Bartholomew Reyes-Vance — everyone calls him \"Bart\".", "response": "Got it."},
+    {"pair_id": "e05", "timestamp": "2025-01-06T09:00:00", "prompt": "Bart's hemdle on the team chat is @bart_rv.", "response": "Saved."},
+    {"pair_id": "e06", "timestamp": "2025-01-07T09:00:00Z", "prompt": "Bartholomew Reyes-Vance's email is bart.rv@corp.example.io.", "response": "Saved."},
+    {"pair_id": "e07", "timestamp": "2025-01-08T09:00:00Z", "prompt": "Samuel Ortiz is “Sam” to his friends.", "response": "Noted."},
+    {"pair_id": "e08", "timestamp": "2025-01-09T09:00:00Z", "prompt": "Samantha Lee also goes by “Sam”.", "response": "Noted."},
+    {"pair_id": "e09", "timestamp": "2025-01-10T09:00:00Z", "prompt": "Olivia Cantu is also called “Liv” at work.", "response": "Noted."},
+    {"pair_id": "e10", "timestamp": "2025-01-11T09:00:00Z", "prompt": "Sam's signal handle: @sam.o. I don’t want it on file after March.", "response": "Okay."},
+    {"pair_id": "e11", "timestamp": "2025-01-12T09:00:00Z", "prompt": "Liv's email: liv+work@cantu.example.com", "response": "Saved."},
+    {"pair_id": "e12", "timestamp": "2025-01-13T09:00:00Z", "prompt": "Dana Whitfield owns the Harbor project now; she's “Dee”.", "response": "Noted."},
+    {"pair_id": "e13", "timestamp": "2025-01-14T09:00:00Z", "prompt": "Dee's address is 14 Elm Row and her e-mail is dee@whit.example.org.", "response": "Saved."},
+    {"pair_id": "e14", "timestamp": "", "prompt": "Undated: Bart's handle changed to @bart.new, don’t hand it out.", "response": ""},
+    {"pair_id": "e15", "timestamp": "2025-01-14T09:00:00Z", "prompt": "Ollie handle hnale typo: @ollie.c", "response": "  "},
+]
