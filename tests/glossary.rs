@@ -9,3 +9,7 @@ use ditto_agent::glossary as g;
 use ditto_agent::store::UserMemory;
 use indexmap::IndexMap;
 use serde_json::{json, Value};
+
+fn pairs_json(map: &IndexMap<String, String>) -> Value {
+    map.iter().map(|(k, v)| json!([k, v])).collect()
+}
