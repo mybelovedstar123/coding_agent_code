@@ -23,3 +23,4 @@ OUT = os.path.join(HERE, "..", "fixtures", "record_order.json")
 DATASETS = sorted(glob.glob("/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/case/datasets/v13-full-*.json"))
 # agent.py
 rng = random.Random(118)
+IDENT_RE = re.compile(r"\b(?=[A-Za-z0-9-]*\d)(?=[A-Za-z0-9-]*[A-Za-z])[A-Za-z0-9][A-Za-z0-9-]{7,}\b")
