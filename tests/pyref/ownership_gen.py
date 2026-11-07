@@ -320,3 +320,112 @@ def ownership_cases(pairs, idx, requests, full):
                 case["out"] = out
             cases.append(case)
     return cases, fired
+
+
+def main():
+    sets = []
+    sm_all = []
+    totals = {"requests": 0, "fired": 0, "ownership_cases": 0, "ownership_changed": 0}
+    for path in DATASETS:
+        pairs, requests = load(path)
+        records = [(pid, store.fmt_ts(p.ts), p.prompt) for pid, p in pairs.items()]
+        idx = ownership.IndexV2(records)
+        memo_best_chain(idx)
+        full = {pid: {"pairID": pid, "timestamp": store.fmt_ts(p.ts), "text": store.render_pair(p)} for pid, p in pairs.items()}
+        all_requests = requests + synth_requests(pairs, 120)
+        req_cases = []
+        ident_seen = 0
+        for r in all_requests:
+            c = {
+                "request": r,
+                "asks_holder": ownership.asks_holder(r),
+                "asks_current_holder": ownership.asks_current_holder(r),
+                "lower_grams": sorted(ownership.lower_grams(r)),
+                "tokens": ownership.tokens(r),
+            }
+            req_cases.append(c)
+            if IDENT_RE.search(r):
+                ident_seen += 1
+                if ident_seen % 40 != 1 or ident_seen > 40 * IDENT_SAMPLE:
+                    continue
+            phrase, chain = idx.best_chain(r)
+            c["phrase"] = phrase
+            c["chain"] = chain_list(chain)
+            if chain:
+                c["sources"] = idx.sources(phrase)
+                c["occurs"] = idx.occurs(phrase)
+                c["candidates"] = idx.candidates(phrase)
+                c["holder_now"] = ownership.holder_now(chain, idx.orgs)
+                c["first_named_holder"] = ownership.first_named_holder(chain)
+        own_cases, fired = ownership_cases(pairs, idx, all_requests, full)
+        # fuzzy_in / thread_like / is_person over record material.
+        fuzzy = []
+        toks_pool = [ownership.tokens(p.prompt) for p in pairs.values()]
+        for _ in range(400):
+            tk = rng.choice(toks_pool)
+            if len(tk) < 3:
+                continue
+            n = rng.randrange(1, 4)
+            i = rng.randrange(max(1, len(tk) - n + 1))
+            phrase = " ".join(typo(w) if rng.random() < 0.3 else w for w in tk[i : i + n])
+            other = (rng.choice(toks_pool) if rng.random() < 0.3 else tk)[: max(i + n + 20, 60)]
+            ratio = rng.choice([None, None, 0.0, 0.5, 0.95])
+            fuzzy.append([phrase, other, ratio, ownership.fuzzy_in(phrase, other, ratio)])
+        words = sorted({w for tk in toks_pool for w in tk})
+        thread_words = [typo(b) for b in ownership.BOUNDARY_WORDS for _ in range(30)] + rng.sample(words, 300)
+        thread_words += list(ownership.BOUNDARY_WORDS) + ["thr", "sag", "projects", "situations", "busyness", "tread"]
+        thread = [[w, ownership.thread_like(w)] for w in thread_words]
+        names = sorted({m.group(1) for p in pairs.values() for m in ownership.PERSON.finditer(p.prompt)})
+        persons = [[n, ownership.is_person(n)] for n in names]
+        cand_phrases = [c["phrase"] for c in req_cases if c.get("phrase")] + rng.sample(words, 50)
+        cand_phrases += [" ".join(rng.sample(words, 2)) for _ in range(50)]
+        index_cases = [
+            {"phrase": ph, "candidates": idx.candidates(ph), "occurs": idx.occurs(ph), "chain": chain_list(idx.chain(ph)),
+             "sources": idx.sources(ph)}
+            for ph in cand_phrases
+        ]
+        sets.append(
+            {
+                "dataset": os.path.basename(path),
+                "records": [[pid, store.fmt_ts(p.ts), p.prompt, p.response] for pid, p in pairs.items()],
+                "index_order": idx.pids,
+                "orgs": sorted(idx.orgs),
+                "requests": req_cases,
+                "with_ownership": own_cases,
+                "index_cases": index_cases,
+                "fuzzy_in": fuzzy,
+                "thread_like": thread,
+                "is_person": persons,
+                "holder_chains": holder_chains(pairs, idx),
+            }
+        )
+        sm_all += sm_cases(pairs, requests)
+        totals["requests"] += len(req_cases)
+        totals["fired"] += sum(1 for c in req_cases if c.get("chain"))
+        totals["best_chain_run"] = totals.get("best_chain_run", 0) + sum(1 for c in req_cases if "chain" in c)
+        totals["ownership_cases"] += len(own_cases)
+        totals["ownership_changed"] += sum(1 for c in own_cases if not c["same"])
+    extra_holder = [
+        {"request": r, "asks_holder": ownership.asks_holder(r), "asks_current_holder": ownership.asks_current_holder(r),
+         "lower_grams": sorted(ownership.lower_grams(r))}
+        for r in holder_requests()
+    ]
+    sent_texts = [
+        "One. Two; three! Four? five", "a … b … c", "a…b", "Done.\n\nNext … then. ", "x. … y", "x.… y", "  lead. ",
+        "Tab.\tnext", "nbsp. next", "sep.\x1cnext \x1f… z", "q.\n\n\n", "...  ok", "end.", "", "\n", "a … b."
+        "Mr. Smith took over. Then Ana Lima did!", "Hand-off: Jo Park to Li Wen; done.",
+    ]
+    sent_cases = [[t, ownership.SENT.split(t)] for t in sent_texts]
+    fixture = {
+        "prefix": PREFIX,
+        "datasets": sets,
+        "holder_requests": extra_holder,
+        "sequence_ratio": sm_all,
+        "sentences": sent_cases,
+    }
+    with open(OUT, "w", encoding="utf-8") as f:
+        json.dump(fixture, f, ensure_ascii=False)
+    totals["sequence_ratio"] = len(sm_all)
+    totals["holder_requests"] = len(extra_holder)
+    totals["holder_requests_true"] = sum(1 for c in extra_holder if c["asks_holder"])
+    print(json.dumps(totals))
