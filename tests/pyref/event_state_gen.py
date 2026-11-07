@@ -182,3 +182,22 @@ md_quirks = [
     "| a | f | v | 1 | remove | extra |\n| a | f |",
     "| entity | entity | field | value | effective_step | operation |\n| :-: | --- |\n| a | b | f | v | 1 | assign |",
     "|entity|field|value|effective_step|operation\n|a|f|v|0|assign",
+]
+sent_quirks = [
+    'At effective step 2, add "x" to the "members" set of "e1", retaining the others. '
+    'At STEP 3, Remove "x" from the "members" set of "e1".',
+    'For "e1", the value of "owner" becomes "p2" at effective step 8; prior values are superseded.',
+    'The assignment of "v1" to field "vendor" of "e2" takes effect at step 0 and replaces its previous assignment.',
+    '"e3" has "status" set to "open" at step 5.',
+    '"e3" has "status" set to "open" at step 5 and "more".',
+    'At step 4 "a" "b" "c" are replaced.',
+    'At step 4 the "a" value "b" for "c" becomes.',
+    "At step 4 nothing quoted.\nAt step 5 “x” curly.",
+    'For "e1" the value of "f" becomes "v" at step 0012;\nfor "e2", the value of "g" becomes "w" at step 3.',
+    'For "e1", the value of "f" becomes "v" at step ٣.',
+    'For "e1", the value of "f" becomes "v" at step 5́.',
+    'For "e1", the value of "f" becomes "v" at step 5‍.',
+    'For "e1", the value of "f" becomes "v" at éstep 5.',
+    'For "e1", the value of "f" becomes "v" at step\x1c5.',
+    'For "e1", the value of "f" becomes "v" at step 5_0.',
+    'x.\x1cFor "e1", the value of "f" becomes "v" at step 6. [For "e2", the value of "f" becomes "v" at step 7.',
