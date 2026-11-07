@@ -267,3 +267,4 @@ for ci, cat in enumerate(catalogs):
 
 rng = random.Random(118)
 words = sorted({w for r in requests for w in tool_hints._words(r["text"])})
+targets = ["exact", "precise", "value", "figure", "calendar", "workflow", "background", "recurring", "send", "reading"]
