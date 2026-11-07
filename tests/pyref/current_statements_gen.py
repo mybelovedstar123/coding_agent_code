@@ -57,3 +57,18 @@ def outputs(items, ident, request, context, by_id):
 
 def fires(c):
     return "digest" in c["with_current_statements"]
+
+
+def typo(rng, text):
+    """One random edit (swap, drop, double or replace a letter)."""
+    if len(text) < 2:
+        return text + "x"
+    i = rng.randrange(len(text) - 1)
+    op = rng.randrange(4)
+    if op == 0:
+        return text[:i] + text[i + 1] + text[i] + text[i + 2 :]
+    if op == 1:
+        return text[:i] + text[i + 1 :]
+    if op == 2:
+        return text[:i] + text[i] + text[i:]
+    return text[:i] + rng.choice("abcdefghijklmnopqrstuvwxyz ") + text[i + 1 :]
