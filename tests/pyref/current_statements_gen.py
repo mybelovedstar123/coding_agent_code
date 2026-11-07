@@ -1,0 +1,197 @@
+"""Fixtures for src/current_statements.rs from harness/current_statements.py (the reference).
+
+Cases:
+- every request of every v13-full dataset that names an identifier the records carry (agent.request_identifier):
+  the identifier records as (pairID, prompt) items, the agent-built context and every function's output;
+- every identifier the records carry (IDENT_RE over the records, lower-cased; at most SWEEP_MAX records), with the
+  request set to the records' own statements (so every change note is on topic) over a minimal context;
+- difflib ratios over record statements (pairs, typo'd copies, 200+ character texts for the autojunk rule), the
+  fuzzy cue matcher on typo'd cues, and synthetic list changes.
+Writes tests/fixtures/current_statements.json."""
+
+import difflib
+import os
+import random
+import sys
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import ce_records as R  # noqa: E402
+
+from harness import current_statements as cs  # noqa: E402
+
+PREFIX = R.PREFIX
+SWEEP_MAX = 40
+MINIMAL = PREFIX + "\n" + '{"note": "Stored records.", "memories": []}'
+
+
+def outputs(items, ident, request, context, by_id):
+    """Every function's output. The direct calls are made only on short identifier records (the agent reaches them
+    only through with_current_statements, which skips records over MAX_RECORD_CHARS); long ones keep null there."""
+    short = sum(len(p) for _, p in items) <= cs.MAX_RECORD_CHARS
+    notes = cs.notes_of(items, ident) if short else []
+    return {
+        "ident": ident,
+        "request": request,
+        "items": [pid if by_id.get(pid) == prompt else [pid, prompt] for pid, prompt in items],
+        "words": sorted(cs.words(request)),
+        "notes": [
+            {
+                "text": n["text"],
+                "records": n["records"],
+                "is_change": cs.is_change(n["text"]),
+                "is_aside": cs.is_aside(n["text"]),
+                "list_items": cs.list_items(n["text"]),
+                "words": sorted(cs.words(n["text"])),
+            }
+            for n in notes
+        ],
+        "short": short,
+        "current_statements": cs.current_statements(items, ident, request) if short else None,
+        "with_current_statements": R.changed(
+            context, cs.with_current_statements(context, PREFIX, items, ident, request), full=True
+        ),
+    }
+
+
+def fires(c):
+    return "digest" in c["with_current_statements"]
+
+
+def typo(rng, text):
+    """One random edit (swap, drop, double or replace a letter)."""
+    if len(text) < 2:
+        return text + "x"
+    i = rng.randrange(len(text) - 1)
+    op = rng.randrange(4)
+    if op == 0:
+        return text[:i] + text[i + 1] + text[i] + text[i + 2 :]
+    if op == 1:
+        return text[:i] + text[i + 1 :]
+    if op == 2:
+        return text[:i] + text[i] + text[i:]
+    return text[:i] + rng.choice("abcdefghijklmnopqrstuvwxyz ") + text[i + 1 :]
+
+
+def ratios(statements, rng):
+    out = []
+    texts = [t.lower() for t in statements if t]
+    for _ in range(600):
+        a, b = rng.choice(texts), rng.choice(texts)
+        out.append((a, b))
+    for t in rng.sample(texts, min(300, len(texts))):
+        u = t
+        for _ in range(rng.randrange(1, 6)):
+            u = typo(rng, u)
+        out.append((t, u))
+        out.append((u[: rng.randrange(len(u) + 1)], t))
+    out += [("", ""), ("", "a"), ("a", ""), ("abc", "abc"), ("é—x", "e—x"), ("a" * 250, "a" * 249 + "b"),
+            (" ".join(["aa bb"] * 60), " ".join(["aa bc"] * 60)), ("x" * 199 + "y", "x" * 200)]
+    return [{"a": a, "b": b, "ratio": difflib.SequenceMatcher(None, a, b).ratio()} for a, b in out]
+
+
+def phrases(rng, statements):
+    cues = [c for c in cs.CHANGE_CUES] + ["separately", "unrelated"]
+    out = []
+    for cue in cues:
+        variants = [cue, typo(rng, cue), typo(rng, typo(rng, cue)), cue.upper(), cue[1:]]
+        for v in variants:
+            for ctx in (f"so {v} now", f"{v}", f"x{v}", f"{v}s here", "nothing"):
+                low = ctx.lower()
+                out.append({"low": low, "cue": cue, "value": cs.has_phrase(low, cue)})
+    for t in rng.sample(statements, min(200, len(statements))):
+        low = t.lower()
+        cue = rng.choice(cues)
+        out.append({"low": low, "cue": cue, "value": cs.has_phrase(low, cue)})
+    return out
+
+
+LIST_CASES = [
+    ("Shopping list: milk, eggs, bread and butter.", "Revised list — eggs is off it, cheese is on it."),
+    ("Packing needs: tent, stove, rope", "Update: added a lantern and the stove is gone"),
+    ("Guests — Ann, Bob, Cy, Di", "Changed my mind: plus some Eve. Bob no longer coming"),
+    ("Menu wants: soup, salad and pie.", "now serving the cake, salad dropped."),
+    ("Agenda: budget, hiring, roadmap.", "update — roadmap is on it, budget is on it"),
+    ("No list here", "added stuff"),
+    ("Kit: a, b", "a and b are on it"),
+]
+
+
+def lists():
+    out = []
+    for earlier, change in LIST_CASES:
+        items = cs.list_items(earlier)
+        out.append({"earlier": earlier, "change": change, "list_items": items, "change_items": cs.list_items(change),
+                    "current_list": cs.current_list(items, change)})
+    return out
+
+
+def edge(by_id):
+    ident = "case-0002y"
+    items = [
+        ("p1", f'Case file {ident}: "Packing list: tent, stove, rope and maps."'),
+        ("p2", f"Case file {ident}: Packing list: tent, stove, rope and maps"),
+        ("p3", f"Case file {ident}: Update — the packing list changed: stove is off it, a lantern is on it."),
+        ("p4", f"Case file {ident}: Separately, the packing for the boat is done."),
+        ("p5", f"Case file {ident}: Unrelated: dinner is at eight."),
+        ("p6", f"Case file {ident}: Rescheudled: the packing trip is now Friday instead of Monday."),
+    ]
+    request = "What is on the packing list now?"
+    contexts = [None, "", "no newline", PREFIX + "\n{bad", MINIMAL, PREFIX + "\n" + '{"note": null, "x": [1.0]}']
+    cases = [outputs(items, ident, request, ctx, by_id) | {"context": ctx} for ctx in contexts]
+    cases.append(outputs(items + [("p7", "y" * 15_000)], ident, request, MINIMAL, by_id) | {"context": MINIMAL})
+    cases.append(outputs(items, ident, "unrelated question", MINIMAL, by_id) | {"context": MINIMAL})
+    stmts = [{"prompt": p, "ident": i, "statement": cs.statement(p, i)} for p, i in [
+        (f'Case file {ident}: "quoted" ', ident), (f"{ident.upper()}:: x}}", ident), ("none", ident), ("", ident)]]
+    return {"cases": cases, "statements": stmts}
+
+
+def main():
+    rng = random.Random(118)
+    datasets = []
+    all_statements = []
+    totals = {"requests": 0, "requests_firing": 0, "sweep": 0, "sweep_firing": 0}
+    for path in R.DATASETS:
+        name, mem, flat, requests = R.load(path)
+        by_id = {pid: p.prompt for pid, p in mem.pairs.items()}
+        req_cases = []
+        for category, q in requests:
+            ident, ident_records = R.request_identifier(mem, q)
+            if not ident:
+                continue
+            ctx, spec = R.build_context(mem, q, ident_records)
+            items = [(p.pair_id, p.prompt) for p in ident_records]
+            c = outputs(items, ident, q, ctx, by_id)
+            c |= {"category": category, "context_spec": spec, "context_digest": R.digest(ctx)}
+            req_cases.append(c)
+        idents = sorted({t.lower() for p in mem.pairs.values() for t in R.IDENT_RE.findall(f"{p.prompt}\n{p.response}")})
+        sweep = []
+        for ident in idents:
+            found, records = R.request_identifier(mem, ident)
+            if found != ident or not records or len(records) > SWEEP_MAX:
+                continue
+            if sum(len(p.prompt) for p in records) > cs.MAX_RECORD_CHARS:
+                continue
+            items = [(p.pair_id, p.prompt) for p in records]
+            statements = [cs.statement(p, ident) for _, p in items]
+            all_statements += [s for s in statements if len(s) < 2000]
+            request = " ".join(statements)[:4000]
+            sweep.append(outputs(items, ident, request, MINIMAL, by_id) | {"context": MINIMAL})
+        for key, cases in (("requests", req_cases), ("sweep", sweep)):
+            totals[key] += len(cases)
+            totals[key + "_firing"] += sum(fires(c) for c in cases)
+        print(f"{name}: {len(req_cases)} identifier requests ({sum(fires(c) for c in req_cases)} firing), "
+              f"{len(sweep)} sweep identifiers ({sum(fires(c) for c in sweep)} firing)", file=sys.stderr)
+        datasets.append({"name": name, "user_id": mem.user_id, "records": flat, "requests": req_cases, "sweep": sweep})
+    e = edge({})
+    e["ratios"] = ratios(all_statements, rng)
+    e["phrases"] = phrases(rng, all_statements)
+    e["lists"] = lists()
+    print(f"edge: {len(e['cases'])} cases, {len(e['ratios'])} ratios, {len(e['phrases'])} phrases", file=sys.stderr)
+    path = R.write("current_statements", {"prefix": PREFIX, "datasets": datasets, "edge": e})
+    print(f"wrote {path}: {totals}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
