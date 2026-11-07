@@ -4,3 +4,9 @@ Records are the 'miner' memory_waves pairs plus every tool_cases prerequisite_pa
 mem.pairs insertion order. Requests are memory_cases questions plus tool_cases prompts (anchors: the records sharing
 the most request phrases and words, as retrieval would rank them), plus requests made from the records that name a
 joint-mention person, so companion_records fires often. Writes tests/fixtures/companions.json."""
+
+import glob
+import json
+import os
+import random
+import sys
