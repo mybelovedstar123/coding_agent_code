@@ -30,3 +30,5 @@ import time
 from collections import defaultdict
 
 from aiohttp import web, ClientSession, ClientTimeout
+
+PY_REF = "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent"
