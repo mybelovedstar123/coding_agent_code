@@ -21,3 +21,19 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "fixtures", "tool_hints.json")
 REF = "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent"
 DATASETS = sorted(glob.glob("/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/case/datasets/v13-full-*.json"))
+
+WANTS = [
+    "wants_schedules",
+    "wants_image_edit",
+    "wants_arithmetic",
+    "wants_background_job",
+    "wants_calendar_entry",
+    "wants_sandbox_run",
+    "wants_job_figure",
+    "wants_note_fix",
+    "wants_research_send",
+    "wants_usual_effort",
+    "asks_own_preference",
+    "wants_send_on_record",
+    "wants_exact_value",
+]
