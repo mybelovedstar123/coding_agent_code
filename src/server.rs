@@ -48,3 +48,15 @@ impl Default for App {
 fn error(status: StatusCode, message: String) -> Response {
     (status, Json(json!({"error": message}))).into_response()
 }
+
+/// The request body as a JSON object, or the reference's 400 response.
+fn object_body(raw: &[u8]) -> Result<serde_json::Map<String, Value>, Box<Response>> {
+    match serde_json::from_slice::<Value>(raw) {
+        Err(_) => Err(Box::new(error(StatusCode::BAD_REQUEST, "invalid JSON".into()))),
+        Ok(Value::Object(m)) => Ok(m),
+        Ok(_) => Err(Box::new(error(
+            StatusCode::BAD_REQUEST,
+            "the body must be a JSON object".into(),
+        ))),
+    }
+}
