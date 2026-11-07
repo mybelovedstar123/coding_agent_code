@@ -139,3 +139,6 @@ refusal state appears.
 - A turn that ended with provider `finish_reason: "error"` is discarded and asked
   again only when none of its tool calls is well formed; well-formed calls are
   executed.
+- The no-tool final stages (memory final check, last resort)
+  offer no tools; any call such a stage still emits is listed in
+  `blocked_tool_calls` as `blocked_before_execution`.
