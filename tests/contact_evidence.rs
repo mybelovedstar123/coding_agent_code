@@ -176,3 +176,12 @@ fn datasets() {
     }
     assert!(total.0 >= 1000 && total.1 >= 60, "coverage {total:?}");
 }
+
+#[test]
+fn edge_cases() {
+    let fx = load("contact_evidence");
+    let e = &fx["edge"];
+    let mem = memory("miner", &e["records"]);
+    let (_, f) = run_cases(&mem, e["cases"].as_array().expect("cases"), "edge");
+    assert!(f > 50);
+}
