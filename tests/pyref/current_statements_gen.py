@@ -72,3 +72,20 @@ def typo(rng, text):
     if op == 2:
         return text[:i] + text[i] + text[i:]
     return text[:i] + rng.choice("abcdefghijklmnopqrstuvwxyz ") + text[i + 1 :]
+
+
+def ratios(statements, rng):
+    out = []
+    texts = [t.lower() for t in statements if t]
+    for _ in range(600):
+        a, b = rng.choice(texts), rng.choice(texts)
+        out.append((a, b))
+    for t in rng.sample(texts, min(300, len(texts))):
+        u = t
+        for _ in range(rng.randrange(1, 6)):
+            u = typo(rng, u)
+        out.append((t, u))
+        out.append((u[: rng.randrange(len(u) + 1)], t))
+    out += [("", ""), ("", "a"), ("a", ""), ("abc", "abc"), ("é—x", "e—x"), ("a" * 250, "a" * 249 + "b"),
+            (" ".join(["aa bb"] * 60), " ".join(["aa bc"] * 60)), ("x" * 199 + "y", "x" * 200)]
+    return [{"a": a, "b": b, "ratio": difflib.SequenceMatcher(None, a, b).ratio()} for a, b in out]
