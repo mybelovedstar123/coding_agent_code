@@ -611,4 +611,87 @@ impl Agent {
             }
         }
     }
+
+    /// One delivery per model call. Only a connection that failed before the request was sent (provably not delivered)
+    /// is retried; any failure after that is delivery-unknown and is returned to the model as such, never replayed
+    /// (the call may already have run).
+    #[allow(clippy::too_many_arguments)]
+    async fn exec_remote(
+        &self,
+        endpoint: &str,
+        case_id: &str,
+        user_id: &str,
+        name: &str,
+        args: &Map<String, Value>,
+        hop: i64,
+        deadline: Option<Instant>,
+    ) -> Value {
+        let body = json!({"case_id": case_id, "user_id": user_id, "name": name, "args": Value::Object(args.clone()),
+                          "hop": hop});
+        let url = match reqwest::Url::parse(endpoint) {
+            Ok(u) => u,
+            Err(err) => return json!({"error": format!("{NOT_DELIVERED}: invalid tool endpoint ({err:?})")}),
+        };
+        let mut last = String::new();
+        for attempt in 0..TOOL_ATTEMPTS {
+            let budget = match deadline {
+                None => 60.0,
+                Some(d) => d
+                    .saturating_duration_since(Instant::now())
+                    .as_secs_f64()
+                    .clamp(5.0, 60.0),
+            };
+            let sent = self
+                .http
+                .post(url.clone())
+                .header("Content-Type", "application/json")
+                .body(py::dumps(&body, true))
+                .timeout(secs(budget))
+                .send()
+                .await;
+            let resp = match sent {
+                Ok(r) => r,
+                Err(err) if err.is_connect() => {
+                    last = format!("{err:?}");
+                    tokio::time::sleep(secs(1.0 + attempt as f64)).await;
+                    continue;
+                }
+                Err(err) => {
+                    return json!({"error": format!("{OUTCOME_UNKNOWN}: the {name} call may or may not have run ({err:?})")})
+                }
+            };
+            let status = resp.status().as_u16();
+            let text = match resp.text().await {
+                Ok(t) => t,
+                Err(err) => {
+                    return json!({"error": format!("{OUTCOME_UNKNOWN}: the {name} call may or may not have run ({err:?})")})
+                }
+            };
+            if (400..500).contains(&status) {
+                // The endpoint refused the request (route unavailable, at capacity, unmatched emission...): the tool
+                // did not run.
+                return json!({"error": format!("{REFUSED}: HTTP {status}: {}", py::head(&text, 200))});
+            }
+            if status != 200 {
+                return json!({"error": format!("{OUTCOME_UNKNOWN}: the tool endpoint returned HTTP {status} for {name}")});
+            }
+            let data: Option<Value> = if text.is_empty() {
+                None
+            } else {
+                serde_json::from_str(&text).ok()
+            };
+            let Some(Value::Object(data)) = data else {
+                return json!({"error": format!("{OUTCOME_UNKNOWN}: the tool endpoint returned an unreadable body for {name}")});
+            };
+            // The endpoint's own error wins over an empty result field.
+            if let Some(err) = data.get("error").filter(|e| truthy(e)) {
+                return json!({"error": err});
+            }
+            if let Some(result) = data.get("result") {
+                return json!({"result": result});
+            }
+            return json!({"error": format!("{OUTCOME_UNKNOWN}: the tool endpoint returned an empty result for {name}")});
+        }
+        json!({"error": format!("{NOT_DELIVERED}: {last}")})
+    }
 }
