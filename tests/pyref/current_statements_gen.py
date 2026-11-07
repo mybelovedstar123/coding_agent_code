@@ -145,3 +145,49 @@ def edge(by_id):
     stmts = [{"prompt": p, "ident": i, "statement": cs.statement(p, i)} for p, i in [
         (f'Case file {ident}: "quoted" ', ident), (f"{ident.upper()}:: x}}", ident), ("none", ident), ("", ident)]]
     return {"cases": cases, "statements": stmts}
+
+
+def main():
+    rng = random.Random(118)
+    datasets = []
+    all_statements = []
+    totals = {"requests": 0, "requests_firing": 0, "sweep": 0, "sweep_firing": 0}
+    for path in R.DATASETS:
+        name, mem, flat, requests = R.load(path)
+        by_id = {pid: p.prompt for pid, p in mem.pairs.items()}
+        req_cases = []
+        for category, q in requests:
+            ident, ident_records = R.request_identifier(mem, q)
+            if not ident:
+                continue
+            ctx, spec = R.build_context(mem, q, ident_records)
+            items = [(p.pair_id, p.prompt) for p in ident_records]
+            c = outputs(items, ident, q, ctx, by_id)
+            c |= {"category": category, "context_spec": spec, "context_digest": R.digest(ctx)}
+            req_cases.append(c)
+        idents = sorted({t.lower() for p in mem.pairs.values() for t in R.IDENT_RE.findall(f"{p.prompt}\n{p.response}")})
+        sweep = []
+        for ident in idents:
+            found, records = R.request_identifier(mem, ident)
+            if found != ident or not records or len(records) > SWEEP_MAX:
+                continue
+            if sum(len(p.prompt) for p in records) > cs.MAX_RECORD_CHARS:
+                continue
+            items = [(p.pair_id, p.prompt) for p in records]
+            statements = [cs.statement(p, ident) for _, p in items]
+            all_statements += [s for s in statements if len(s) < 2000]
+            request = " ".join(statements)[:4000]
+            sweep.append(outputs(items, ident, request, MINIMAL, by_id) | {"context": MINIMAL})
+        for key, cases in (("requests", req_cases), ("sweep", sweep)):
+            totals[key] += len(cases)
+            totals[key + "_firing"] += sum(fires(c) for c in cases)
+        print(f"{name}: {len(req_cases)} identifier requests ({sum(fires(c) for c in req_cases)} firing), "
+              f"{len(sweep)} sweep identifiers ({sum(fires(c) for c in sweep)} firing)", file=sys.stderr)
+        datasets.append({"name": name, "user_id": mem.user_id, "records": flat, "requests": req_cases, "sweep": sweep})
+    e = edge({})
+    e["ratios"] = ratios(all_statements, rng)
+    e["phrases"] = phrases(rng, all_statements)
+    e["lists"] = lists()
+    print(f"edge: {len(e['cases'])} cases, {len(e['ratios'])} ratios, {len(e['phrases'])} phrases", file=sys.stderr)
+    path = R.write("current_statements", {"prefix": PREFIX, "datasets": datasets, "edge": e})
+    print(f"wrote {path}: {totals}", file=sys.stderr)
