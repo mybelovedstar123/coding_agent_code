@@ -350,3 +350,7 @@ the user's own records, never from a reply, and no record text is changed):
 - Requests for the email or address of whoever owns or holds something: a second
   retrieval hop adds the email-bearing records of the people the retrieved
   records name (any recorded name form).
+- Email/address requests about someone identified through a recorded nickname
+  ("Lucky's colleague"): the records declaring who that person is are added in
+  full.
+
