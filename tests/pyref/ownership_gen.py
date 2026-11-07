@@ -49,3 +49,18 @@ class P:
         self.ts = store.parse_ts(d.get("timestamp"))
         self.prompt = d.get("prompt") or ""
         self.response = d.get("response") or ""
+
+
+def load(path):
+    with open(path, encoding="utf-8") as f:
+        d = json.load(f)
+    pairs = {}
+    for w in d["memory_waves"]:
+        if w.get("user_id") == "miner":
+            for p in w.get("pairs") or []:
+                pairs[p["pair_id"]] = P(p)
+    for t in d["tool_cases"]:
+        for p in t.get("prerequisite_pairs") or []:
+            pairs[p["pair_id"]] = P(p)
+    requests = [m["question"] for m in d["memory_cases"]] + [t["prompt"] for t in d["tool_cases"]]
+    return pairs, list(dict.fromkeys(requests))
