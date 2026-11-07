@@ -340,3 +340,6 @@ context as `ownership`, in time order. Requests about an internal role
 ("internally") are left alone. The records stay unchanged; the model reads
 them and writes the reply.
 
+Request-derived additions (retrieval only; each is decided from the request and
+the user's own records, never from a reply, and no record text is changed):
+
