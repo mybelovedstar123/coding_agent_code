@@ -58,3 +58,15 @@ against any expected value, never re-asks a valid reply because of its meaning,
 and never continues generation until a preferred answer, vocabulary, action or
 refusal state appears.
 
+## Limits (declared)
+
+- Time: each request has a 270 s budget (validator deadline 300 s). Ordinary
+  calls keep a 60 s reserve for the answer. With 90 s left (120 s when the
+  transcript exceeds 150,000 characters) the model is told that time is nearly
+  up and asked to answer from the results it has; this is advisory only: the
+  full catalog stays offered and any call it makes is executed. Tools are never
+  withdrawn from a deciding turn. The wrap-up note and the model-failure note
+  (4d) share one flag: at most one of them is added per request, and once either
+  was added a further failed model call ends the loop. When only the 60 s answer
+  reserve is left, the deciding loop ends and a final stage writes the answer
+  from the transcript: when no reply exists yet, recovery (c).
