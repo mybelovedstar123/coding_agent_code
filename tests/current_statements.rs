@@ -9,3 +9,9 @@ use ditto_agent::current_statements as cs;
 use ditto_agent::store::UserMemory;
 use serde_json::{json, Value};
 use std::collections::HashSet;
+
+fn sorted_words(set: HashSet<String>) -> Value {
+    let mut v: Vec<String> = set.into_iter().collect();
+    v.sort();
+    v.into()
+}
