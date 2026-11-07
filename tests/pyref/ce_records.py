@@ -90,3 +90,24 @@ def lexical_top(mem, question, k=8):
 
 
 HIT_CHARS = 600
+
+
+def build_context(mem, question, ident_records):
+    """(context, spec): the agent's retrieved context (identifier records in full, else a lexical top-k cut to
+    HIT_CHARS like the agent's excerpts; plus channel records in full), and the spec that rebuilds it: the note and
+    [pairID, text limit or None] per memory, oldest first. (None, None) when there is nothing."""
+    hits = [] if ident_records else lexical_top(mem, question)
+    channel = contact_evidence.channel_records(mem, question)
+    if not hits and not ident_records and not channel:
+        return None, None
+    seen, items = set(), []
+    for p, limit in [(p, None) for p in ident_records] + [(p, HIT_CHARS) for p in hits] + [(p, None) for p in channel]:
+        if p.pair_id not in seen:
+            seen.add(p.pair_id)
+            it = item(p)
+            if limit is not None:
+                it["text"] = it["text"][:limit]
+            items.append((content_key(p), it, [p.pair_id, limit]))
+    items.sort(key=lambda kv: kv[0])
+    payload = {"note": NOTE, "memories": [it for _, it, _ in items]}
+    return PREFIX + "\n" + json.dumps(payload, ensure_ascii=False), {"note": NOTE, "items": [s for _, _, s in items]}
