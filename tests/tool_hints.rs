@@ -62,3 +62,9 @@ const EFFORT_WIDENED: &[&str] = &[
 fn effort_widened(text: &str, name: &str) -> bool {
     matches!(name, "wants_usual_effort" | "effort_note") && EFFORT_WIDENED.contains(&text)
 }
+
+/// A note one of the added rules wrote.
+fn from_added_rule(note: &str) -> bool {
+    let prefix = &th::TOOL_HINT_NOTE[..th::TOOL_HINT_NOTE.find("{tool}").expect("placeholder")];
+    ADDED_RULES.iter().any(|t| note.starts_with(&format!("{prefix}{t} ")))
+}
