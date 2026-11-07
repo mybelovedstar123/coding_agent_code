@@ -7,3 +7,7 @@ fn fixture() -> Value {
     let path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/tool_hints.json");
     serde_json::from_str(&std::fs::read_to_string(path).expect("fixture")).expect("fixture json")
 }
+
+fn s(v: &Value) -> &str {
+    v.as_str().unwrap_or("")
+}
