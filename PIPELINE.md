@@ -122,3 +122,14 @@ refusal state appears.
   (error-only results do not count; empty ids never pass) are blocked before
   execution: the model receives an error and nothing is sent. An accepted id the
   store does not hold is simply not found.
+- Every call receives one W12 state. Reported in `tool_calls`: `completed`
+  (the endpoint returned a result, or the call ran in the harness) and
+  `delivered_failed` calls the tool itself answered with an error (for non-memory
+  tools the endpoint's error is passed to the model as an error, never as an
+  empty result). Not
+  reported, listed in the advisory `blocked_tool_calls`: `blocked_before_execution`,
+  `not_delivered` (connection failure before sending), `delivered_failed` refused
+  by the endpoint with HTTP 4xx before the tool ran, and `delivery_unknown`
+  (timeout, HTTP 5xx or an unreadable body after sending). Only a
+  connection that failed before sending is retried; a delivery-unknown call is
+  never replayed. The validator's endpoint ledger is authoritative.
