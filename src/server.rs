@@ -44,3 +44,7 @@ impl Default for App {
         Self::new()
     }
 }
+
+fn error(status: StatusCode, message: String) -> Response {
+    (status, Json(json!({"error": message}))).into_response()
+}
