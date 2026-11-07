@@ -7,3 +7,4 @@ from pathlib import Path
 
 REF = "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent"
 sys.path.insert(0, REF)
+from harness import agent, policy, router  # noqa: E402
