@@ -80,3 +80,92 @@ def case(items, ident, table):
 
 def items_of(records):
     return [(p.pair_id, store.fmt_ts(p.ts), p.ts, p.prompt) for p in records]
+
+
+def crafted():
+    base = datetime(2025, 3, 1, 9, 0, tzinfo=timezone.utc)
+    st = [
+        "the venue deposit was paid to the harbour hall team",
+        "the caterer confirmed the tasting menu for forty guests",
+        "the florist moved delivery to the friday morning slot",
+        "the band signed the contract for the evening set",
+    ]
+
+    def rec(pid, minutes, text):
+        ts = base + timedelta(minutes=minutes)
+        return (pid, store.fmt_ts(ts), ts, text)
+
+    out = []
+    ident = "evt-77aa12"
+    # Two copy sets whose filing spans interleave: reordered.
+    out.append(
+        (
+            [
+                rec("p1", 0, f"Calendar entry EVT-77AA12: {st[0]}\nfiled by calendar"),
+                rec("p2", 10, f"Forwarded text evt-77aa12: {st[1]}"),
+                rec("p3", 20, f"List snapshot evt-77aa12: {st[0].replace('paid', 'payed')}"),
+                rec("p4", 30, f"evt-77aa12: {st[1]} today"),
+            ],
+            ident,
+        )
+    )
+    # Copy sets that do not overlap in time: no note.
+    out.append(
+        (
+            [
+                rec("q1", 0, f"evt-77aa12: {st[0]}"),
+                rec("q2", 5, f"evt-77aa12: {st[0]}"),
+                rec("q3", 50, f"evt-77aa12: {st[1]}"),
+                rec("q4", 60, f"evt-77aa12: {st[1]}"),
+            ],
+            ident,
+        )
+    )
+    # Equal spans touching at one instant (strict comparison): no overlap.
+    out.append(
+        (
+            [
+                rec("r1", 0, f"evt-77aa12: {st[2]}"),
+                rec("r2", 10, f"evt-77aa12: {st[2]}"),
+                rec("r3", 10, f"evt-77aa12: {st[3]}"),
+                rec("r4", 20, f"evt-77aa12: {st[3]}"),
+            ],
+            ident,
+        )
+    )
+    # Three sets, one nested inside another, one apart; short statements skipped; Jaccard just under / over 0.7.
+    out.append(
+        (
+            [
+                rec("s1", 0, f"evt-77aa12: {st[0]}"),
+                rec("s2", 5, f"evt-77aa12: {st[1]}"),
+                rec("s3", 6, f"evt-77aa12: {st[1]}"),
+                rec("s4", 30, f"evt-77aa12: {st[0]}"),
+                rec("s5", 100, f"evt-77aa12: {st[2]}"),
+                rec("s6", 110, f"evt-77aa12: {st[2]}"),
+                rec("s7", 7, "evt-77aa12: too short"),
+                rec("s8", 8, "evt-77aa12: too short"),
+                rec("s9", 9, "evt-77aa12: alpha bravo charlie delta echo foxtrot golf hotel india juliet"),
+                rec("s10", 12, "evt-77aa12: alpha bravo charlie delta echo foxtrot golf kilo lima mike"),
+                rec("s11", 3, "evt-77aa12: alpha bravo charlie delta echo foxtrot golf hotel india oscar"),
+                rec("s12", 4, "no identifier here: alpha bravo charlie delta echo"),
+            ],
+            ident,
+        )
+    )
+    # An upper-case identifier argument never matches the lower-cased text.
+    out.append(([rec("u1", 0, f"EVT-77AA12: {st[0]}"), rec("u2", 9, f"evt-77aa12: {st[0]}")], "EVT-77AA12"))
+    # Non-ASCII around the identifier and in the statement.
+    out.append(
+        (
+            [
+                rec("v1", 0, f"Café — évt-77aa12: {st[0]} ünd €5"),
+                rec("v2", 1, f"evt-77aa12: {st[1]} — £5 ‘ok’"),
+                rec("v3", 2, f"ÉVT-77AA12 evt-77aa12: {st[0]} ünd €5"),
+                rec("v4", 3, f"evt-77aa12: {st[1]} — £5 ‘ok’"),
+            ],
+            ident,
+        )
+    )
+    out.append(([], ident))
+    return out
