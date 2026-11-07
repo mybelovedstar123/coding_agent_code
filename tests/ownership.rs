@@ -20,3 +20,7 @@ fn s(v: &Value) -> &str {
 fn opt(v: &Value) -> Option<String> {
     v.as_str().map(String::from)
 }
+
+fn strings(v: &Value) -> Vec<String> {
+    v.as_array().expect("array").iter().map(|x| s(x).to_string()).collect()
+}
