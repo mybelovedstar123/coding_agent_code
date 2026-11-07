@@ -53,3 +53,22 @@ fn needs_the_workflow_tools() {
     assert_eq!(th::agreed_start_note(text, &catalog(&["run_workflow"])), "");
     assert_eq!(th::agreed_start_note(text, &catalog(&["list_workflows"])), "");
 }
+
+#[test]
+fn team_feedback_requests_fire() {
+    for text in [
+        "Forward this note to whoever builds this: the image tool keeps timing out.",
+        "Let the taem know love the new memory search.",
+        "Report to the devs that love the new memory search.",
+        "Send this to the Ditto team: love the new memory search.",
+    ] {
+        assert!(th::wants_team_feedback(text), "should fire: {text}");
+    }
+    for text in [
+        "Use only case file c05a8f1e8702d939b. At effective step 12, follow the team of entity-0fbfe0 and consider its members.",
+        "Add team offsite to my calendar.",
+        "Send them the \"moto mile rollout\" numbers now.",
+    ] {
+        assert!(!th::wants_team_feedback(text), "should not fire: {text}");
+    }
+}
