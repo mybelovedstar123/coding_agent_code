@@ -82,3 +82,9 @@ refusal state appears.
   (again, another, once more, repeat), no call is blocked. A call that returned
   an error does not count, so it can be retried. The memory read tools and
   tools named `read_*` or `fetch_*` are exempt.
+- Call count note (`REQUERY_NOTE`, advisory): after a turn in which any
+  non-reader tool has run more than once in this request, one user-role line
+  lists those tools with their call counts and says that each call is an
+  action taken for the user: reply if the results answer the request, call
+  again only for something they do not contain. Nothing is blocked, the full
+  catalog stays offered, and a request to do something again gets no note.
