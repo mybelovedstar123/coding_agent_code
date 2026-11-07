@@ -76,3 +76,7 @@ def case(items, ident, table):
         "reordered_sets": [[pid for pid, _, _ in s] for s in re_sets],
         "note": ro.copies_note(tup, ident),
     }
+
+
+def items_of(records):
+    return [(p.pair_id, store.fmt_ts(p.ts), p.ts, p.prompt) for p in records]
