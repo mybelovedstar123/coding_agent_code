@@ -52,3 +52,16 @@ def context_for(records, note=NOTE):
 
 texts_seen = {}
 calls = []
+
+
+def add_texts(texts):
+    for t in texts:
+        if t in texts_seen:
+            continue
+        texts_seen[t] = {
+            "text": t,
+            "from_json": evs_out(event_state.from_json(t)),
+            "from_csv": evs_out(event_state.from_csv(t)),
+            "from_markdown": evs_out(event_state.from_markdown(t)),
+            "from_sentences": evs_out(event_state.from_sentences(t)),
+        }
