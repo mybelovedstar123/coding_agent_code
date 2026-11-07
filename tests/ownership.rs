@@ -16,3 +16,7 @@ static FIXTURE: LazyLock<Value> = LazyLock::new(|| {
 fn s(v: &Value) -> &str {
     v.as_str().unwrap_or_else(|| panic!("string expected, got {v}"))
 }
+
+fn opt(v: &Value) -> Option<String> {
+    v.as_str().map(String::from)
+}
