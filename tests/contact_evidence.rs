@@ -163,3 +163,16 @@ fn run_cases(mem: &UserMemory, cases: &[Value], label: &str) -> (usize, usize) {
     );
     (cases.len(), cases.iter().filter(|c| fires(c)).count())
 }
+
+#[test]
+fn datasets() {
+    let fx = load("contact_evidence");
+    assert_eq!(s(&fx["prefix"]), PREFIX);
+    let mut total = (0, 0);
+    for ds in fx["datasets"].as_array().expect("datasets") {
+        let mem = memory(s(&ds["user_id"]), &ds["records"]);
+        let (n, f) = run_cases(&mem, ds["cases"].as_array().expect("cases"), s(&ds["name"]));
+        total = (total.0 + n, total.1 + f);
+    }
+    assert!(total.0 >= 1000 && total.1 >= 60, "coverage {total:?}");
+}
