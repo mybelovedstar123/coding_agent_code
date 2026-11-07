@@ -57,3 +57,6 @@ def tool_defs_for(catalog):
     if pytool.TOOL_NAME not in {t["name"] for t in wire}:
         defs.append(pytool.DEFINITION)
     return defs
+
+
+requests, seen = [], set()
