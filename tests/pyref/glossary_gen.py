@@ -149,3 +149,7 @@ def main():
     print(f"edge: {len(e['texts'])} texts, {len(e['cases'])} context cases", file=sys.stderr)
     path = R.write("glossary", {"prefix": PREFIX, "datasets": datasets, "edge": e})
     print(f"wrote {path}: {totals}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
