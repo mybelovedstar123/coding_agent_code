@@ -211,3 +211,9 @@ long_csv = "entity,field,value,effective_step,operation\n" + "\n".join(
 )
 long_md = "| entity | field | value | effective_step | operation |\n|---|---|---|---|---|\n" + "\n".join(
     f"| e{i % 2} | tags | v{i % 4} | {i % 6} | {['add', 'remove'][i % 2]} |" for i in range(12)
+)
+long_sent = " ".join(
+    f'At effective step {i % 5}, {"add" if i % 2 else "remove"} "m{i % 3}" to the "members" set of "e{i % 2}".'
+    if i % 3
+    else f'For "e{i % 2}", the value of "owner" becomes "p{i}" at effective step {i % 7}.'
+    for i in range(15)
