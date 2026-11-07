@@ -217,3 +217,5 @@ synthetic = [
 ]
 for t in synthetic:
     add_request(t, "synthetic")
+
+long_desc = "  Lists the saved schedules. " + "x" * 230 + ".. "
