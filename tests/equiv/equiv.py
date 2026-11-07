@@ -122,3 +122,27 @@ def model_reply(body: dict) -> dict:
         finish = "error"
     usage = {"prompt_tokens": 100 + key % 50, "completion_tokens": 10 + key % 7}
     return {"choices": [{"message": msg, "finish_reason": finish}], "usage": usage}
+
+
+class Fakes:
+    def __init__(self):
+        self.requests: dict[str, list] = defaultdict(list)
+
+    async def chat(self, req: web.Request) -> web.Response:
+        body = await req.json()
+        case = req.headers.get("X-Ditto-Case-Id", "")
+        self.requests[case].append(body)
+        return web.json_response(model_reply(body))
+
+    async def embed(self, req: web.Request) -> web.Response:
+        body = await req.json()
+        return web.json_response({"embeddings": [unit_vector(t) for t in body.get("input") or []]})
+
+    async def tool(self, req: web.Request) -> web.Response:
+        body = await req.json()
+        n = h("toolres", body.get("name"), body.get("args"))
+        if n % 7 == 0:
+            return web.json_response({"error": f"tool {body.get('name')} failed: bad input"})
+        if n % 13 == 0:
+            return web.Response(status=422, text="unmatched emission")
+        return web.json_response({"result": {"ok": True, "name": body.get("name"), "value": n % 1000, "note": "résultat"}})
