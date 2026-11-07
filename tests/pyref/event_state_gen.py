@@ -203,3 +203,5 @@ sent_quirks = [
     'x.\x1cFor "e1", the value of "f" becomes "v" at step 6. [For "e2", the value of "f" becomes "v" at step 7.',
 ]
 for group in (json_quirks, csv_quirks, md_quirks, sent_quirks):
+    add_texts(group)
+
