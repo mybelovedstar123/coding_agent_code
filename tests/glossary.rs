@@ -13,3 +13,14 @@ use serde_json::{json, Value};
 fn pairs_json(map: &IndexMap<String, String>) -> Value {
     map.iter().map(|(k, v)| json!([k, v])).collect()
 }
+
+fn items(mem: Option<&UserMemory>, v: &Value) -> Vec<(String, String)> {
+    v.as_array()
+        .expect("items")
+        .iter()
+        .map(|it| match it {
+            Value::String(pid) => (pid.clone(), mem.expect("memory").pairs[pid].prompt.clone()),
+            pair => (s(&pair[0]).to_string(), s(&pair[1]).to_string()),
+        })
+        .collect()
+}
