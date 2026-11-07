@@ -8,3 +8,10 @@ use serde_json::{json, Value};
 fn s(v: &Value) -> &str {
     v.as_str().unwrap_or_else(|| panic!("string expected, got {v}"))
 }
+
+fn ids(sets: &[Vec<ro::Copy>]) -> Value {
+    sets.iter()
+        .map(|set| set.iter().map(|(pid, _, _)| pid.clone()).collect::<Vec<_>>())
+        .collect::<Vec<_>>()
+        .into()
+}
