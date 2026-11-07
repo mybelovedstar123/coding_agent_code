@@ -77,3 +77,8 @@ for path in DATASETS:
         add_request(c["prompt"], "tool_case")
     for c in d["memory_cases"]:
         add_request(c["question"], "memory_case")
+for name in ("send_requests.json", "exact_value_requests.json"):
+    fx = json.load(open(os.path.join(REF, "tests", "fixtures", name), encoding="utf-8"))
+    for group in (v for v in fx.values() if isinstance(v, list)):
+        for c in group:
+            add_request(c["prompt"], "ref_fixture")
