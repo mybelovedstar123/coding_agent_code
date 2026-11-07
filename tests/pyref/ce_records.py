@@ -111,3 +111,11 @@ def build_context(mem, question, ident_records):
     items.sort(key=lambda kv: kv[0])
     payload = {"note": NOTE, "memories": [it for _, it, _ in items]}
     return PREFIX + "\n" + json.dumps(payload, ensure_ascii=False), {"note": NOTE, "items": [s for _, _, s in items]}
+
+
+def fnv(s):
+    """FNV-1a 64 of the UTF-8 text, as hex (a compact expectation for long outputs)."""
+    h = 0xCBF29CE484222325
+    for b in s.encode("utf-8"):
+        h = ((h ^ b) * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
+    return f"{h:016x}"
