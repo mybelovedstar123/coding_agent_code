@@ -12,3 +12,7 @@ static FIXTURE: LazyLock<Value> = LazyLock::new(|| {
     let text = std::fs::read_to_string(path).expect("fixture (run tests/pyref/ownership_gen.py)");
     serde_json::from_str(&text).expect("fixture json")
 });
+
+fn s(v: &Value) -> &str {
+    v.as_str().unwrap_or_else(|| panic!("string expected, got {v}"))
+}
