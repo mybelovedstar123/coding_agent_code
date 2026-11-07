@@ -694,4 +694,129 @@ impl Agent {
         }
         json!({"error": format!("{NOT_DELIVERED}: {last}")})
     }
+
+    // ---------------------------------------------------------------- context
+    /// The memory context for a request: retrieved or identifier records, then each evidence add-on in its declared
+    /// order (PIPELINE.md, Context construction). Every add-on reads only the request and the user's records; a step
+    /// that does not apply leaves the context unchanged.
+    pub async fn memory_context(&self, user_id: &str, user_input: &str, deadline: Instant) -> Option<String> {
+        let (ident, ident_records) = {
+            let mem = self.store.user(user_id);
+            let mem = mem.read().await;
+            request_identifier(&mem, user_input)
+        };
+        let hits: Vec<(Pair, f64)> = if ident_records.is_empty() {
+            let q = vec![user_input.to_string()];
+            match self
+                .store
+                .search(user_id, &q, CONTEXT_MEMORIES, None, None, Some(deadline))
+                .await
+            {
+                Ok(h) => h,
+                Err(EmbedError::TooLarge(_)) | Err(EmbedError::Failed(_)) => {
+                    tracing::warn!("case retrieval failed; the context keeps identifier and channel records only");
+                    Vec::new()
+                }
+            }
+        } else {
+            Vec::new()
+        };
+        let mem = self.store.user(user_id);
+        let mem = mem.read().await;
+        let prefix = config::MEMORY_CONTEXT_PREFIX;
+        let mut context = retrieved_context(&mem, user_input, &ident_records, &hits);
+        // A handle request whose channel records include a removal instruction: the removal rule.
+        if contact_evidence::has_removal_instruction(&contact_evidence::channel_records(&mem, user_input)) {
+            context = contact_evidence::with_removal_note(context, prefix);
+        }
+        // The email of whoever holds something: a second hop to the email records of the people the context names.
+        if contact_evidence::asks_owner_contact(user_input) {
+            let forms = contact_evidence::people_named(&mem, &contact_evidence::context_texts(context.as_deref()));
+            let records = if forms.is_empty() {
+                Vec::new()
+            } else {
+                contact_evidence::email_records(&mem, &forms)
+            };
+            if !records.is_empty() {
+                context = contact_evidence::with_records(context, prefix, &records);
+            }
+        }
+        // An email/address request about someone identified through a nicknamed person: who that person is.
+        let named = contact_evidence::possessive_nicknames(&mem, user_input);
+        let records = if named.is_empty() {
+            Vec::new()
+        } else {
+            contact_evidence::identity_records(&mem, &named)
+        };
+        if !records.is_empty() {
+            context = contact_evidence::with_records_and_note(
+                context,
+                prefix,
+                &records,
+                &contact_evidence::related_person_note(&named),
+            );
+        }
+        // A handle request whose records include a removal instruction: the removed-handle note.
+        let note = contact_evidence::removed_handle_note(&mem, user_input);
+        if !note.is_empty() {
+            context = contact_evidence::with_records_and_note(context, prefix, &[], &note);
+        }
+        // Long identifier event histories: how to compute over them with the program tool.
+        if context.as_deref().is_some_and(|c| !c.is_empty())
+            && ident_records.iter().map(|p| py::len(&render_pair(p))).sum::<usize>() > PROGRAM_HISTORY_CHARS
+        {
+            context = contact_evidence::with_records_and_note(context, prefix, &[], PROGRAM_RECORDS_NOTE);
+        }
+        if context.as_deref().is_none_or(str::is_empty) {
+            return context;
+        }
+        if !ident.is_empty() {
+            // Copies of one note that disagree on order: which records are copies, with their filing times.
+            let items: Vec<(String, String, chrono::DateTime<chrono::Utc>, String)> = ident_records
+                .iter()
+                .map(|p| (p.pair_id.clone(), fmt_ts(&p.ts), p.ts, p.prompt.clone()))
+                .collect();
+            let note = record_order::copies_note(&items, &ident);
+            if !note.is_empty() {
+                context = contact_evidence::with_records_and_note(context, prefix, &[], &note);
+            }
+            // An event history: its state at the step the request names.
+            let ids: Vec<String> = ident_records.iter().map(|p| p.pair_id.clone()).collect();
+            let prompts: Vec<String> = ident_records.iter().map(|p| p.prompt.clone()).collect();
+            context = event_state::with_event_state(context, prefix, &ids, user_input, &prompts);
+            if context.as_deref().is_none_or(str::is_empty) {
+                return context;
+            }
+            // Short notes where one states a change: that note with the earlier notes it supersedes.
+            let items: Vec<(String, String)> = ident_records
+                .iter()
+                .map(|p| (p.pair_id.clone(), p.prompt.clone()))
+                .collect();
+            context = current_statements::with_current_statements(context, prefix, &items, &ident, user_input);
+        }
+        if context.as_deref().is_some_and(|c| !c.is_empty()) && ident_records.is_empty() {
+            // Who holds a project now: its handover sentences with their source records.
+            let index = mem.derived("ownership", || {
+                let records: Vec<(String, String, String)> = mem
+                    .pairs
+                    .iter()
+                    .map(|(pid, p)| (pid.clone(), fmt_ts(&p.ts), p.prompt.clone()))
+                    .collect();
+                ownership::IndexV2::new(&records)
+            });
+            context = ownership::with_ownership(context, prefix, &index, user_input, |pid| {
+                let p = &mem.pairs[pid];
+                json!({"pairID": pid, "timestamp": fmt_ts(&p.ts), "text": render_pair(p)})
+            });
+        }
+        if context.as_deref().is_some_and(|c| !c.is_empty()) && !ident.is_empty() {
+            // Field names the identifier records define for themselves: the glossary.
+            let items: Vec<(String, String)> = ident_records
+                .iter()
+                .map(|p| (p.pair_id.clone(), p.prompt.clone()))
+                .collect();
+            context = glossary::with_glossary(context, prefix, &items, &ident);
+        }
+        context
+    }
 }
