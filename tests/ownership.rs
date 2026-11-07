@@ -32,3 +32,7 @@ fn chain_of(v: &Value) -> Vec<(String, String)> {
         .map(|x| (s(&x[0]).to_string(), s(&x[1]).to_string()))
         .collect()
 }
+
+fn chain_json(ch: &[(String, String)]) -> Value {
+    ch.iter().map(|(a, b)| json!([a, b])).collect()
+}
