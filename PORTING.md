@@ -49,3 +49,5 @@ call and an unmeasured behaviour change. The port is proven by replaying cached 
    `config::MEMORY_CONTEXT_PREFIX`.
 4. **A context is `Option<String>`.** It is the memory context string (prefix line plus JSON payload), as the
    Python `str | None`. A function that returns `""` for "no note" returns an empty `String`.
+5. **Formatting and lints.** `cargo fmt` (the repo's `rustfmt.toml`, width 120) and
+   `cargo clippy --all-targets -- -D warnings` must be clean for your files. No `unsafe`.
