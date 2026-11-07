@@ -307,3 +307,12 @@ for the content); when the records say no recipient has been decided, send nothi
 should receive it, naming the people the records mention. Requests to look a
 figure up first get the look-up-and-send note below instead. Advisory; the model makes every call.
 
+Look-up-and-send requests (tool path): when a request asks for a current figure
+to be looked up and sent to a person (look up / check / pull the current figure /
+see where it stands, then send / email / forward / pass it along to someone), and
+the catalog offers both `search_web` and `gmail_send`, the system prompt gets one
+line: the request has two parts (look up the figure, then send it to the person
+with their email from the records), do both, and state the figure sent and to
+whom. Questions about an address, and requests to send an update, do not trigger
+it. The note is advisory and names no value; the model makes every call.
+
