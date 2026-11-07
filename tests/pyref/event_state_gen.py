@@ -233,3 +233,21 @@ for ui in [
     "at step 123456789012345678901234567890",
     "at step -3",
 ]:
+    add_call("edge", base_ctx, ids, ui, mixed)
+contexts = [
+    None,
+    "",
+    "no newline",
+    PREFIX + "\nnot json",
+    PREFIX + "\n[1, 2]",
+    PREFIX + '\n["other", "memoriesx"]',  # a list payload without the element "memories" (with it, Python raises)
+    PREFIX + '\n"no such key"',
+    PREFIX + '\n{"note": "x"}',
+    PREFIX + '\n{"memories": [], "note": null}',
+    PREFIX + '\n{"memories": [], "note": 5}',
+    PREFIX + '\n{"memories": [], "note": {"a": [1.50, true]}}',
+    PREFIX + '\n{"memories": []}',
+    PREFIX + '\n{"event_state": 1, "memories": [], "note": "  "}',
+    PREFIX + '\n  {"memories": [{"x": 1.0, "y": 10000000000000000000000, "z": "é\\u2028"}], "note": "n"}  ',
+    PREFIX + "\nline two\n" + json.dumps({"memories": []}),
+    "Other prefix\n" + json.dumps({"memories": [], "note": "é"}),
