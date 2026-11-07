@@ -123,3 +123,28 @@ CRAFTED_REQUESTS = [
     ("What about the glaze plan trip?", ["a5"], []),
     ("kiln plan clay plan glaze plan trip", ["a3", "a4", "a5"], []),
 ]
+
+
+def crafted(joint=True):
+    rows = CRAFTED if joint else [r for r in CRAFTED if " and I" not in r[2]]
+    pairs = {pid: store.Pair(pid, "", store.parse_ts(ts), text, "") for pid, ts, text in rows}
+    ordered = sorted(pairs.values(), key=store.content_key)
+    index = companions.build_index(ordered)
+    drop = ["c5"] if joint else []
+    view = {pid: p for pid, p in pairs.items() if pid not in drop}
+    cases = []
+    for r, anchors, exclude in CRAFTED_REQUESTS:
+        anchors = [a for a in anchors if a in pairs]
+        out = companions.companion_records(index, view, r, [pairs[a] for a in anchors], set(exclude))
+        cases.append({"request": r, "anchors": anchors, "exclude": exclude, "out": [p.pair_id for p in out]})
+    return {
+        "dataset": "crafted" if joint else "crafted-no-joint",
+        "records": [[p.pair_id, p.ts.isoformat(), p.prompt, p.response] for p in pairs.values()],
+        "sorted": [p.pair_id for p in ordered],
+        "joint": index.joint,
+        "phrase_records_len": len(index.phrase_records),
+        "phrase_records_total": sum(index.phrase_records.values()),
+        "drop": drop,
+        "cases": cases,
+        "proper_words": [[t, sorted(companions.proper_words(t))] for _, _, t in rows],
+    }
