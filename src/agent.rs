@@ -70,3 +70,7 @@ pub fn repeat_exempt(name: &str) -> bool {
 
 /// The user asks for something to be done again: identical calls are then allowed.
 static REPEAT_REQUEST_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\b(again|another|once more|repeat\w*)\b"));
+
+pub fn asks_to_repeat(user_input: &str) -> bool {
+    REPEAT_REQUEST_RE.is_match(user_input)
+}
