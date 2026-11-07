@@ -71,3 +71,30 @@ fn run_case(mem: Option<&UserMemory>, c: &Value) -> Vec<String> {
         .map(|b| format!("{ident} {:?}: {b}", c.get("question")))
         .collect()
 }
+
+#[test]
+fn datasets() {
+    let fx = load("glossary");
+    let (mut n, mut firing) = (0, 0);
+    let mut failures = Vec::new();
+    for ds in fx["datasets"].as_array().expect("datasets") {
+        let mem = memory(s(&ds["user_id"]), &ds["records"]);
+        for c in ds["requests"]
+            .as_array()
+            .expect("requests")
+            .iter()
+            .chain(ds["sweep"].as_array().expect("sweep"))
+        {
+            failures.extend(run_case(Some(&mem), c));
+            n += 1;
+            firing += c["with_glossary"].get("digest").is_some() as usize;
+        }
+    }
+    assert!(
+        failures.is_empty(),
+        "{} mismatches:\n{}",
+        failures.len(),
+        failures[..failures.len().min(10)].join("\n")
+    );
+    assert!(n > 1000 && firing >= 60, "coverage {n} / {firing}");
+}
