@@ -1340,3 +1340,16 @@ fn retrieved_context(
         py::dumps(&payload, false)
     ))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn call(name: &str) -> Call {
+        Call {
+            name: name.into(),
+            args: Map::new(),
+            hop: 1,
+        }
+    }
+}
