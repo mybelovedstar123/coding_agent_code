@@ -124,3 +124,14 @@ def fnv(s):
 def digest(s):
     """None, or {"len": code points, "fnv": hash} of a text."""
     return None if s is None else {"len": len(s), "fnv": fnv(s)}
+
+
+def changed(before, after, full=False):
+    """A compact expectation of a context step: {"same": true} when it left the context unchanged, else the digest of
+    its output (null for None) and, with `full`, the output itself."""
+    if after == before:
+        return {"same": True}
+    out = {"digest": digest(after)}
+    if full:
+        out["value"] = after
+    return out
