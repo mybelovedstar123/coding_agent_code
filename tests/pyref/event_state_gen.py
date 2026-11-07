@@ -161,3 +161,16 @@ json_quirks = [
     '[{"entity": 12, "field": 0.1, "value": -0.0, "effective_step": 1, "operation": "assign"}]',
     '[\x1c{"entity": "a", "field": "f", "value": "v", "effective_step": 1, "operation": "assign"}]',
 ]
+csv_quirks = [
+    "entity,field,value,effective_step,operation\na,f,v,1,assign\nb,f,w,2,add\n\nc,f,x,3,assign",
+    'Entity,Field,Value,Effective_Step,Operation\n"a, inc",f,"say ""hi""",1,assign\nb,f,"multi\nline",2,add',
+    'entity,field,value,effective_step,operation\na,f,"open quote,1,assign\nb,f,w,2,add',
+    'entity,field,value,effective_step,operation\na,f,"q"x,1,assign\na,f,v\na,f,v,1,assign,extra,more',
+    "entity,field,entity,effective_step,operation,value\na,f,b,1,assign\na,f,b,1,assign,v",
+    "intro, with comma\nentity,field,value,effective_step,operation\na,f,v,1,assign\neffective_step,x\n1,2",
+    "entity,field,value,effective_step,operation\r\na,f,v,1,assign\r\nb,f,w,x,assign c,f,y,3,remove",
+    'entity,field,value,effective_step,operation\n"",f,v,1,assign\n,,,,\na,f,v, 4 ,Assign',
+    'entity,field,value,effective_step,operation\n"a"\n,f,v,1,assign',
+    'entity,field,value,effective_step,operation\n"a, inc",f,"say ""hi""",1,assign\nb,f,"multi\nline,2",2,add\n'
+    'c,"x""y"z,w,3,add',
+    ' x,effective_step\n"open, never closed\nmore, text\n',
