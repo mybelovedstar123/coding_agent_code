@@ -385,3 +385,24 @@ does not give is left unspecified). Decided from the
 request and the offered catalog only; it names no value and never changes the
 reply.
 
+Tool arguments are parsed as a JSON object; for the program tool, arguments sent
+as bare program text instead of a JSON object (some providers emit the code that
+way) are taken as the program (`{"code": text}`), so the model's own program runs
+and any error in it comes back as a program error.
+The program tool may import json, re, csv, math, statistics, datetime,
+collections, itertools, functools, decimal, fractions, textwrap, pprint and copy
+(no I/O modules, no typing, sys or string); the tool description still lists
+the original modules (it is unchanged). A program over 8,000 characters is
+refused with an error that says how to load record text inside the program
+(`records([...pairIDs])`, `grep_records`) instead of pasting it.
+The program sandbox also offers `parse_table(text)`: the rows of every CSV block
+(a header line of field labels and rows with the same number of fields, each
+block with its own column order) and markdown pipe table in a text, as dicts
+keyed by that table's header (lower case, spaces as underscores, so CSV and
+markdown tables of the same data share keys), cell markup removed. `records(ids)` also returns
+`rows` (= `parse_table` of the user side) for a record that holds a table; other
+records are returned unchanged. For long identifier event histories the context
+note says that a table record has `rows` keyed by its own header (column order
+differs between records), that the full text is in `text` (the data is on the
+user's side, also `user`), and names `extract_json` and `grep_records`.
+
