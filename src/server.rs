@@ -60,3 +60,13 @@ fn object_body(raw: &[u8]) -> Result<serde_json::Map<String, Value>, Box<Respons
         ))),
     }
 }
+
+/// `len(x)` of the seed collections as the reference reports them.
+fn py_len(v: &Value) -> usize {
+    match v {
+        Value::Array(a) => a.len(),
+        Value::Object(o) => o.len(),
+        Value::String(s) => crate::py::len(s),
+        _ => 0,
+    }
+}
