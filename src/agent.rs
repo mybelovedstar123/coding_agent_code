@@ -180,3 +180,15 @@ pub struct Agent {
     pub chat: Arc<dyn ChatClient>,
     pub http: reqwest::Client,
 }
+
+/// The request's identifiers (lower-cased), each once, in the order the request names them.
+pub fn request_idents(user_input: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    for t in IDENT_RE.findall(user_input) {
+        let t = t.to_lowercase();
+        if !out.contains(&t) {
+            out.push(t);
+        }
+    }
+    out
+}
