@@ -5,3 +5,9 @@ build-agent/tests (send / exact-value), and synthetic requests that reach each t
 boundaries, numbers). Catalogs: each dataset's own tool_defs (built as agent.py builds them from `catalog`, with
 pytool.DEFINITION appended), an empty catalog, and a synthetic catalog that offers every tool a rule names (with
 descriptions that exercise the strip / rstrip(".") / [:200] formatting). Writes tests/fixtures/tool_hints.json."""
+
+import glob
+import json
+import os
+import random
+import sys
