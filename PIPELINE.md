@@ -101,3 +101,6 @@ refusal state appears.
   evidence add-on fails, the request is answered without the memory context; a
   failed memory tool returns an error result to the model. A malformed request
   body is answered with HTTP 400.
+- Context sizes: up to 10 retrieved records are pre-loaded; the first 4 as
+  excerpts of up to 1,400 characters, the rest up to 600; identifier records
+  (see Context construction) always in full, with no size cap.
