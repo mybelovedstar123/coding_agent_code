@@ -169,3 +169,47 @@ def crafted():
     )
     out.append(([], ident))
     return out
+
+
+def main():
+    sets = []
+    totals = {"cases": 0, "notes": 0}
+    for path in DATASETS:
+        pairs, requests = load(path)
+        cases = []
+        table = {}
+        seen = set()
+        for r in requests:
+            ident, records = request_identifier(pairs, r)
+            if not ident or ident in seen:
+                continue
+            seen.add(ident)
+            cases.append(case(items_of(records), ident, table))
+        idents = sorted({t.lower() for p in pairs.values() for t in IDENT_RE.findall(p.prompt)} - seen)
+        for ident in idents:
+            records = records_for(pairs, ident)
+            if len(records) >= 2:
+                cases.append(case(items_of(records), ident, table))
+        # The cases with copy sets again, their filing times shuffled among the records (other orders, other
+        # overlaps); the shuffled records get new pairIDs so the table stays one record per pairID.
+        for c in [c for c in cases if c["copy_sets"]]:
+            for k in range(6):
+                base = [(pid, *table[pid]) for pid in c["items"]]
+                stamps = [(st, iso) for _, st, iso, _ in base]
+                rng.shuffle(stamps)
+                items = [
+                    (f"{pid}-v{k}", st, datetime.fromisoformat(iso), prompt)
+                    for (pid, _, _, prompt), (st, iso) in zip(base, stamps)
+                ]
+                cases.append(case(items, c["ident"], table))
+        sets.append({"dataset": os.path.basename(path), "records": table, "cases": cases})
+        totals["cases"] += len(cases)
+        totals["notes"] += sum(1 for c in cases if c["note"])
+    table = {}
+    crafted_cases = [case(items, ident, table) for items, ident in crafted()]
+    sets.append({"dataset": "crafted", "records": table, "cases": crafted_cases})
+    totals["cases"] += len(crafted_cases)
+    totals["notes"] += sum(1 for c in crafted_cases if c["note"])
+    with open(OUT, "w", encoding="utf-8") as f:
+        json.dump({"datasets": sets}, f, ensure_ascii=False)
+    print(json.dumps(totals))
