@@ -256,3 +256,38 @@ own catalog description (for the image edit and the calendar entry also how to
 pass what the request gives). The trigger comes from the request and the
 catalog only; the model chooses every call.
 
+More request-specific notes (tool path, same form as the tool hints above, advisory, no values):
+code-sandbox / Code Mode requests point to `run_code`; a figure a background job reports
+(items processed, a count) points to `list_agent_jobs`; correcting a stored handoff or
+scratchpad note points to `update_memory`, updating the same note in place;
+feedback meant for the people who build Ditto ("let the team know", "report to
+the devs", "whoever builds this") points to `file_feedback_for_team`, passing
+the user's own words without asking for an address; a change to which kinds of
+tools the assistant may use in chat ("turn off agent jobs", "allow only memory
+tools", "change my chat tools so …") points to `set_chat_tool_preferences`; a
+question about whether or where Ditto can do something ("is there a way to …",
+"where do I find the option for …") points to `discover_capabilities`, answering
+from what it reports without changing the setting; a piece of software work the
+user wants done rather than explained ("go ahead and refactor …", "write a
+script to … — start it", "actually scrape …", "don't just tell me how") points
+to `execute_agent_job`. A request
+for the user's usual reasoning effort that names no level gets one line: set the default
+level the records state, or, when the records say none was chosen, ask which level,
+naming the options they describe. A request to start something the way it was
+agreed earlier ("the way we already agreed", "per what we landed on"; the
+agreement word typo-tolerant), when the catalog offers `list_workflows` and
+`run_workflow`, gets one line: the records say what was agreed; for a saved
+workflow, list the saved workflows first and run the one that matches, or
+create it under its agreed name if it is not saved yet; for a one-off job,
+dispatch it and do not create or run a workflow. A request to have a quoted,
+named item on the user's calendar ("get the "…" review onto my calendar"),
+when the catalog offers `calendar_create_event`, gets one line: if the records
+say it is already on the calendar, do not create another event but find it
+with the calendar search and say it is there; otherwise create it as asked. A
+request to apply an appearance option the user spells only approximately, with
+a lookup of the configured options first ("look the list up first, I may have
+botched the name"), when the catalog offers `discover_capabilities`, gets one
+line: after the lookup, apply the listed option closest to what they wrote
+(swapped, doubled or missing letters; a variant word belongs to the option),
+and do not stop because the exact spelling is not listed.
+
