@@ -161,3 +161,56 @@ EDGE_CONTEXTS = [
     PREFIX + "\n" + '{"memories": [{"pairID": "b", "timestamp": "2025-01-02"}, {"pairID": "a", "timestamp": "2025-01-02"}]}',
     "  \n" + '{"note": "x"}',
 ]
+
+
+def edge():
+    mem, flat = R.build_mem([EDGE_PAIRS[:8], EDGE_PAIRS[8:], [EDGE_PAIRS[2]]])
+    cases = []
+    for q in EDGE_QUESTIONS:
+        for ctx in EDGE_CONTEXTS[:9] if q else EDGE_CONTEXTS[:2]:
+            cases.append(case(mem, "edge", q, ctx))
+    # The context helpers on every context shape, including the ones the Python raises on.
+    some = [mem.pairs["e06"], mem.pairs["e02"], mem.pairs["e14"]]
+    shapes = []
+    for ctx in EDGE_CONTEXTS:
+        shapes.append(
+            {
+                "context": ctx,
+                "with_removal_note": attempt(lambda: ce.with_removal_note(ctx, PREFIX)),
+                "context_texts": attempt(lambda: ce.context_texts(ctx)),
+                "with_records": attempt(lambda: ce.with_records(ctx, PREFIX, some, render_pair, fmt_ts)),
+                "with_records_empty": attempt(lambda: ce.with_records(ctx, PREFIX, [], render_pair, fmt_ts)),
+                "with_records_and_note": attempt(
+                    lambda: ce.with_records_and_note(ctx, PREFIX, some, "Extra note.", render_pair, fmt_ts)
+                ),
+                "with_records_and_note_empty": attempt(
+                    lambda: ce.with_records_and_note(ctx, PREFIX, [], "", render_pair, fmt_ts)
+                ),
+            }
+        )
+    named_sets = [{}, {"Ollie": "Olivia Cantu"}, {"Zed": "Zed Alpha", "Bart": "Bartholomew Reyes-Vance", "Ann": "Ann B"}]
+    notes = [
+        {
+            "named": [[k, v] for k, v in n.items()],
+            "related_person_note": ce.related_person_note(n),
+            "identity_records": R.ids(ce.identity_records(mem, n)),
+        }
+        for n in named_sets
+    ]
+    form_sets = [[], ["Ollie"], ["Olivia Cantu", "Liv"], ["Bart", "Bartholomew Reyes-Vance"], ["Sam"], ["Dee", "Nobody"]]
+    texts = [p["prompt"] for p in EDGE_PAIRS] + ["", "Ollie", "ollie", "Bartholomew Reyes-Vance's", "SamSam", "Sam."]
+    names_any = [{"forms": f, "text": t, "value": ce.names_any(t, set(f))} for f in form_sets for t in texts]
+    email = [{"forms": f, "records": R.ids(ce.email_records(mem, set(f)))} for f in form_sets]
+    removal = [
+        {"records": [p["pair_id"] for p in sub], "value": ce.has_removal_instruction([mem.pairs[p["pair_id"]] for p in sub])}
+        for sub in ([], EDGE_PAIRS[:2], EDGE_PAIRS[:3], [EDGE_PAIRS[9]], [EDGE_PAIRS[13]], [EDGE_PAIRS[4]])
+    ]
+    return {
+        "records": flat,
+        "cases": cases,
+        "shapes": shapes,
+        "notes": notes,
+        "names_any": names_any,
+        "email_records": email,
+        "removal": removal,
+    }
