@@ -104,3 +104,5 @@ refusal state appears.
 - Context sizes: up to 10 retrieved records are pre-loaded; the first 4 as
   excerpts of up to 1,400 characters, the rest up to 600; identifier records
   (see Context construction) always in full, with no size cap.
+- Memory tools: search previews are up to 900 characters per record; `topK`
+  defaults to 8 and is clamped to 1-25.
