@@ -41,3 +41,12 @@ const WITH_TOOLS: &[(&str, WithTools)] = &[
     ("tool_hint_note", th::tool_hint_note),
     ("send_on_record_note", th::send_on_record_note),
 ];
+
+/// Tool-hint rules added after the port (change 26 on), in order after the reference's rules. Each fires only where
+/// the reference produced no tool-hint note.
+const ADDED_RULES: &[&str] = &[
+    "file_feedback_for_team",
+    "set_chat_tool_preferences",
+    "discover_capabilities",
+    "execute_agent_job",
+];
