@@ -36,3 +36,7 @@ fn chain_of(v: &Value) -> Vec<(String, String)> {
 fn chain_json(ch: &[(String, String)]) -> Value {
     ch.iter().map(|(a, b)| json!([a, b])).collect()
 }
+
+fn sorted(set: &HashSet<String>) -> Vec<String> {
+    set.iter().cloned().collect::<BTreeSet<_>>().into_iter().collect()
+}
