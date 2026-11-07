@@ -74,3 +74,23 @@ fn py_len(v: &Value) -> usize {
 async fn health() -> Response {
     Json(json!({"status": "ok"})).into_response()
 }
+
+async fn seed(State(app): State<App>, body: axum::body::Bytes) -> Response {
+    let body = match object_body(&body) {
+        Ok(b) => b,
+        Err(resp) => return *resp,
+    };
+    let field = |k: &str| body.get(k).filter(|v| truthy(v)).cloned().unwrap_or(json!([]));
+    let (pairs, subjects, links) = (field("pairs"), field("subjects"), field("links"));
+    let user_id = body
+        .get("user_id")
+        .filter(|v| truthy(v))
+        .map(crate::py::str_value)
+        .unwrap_or_else(|| config::DEFAULT_USER.to_string());
+    if let Err(err) = app.store.seed(&user_id, &pairs, &subjects, &links).await {
+        // The scorer retries a failed wave; report why.
+        tracing::error!("seed failed: {err}");
+        return error(StatusCode::SERVICE_UNAVAILABLE, format!("seed failed: {err}"));
+    }
+    Json(json!({"pairs": py_len(&pairs), "subjects": py_len(&subjects), "links": py_len(&links)})).into_response()
+}
