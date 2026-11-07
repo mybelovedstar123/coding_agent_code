@@ -144,3 +144,5 @@ refusal state appears.
   `blocked_tool_calls` as `blocked_before_execution`.
 - No other host-side de-duplication: apart from the identical-call rule above,
   every allowed call the model issues is executed.
+- Every executed call is reported in order with its model-authored name and
+  arguments.
