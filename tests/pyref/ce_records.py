@@ -21,3 +21,4 @@ from harness.store import Pair, UserMemory, content_key, fmt_ts, render_pair  # 
 from harness.text import tokenize  # noqa: E402
 
 DATASETS = sorted(glob.glob("/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/case/datasets/v13-full-*.json"))
+PREFIX = config.MEMORY_CONTEXT_PREFIX
