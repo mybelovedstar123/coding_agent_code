@@ -74,3 +74,22 @@ static REPEAT_REQUEST_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\b(again
 pub fn asks_to_repeat(user_input: &str) -> bool {
     REPEAT_REQUEST_RE.is_match(user_input)
 }
+
+/// REQUERY_NOTE listing every non-reader tool executed more than once so far ("search_web 3 times"), in first-call
+/// order; empty when no such tool exists.
+fn requery_note(calls: &[Call]) -> String {
+    let mut counts: IndexMap<&str, usize> = IndexMap::new();
+    for c in calls.iter().filter(|c| !repeat_exempt(&c.name)) {
+        *counts.entry(c.name.as_str()).or_insert(0) += 1;
+    }
+    let repeated: Vec<String> = counts
+        .iter()
+        .filter(|(_, n)| **n > 1)
+        .map(|(name, n)| format!("{name} {n} times"))
+        .collect();
+    if repeated.is_empty() {
+        String::new()
+    } else {
+        REQUERY_NOTE.replacen("{calls}", &repeated.join(", "), 1)
+    }
+}
