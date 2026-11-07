@@ -311,3 +311,7 @@ with open(OUT, "w", encoding="utf-8") as fh:
 print(f"requests={len(requests)} catalogs={len(catalogs)} note_rows={len(notes)} ratios={len(ratios)} fuzzy={len(fuzzy)}")
 for fn in WANTS + PLAIN_NOTES:
     print(f"  {fn}: {sum(1 for w in wants if w[fn])}")
+for fn in CATALOG_NOTES:
+    for ci, cat in enumerate(catalogs):
+        n = sum(1 for row in notes if row["cat"] == ci and row.get(fn))
+        print(f"  {fn} [{cat['name']}]: {n}")
