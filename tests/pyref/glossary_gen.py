@@ -75,3 +75,41 @@ EDGE_GLOSSED = [
     ("alphaone alphaonex alphaone. betatwo", {"alphaone": "is x", "alphaonex": "is longer", "betatwo": "holds y"}),
     ("nothing here", {"alphaone": "is x"}),
 ]
+
+
+def edge():
+    texts = [{"text": t, "definitions": [[k, v] for k, v in g.definitions(t).items()]} for t in EDGE_TEXTS]
+    stmts = [
+        {"prompt": p, "ident": i, "statement": g.statement(p, i)}
+        for p, i in [
+            ('Case file c53a7436ffb5c91e4: "Local field conventions here: x is y"}', "c53a7436ffb5c91e4"),
+            ("Case file C53A7436FFB5C91E4:: {note}} ", "c53a7436ffb5c91e4"),
+            ("İİİ case c53a7436ffb5c91e4: after", "c53a7436ffb5c91e4"),
+            ("no identifier here", "c53a7436ffb5c91e4"),
+            ('c53a7436ffb5c91e4', "c53a7436ffb5c91e4"),
+            ('"quoted" c53a7436ffb5c91e4 :"  spaced "  ', "c53a7436ffb5c91e4"),
+        ]
+    ]
+    glossed = [{"text": t, "terms": [[k, v] for k, v in terms.items()], "value": g.glossed(t, terms)} for t, terms in EDGE_GLOSSED]
+    ident = "case-0001x"
+    items = [
+        ("p1", f"Case file {ident}: Local field conventions here: jorailset designates a workstream; lumauset names the accountable owner; beluxwire is the payer."),
+        ("p2", f"Case file {ident}: For voraenpath the beluxwire on record is Copperfield Systems."),
+        ("p3", f"Case file {ident}: For voraenpath the beluxwire on record is Copperfield Systems!"),
+        ("p4", f"Case file {ident}: The lumauset for jorailset Atlas is Dana Whitfield."),
+        ("p5", f"Case file {ident}: Nothing defined here."),
+    ]
+    big = items + [("p6", "x" * 15_000)]
+    contexts = [
+        None,
+        "",
+        "no newline",
+        PREFIX + "\n{bad",
+        MINIMAL,
+        PREFIX + "\n" + '{"memories": [], "glossary": {"old": "x"}, "note": null}',
+        PREFIX + "\n" + '{"note": "é", "extra": 1.50}',
+    ]
+    cases = [outputs(items, ident, ctx) | {"context": ctx} for ctx in contexts]
+    cases.append(outputs(big, ident, MINIMAL) | {"context": MINIMAL})
+    cases.append(outputs(items[1:], ident, MINIMAL) | {"context": MINIMAL})
+    return {"texts": texts, "statements": stmts, "glossed": glossed, "cases": cases}
