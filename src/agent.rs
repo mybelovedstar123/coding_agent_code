@@ -93,3 +93,19 @@ fn requery_note(calls: &[Call]) -> String {
         REQUERY_NOTE.replacen("{calls}", &repeated.join(", "), 1)
     }
 }
+
+/// A call's identity for the repeat guard: the tool name and its arguments with object keys sorted.
+pub fn call_key(name: &str, args: &serde_json::Map<String, Value>) -> String {
+    fn sorted(v: &Value) -> Value {
+        match v {
+            Value::Object(m) => {
+                let mut keys: Vec<&String> = m.keys().collect();
+                keys.sort();
+                Value::Object(keys.into_iter().map(|k| (k.clone(), sorted(&m[k]))).collect())
+            }
+            Value::Array(a) => Value::Array(a.iter().map(sorted).collect()),
+            other => other.clone(),
+        }
+    }
+    format!("{name}\u{0}{}", py::dumps(&sorted(&Value::Object(args.clone())), false))
+}
