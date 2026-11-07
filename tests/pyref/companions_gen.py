@@ -21,3 +21,28 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "fixtures", "companions.json")
 DATASETS = sorted(glob.glob("/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/case/datasets/v13-full-*.json"))
 rng = random.Random(118)
+
+
+def load(path):
+    with open(path, encoding="utf-8") as f:
+        d = json.load(f)
+    raw = {}
+    for w in d["memory_waves"]:
+        if w.get("user_id") == "miner":
+            for p in w.get("pairs") or []:
+                raw[p["pair_id"]] = p
+    for t in d["tool_cases"]:
+        for p in t.get("prerequisite_pairs") or []:
+            raw[p["pair_id"]] = p
+    pairs = {
+        pid: store.Pair(
+            pair_id=pid,
+            session_id=p.get("session_id") or "",
+            ts=store.parse_ts(p.get("timestamp")),
+            prompt=p.get("prompt") or "",
+            response=p.get("response") or "",
+        )
+        for pid, p in raw.items()
+    }
+    requests = [m["question"] for m in d["memory_cases"]] + [t["prompt"] for t in d["tool_cases"]]
+    return pairs, list(dict.fromkeys(requests))
