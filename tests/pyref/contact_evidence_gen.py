@@ -6,3 +6,5 @@ context built the way the agent builds it. Writes tests/fixtures/contact_evidenc
 
 import os
 import sys
+
+sys.dont_write_bytecode = True
