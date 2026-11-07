@@ -50,3 +50,11 @@ const ADDED_RULES: &[&str] = &[
     "discover_capabilities",
     "execute_agent_job",
 ];
+
+/// Requests the usual-effort trigger takes since change 33 (a typo in "reasoning", a "Quick one:" opener) where the
+/// reference did not; on these, the trigger and the effort note may newly fire.
+const EFFORT_WIDENED: &[&str] = &[
+    "For planning context c02f07f38c3117d82: Quick one: sort out your reewoning depth.",
+    "For planning context caae4db14610d268b: When you get a sec, dial in my reasoning ecfort the way I lioe it.",
+    "For planning context c7f0276a3ea7b669d: Sort out your rasojing depth for me.",
+];
