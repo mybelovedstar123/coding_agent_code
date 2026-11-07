@@ -113,3 +113,6 @@ pub fn call_key(name: &str, args: &serde_json::Map<String, Value>) -> String {
 fn secs(x: f64) -> Duration {
     Duration::from_secs_f64(x.max(0.0))
 }
+
+/// A call the model made: its id, the tool name, the parsed arguments, and why it may not run (if so).
+type ModelCall = (Value, String, Map<String, Value>, Option<String>);
