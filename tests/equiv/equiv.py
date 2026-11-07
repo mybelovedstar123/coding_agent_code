@@ -39,3 +39,15 @@ DIM = 768
 def h(*parts) -> int:
     d = hashlib.sha256(json.dumps(parts, sort_keys=True, ensure_ascii=False).encode()).digest()
     return int.from_bytes(d[:8], "big")
+
+
+# ------------------------------------------------------------------ fakes
+def unit_vector(text: str) -> list[float]:
+    raw = hashlib.shake_256(text.encode()).digest(DIM * 2)
+    vals = [((v / 65535.0) - 0.5) for v in struct.unpack(f"<{DIM}H", raw)]
+    # Shared words pull vectors together so retrieval has structure: add a bag-of-words component.
+    for w in re.findall(r"[a-z0-9]+", text.lower())[:200]:
+        i = h("w", w) % DIM
+        vals[i] += 2.0
+    n = sum(v * v for v in vals) ** 0.5 or 1.0
+    return [v / n for v in vals]
