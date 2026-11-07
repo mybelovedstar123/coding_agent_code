@@ -271,3 +271,4 @@ fixture = {
 }
 with open(OUT, "w", encoding="utf-8") as fh:
     json.dump(fixture, fh, ensure_ascii=False, indent=0)
+fired = sum(1 for c in calls if c["expected"] != c["context"])
