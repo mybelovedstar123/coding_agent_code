@@ -45,3 +45,11 @@ fn repeat_requests_are_recognised() {
         assert!(!asks_to_repeat(text), "should not ask to repeat: {text}");
     }
 }
+
+#[test]
+fn readers_stay_exempt() {
+    assert!(repeat_exempt("search_memories"));
+    assert!(repeat_exempt("read_links"));
+    assert!(repeat_exempt("fetch_page"));
+    assert!(!repeat_exempt("search_web"));
+}
