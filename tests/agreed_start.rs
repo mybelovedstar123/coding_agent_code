@@ -23,3 +23,10 @@ const OTHER: &[&str] = &[
     "What did we settle on doing about the cloud storage plan before it renews?",
     "Make a reusable workflow called trip-planner.",
 ];
+
+fn catalog(names: &[&str]) -> Vec<Value> {
+    names
+        .iter()
+        .map(|n| json!({"type": "function", "function": {"name": n, "description": "", "parameters": {}}}))
+        .collect()
+}
