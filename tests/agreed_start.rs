@@ -14,3 +14,12 @@ const AGREED: &[&str] = &[
     "Go ahead and start the depeendeny-risk review on \"lenfilm cross brief\" — per what we lanced on. Go.",
     "Kick off the review the way we agreed",
 ];
+
+const OTHER: &[&str] = &[
+    "Do I already have a workflow for \"beko bank ledger\"? If there isn't one, create it under the formal name.",
+    "Kick off my workflow that's set for every Monday at 08:00 — the one already saved.",
+    "Start the existing workflow scheduled every Monday at 08:00 right now.",
+    "Remind me — what day did we land on for the \"getty shore ledger\" handoff?",
+    "What did we settle on doing about the cloud storage plan before it renews?",
+    "Make a reusable workflow called trip-planner.",
+];
