@@ -34,3 +34,14 @@ fn constants_match() {
     assert_eq!(es::MIN_EVENTS as u64, c["MIN_EVENTS"].as_u64().unwrap());
     assert_eq!(es::Q, s(&c["Q"]));
 }
+
+#[test]
+fn keys_and_cells_match() {
+    let fx = fixture();
+    for case in fx["norm_key"].as_array().unwrap() {
+        assert_eq!(es::_norm_key(s(&case[0])), s(&case[1]), "{:?}", case[0]);
+    }
+    for case in fx["cell"].as_array().unwrap() {
+        assert_eq!(es::_cell(s(&case[0])), s(&case[1]), "{:?}", case[0]);
+    }
+}
