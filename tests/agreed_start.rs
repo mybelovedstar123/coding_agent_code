@@ -39,3 +39,10 @@ fn agreed_start_requests_fire() {
         assert_eq!(th::agreed_start_note(text, &tools), th::AGREED_START_NOTE);
     }
 }
+
+#[test]
+fn other_requests_do_not_fire() {
+    for text in OTHER {
+        assert!(!th::wants_agreed_start(text), "should not fire: {text}");
+    }
+}
