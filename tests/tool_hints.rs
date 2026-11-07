@@ -14,3 +14,4 @@ fn s(v: &Value) -> &str {
 
 type Want = fn(&str) -> bool;
 type Plain = fn(&str) -> String;
+type WithTools = fn(&str, &[Value]) -> String;
