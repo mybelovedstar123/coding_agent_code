@@ -147,3 +147,14 @@ fn approximate_option_requests_fire() {
         assert!(!th::names_option_approximately(text), "should not fire: {text}");
     }
 }
+
+#[test]
+fn usual_effort_tolerates_a_typo_in_reasoning() {
+    assert!(th::wants_usual_effort(
+        "For planning context c02f07f38c3117d82: Quick one: sort out your reewoning depth."
+    ));
+    assert!(th::wants_usual_effort(
+        "Sort out how hzrd you think to my usual for me."
+    ));
+    assert!(!th::wants_usual_effort("Set my reasoning effort to high."));
+}
