@@ -219,3 +219,4 @@ long_sent = " ".join(
     for i in range(15)
 )
 mixed = [HEAD + "\n" + rows_json(4), long_csv, long_md, long_sent]
+ids = ["c1", "c2", "c3", "c4"]
