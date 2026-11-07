@@ -253,3 +253,4 @@ contexts = [
     "Other prefix\n" + json.dumps({"memories": [], "note": "é"}),
 ]
 for c in contexts:
+    add_call("edge-context", c, ids, "state at step 2", mixed)
