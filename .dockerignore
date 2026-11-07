@@ -1,0 +1,6 @@
+target/
+tests/
+PORTING.md
+PIPELINE.md
+.git/
+*.md
