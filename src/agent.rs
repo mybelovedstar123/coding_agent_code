@@ -231,3 +231,19 @@ fn program_records(mem: &UserMemory) -> Map<String, Value> {
         })
         .collect()
 }
+
+/// Size of the transcript sent with each call (text of all messages).
+fn transcript_chars(messages: &[Value]) -> usize {
+    messages
+        .iter()
+        .map(|m| {
+            let content = m
+                .get("content")
+                .filter(|c| truthy(c))
+                .map(py::str_value)
+                .unwrap_or_default();
+            let calls = m.get("tool_calls").filter(|c| truthy(c)).cloned().unwrap_or(json!([]));
+            py::len(&content) + py::len(&py::dumps(&calls, true))
+        })
+        .sum()
+}
