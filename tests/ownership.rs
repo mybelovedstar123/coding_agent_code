@@ -63,3 +63,34 @@ fn sequence_ratio_matches_difflib() {
     }
     report("sequence_ratio", cases.len(), &bad);
 }
+
+#[test]
+fn sentence_split() {
+    // The fast splitter against Python's split on crafted text, and against the faithful lookbehind pattern on
+    // every record.
+    let cases = FIXTURE["sentences"].as_array().expect("cases");
+    let mut bad = Vec::new();
+    for c in cases {
+        let text = s(&c[0]);
+        let want = strings(&c[1]);
+        if o::sentences(text) != want || o::SENT.split(text) != want {
+            bad.push(format!(
+                "{text:?}: want {want:?} got {:?} / {:?}",
+                o::sentences(text),
+                o::SENT.split(text)
+            ));
+        }
+    }
+    let mut total = cases.len();
+    for ds in FIXTURE["datasets"].as_array().expect("datasets") {
+        for r in ds["records"].as_array().expect("records") {
+            for text in [s(&r[2]), s(&r[3])] {
+                total += 1;
+                if o::sentences(text) != o::SENT.split(text) {
+                    bad.push(format!("{text:?}"));
+                }
+            }
+        }
+    }
+    report("sentences", total, &bad);
+}
