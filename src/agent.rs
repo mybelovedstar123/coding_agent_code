@@ -1352,4 +1352,26 @@ mod tests {
             hop: 1,
         }
     }
+
+    #[test]
+    fn requery_note_lists_repeated_non_readers_in_first_call_order() {
+        assert_eq!(requery_note(&[call("search_web")]), "");
+        // Readers are not counted.
+        assert_eq!(
+            requery_note(&[call("read_links"), call("read_links"), call("search_memories")]),
+            ""
+        );
+        let note = requery_note(&[
+            call("run_code"),
+            call("search_web"),
+            call("search_web"),
+            call("run_code"),
+            call("search_web"),
+            call("set_theme"),
+        ]);
+        assert_eq!(
+            note,
+            REQUERY_NOTE.replacen("{calls}", "run_code 2 times, search_web 3 times", 1)
+        );
+    }
 }
