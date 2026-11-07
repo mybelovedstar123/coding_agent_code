@@ -276,3 +276,4 @@ for n in (5, 50, 199, 200, 201, 250, 400):
         b = "".join(rng.choice(alphabet) for _ in range(n))
         ratio_pairs.append([a, b])
 ratio_pairs += [["", ""], ["a", ""], ["", "abc"], ["abcd", "dcba"], ["été", "ete"]]
+import difflib  # noqa: E402
