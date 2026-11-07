@@ -49,3 +49,20 @@ def load(path):
 
 
 _FEATURES = {}
+
+
+def ranked(pairs, request, k):
+    """The k records sharing the most request phrases, then words (a stand-in for retrieval's hits)."""
+    rp = companions.phrases(request)
+    rw = set(tokenize(request))
+    scored = []
+    for i, (pid, p) in enumerate(pairs.items()):
+        if pid not in _FEATURES:
+            _FEATURES[pid] = (companions.phrases(p.prompt), set(tokenize(p.prompt)))
+        fp, fw = _FEATURES[pid]
+        ph = len(rp & fp)
+        w = len(rw & fw)
+        if ph or w:
+            scored.append((-ph, -w, i, pid))
+    scored.sort()
+    return [pid for _, _, _, pid in scored[:k]]
