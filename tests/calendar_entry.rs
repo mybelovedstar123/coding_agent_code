@@ -19,3 +19,10 @@ const OTHER: &[&str] = &[
     "Schedule dentist appointment on my calendar.",
     "Check the schedules on my workflows — how many runs has the one that goes each weekday at 07:15 logged so far?",
 ];
+
+fn catalog(names: &[&str]) -> Vec<Value> {
+    names
+        .iter()
+        .map(|n| json!({"type": "function", "function": {"name": n, "description": "", "parameters": {}}}))
+        .collect()
+}
