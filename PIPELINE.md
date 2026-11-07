@@ -347,3 +347,6 @@ the user's own records, never from a reply, and no record text is changed):
   names the person asked about (any recorded name form) together with the
   channel is added in full, including later corrections and removal
   instructions (typo-tolerant channel match).
+- Requests for the email or address of whoever owns or holds something: a second
+  retrieval hop adds the email-bearing records of the people the retrieved
+  records name (any recorded name form).
