@@ -3,3 +3,10 @@
 
 use ditto_agent::named_tool::named_tool_note;
 use serde_json::{json, Value};
+
+fn catalog(names: &[&str]) -> Vec<Value> {
+    names
+        .iter()
+        .map(|n| json!({"type": "function", "function": {"name": n, "description": "", "parameters": {}}}))
+        .collect()
+}
