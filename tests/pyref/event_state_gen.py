@@ -258,3 +258,5 @@ add_call("edge-few", base_ctx, ids, "state at step 2", [HEAD + "\n" + rows_json(
 add_call("edge-ten", base_ctx, ["only"], "", [HEAD + "\n" + rows_json(10)])
 add_call("edge-quirks", base_ctx, ["q"], "step 1", json_quirks + csv_quirks + md_quirks + sent_quirks)
 add_call("edge-big", base_ctx, ["q"], "", [HEAD + "\n" + rows_json(12, step_of=lambda i: 10**30 + i)])
+add_call("edge-big-neg", base_ctx, ["q"], "", [HEAD + "\n" + rows_json(12, step_of=lambda i: -(10**30) - i)])
+
