@@ -20,3 +20,4 @@ from harness.text import tokenize  # noqa: E402
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "fixtures", "companions.json")
 DATASETS = sorted(glob.glob("/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/case/datasets/v13-full-*.json"))
+rng = random.Random(118)
