@@ -109,3 +109,6 @@ refusal state appears.
 - `run_python`: programs up to 8,000 characters, output truncated at 6,000
   characters, 15 s wall time, 8 s CPU, 768 MB address space, 3 open files, no
   child processes.
+- Embeddings: batches of at most 32 texts / 100,000 characters, at most 4
+  concurrent requests.
+
