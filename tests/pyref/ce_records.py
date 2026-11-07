@@ -119,3 +119,8 @@ def fnv(s):
     for b in s.encode("utf-8"):
         h = ((h ^ b) * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
     return f"{h:016x}"
+
+
+def digest(s):
+    """None, or {"len": code points, "fnv": hash} of a text."""
+    return None if s is None else {"len": len(s), "fnv": fnv(s)}
