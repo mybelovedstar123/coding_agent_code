@@ -216,3 +216,18 @@ pub fn request_identifier(mem: &UserMemory, user_input: &str) -> (String, Vec<Pa
     records.sort_by(|a, b| cmp_content(a, b));
     (best.0, records.into_iter().cloned().collect())
 }
+
+/// The records the program tool's records() returns, by pair id: the documented keys (id, timestamp, user, ditto) plus
+/// pairID and text exactly as the memory context shows a record.
+fn program_records(mem: &UserMemory) -> Map<String, Value> {
+    mem.pairs
+        .iter()
+        .map(|(pid, p)| {
+            (
+                pid.clone(),
+                json!({"id": pid, "pairID": pid, "timestamp": fmt_ts(&p.ts), "user": p.prompt, "ditto": p.response,
+                       "text": render_pair(p)}),
+            )
+        })
+        .collect()
+}
