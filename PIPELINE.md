@@ -40,3 +40,8 @@ head of every deciding, draft, check and recovery call and takes precedence over
 the miner guidance (W2); the router receives it after its dispatcher prompt, as
 host instructions the assistant follows.
 
+## Stages
+
+| # | Stage | Role | Input | Output used for |
+|---|---|---|---|---|
+| 0 | Spelling reading (`src/spelling.rs`) | advisory | the user's message only (no records, no tools) | one low-effort call, run concurrently with the router, returns the message with its spelling mistakes corrected and nothing else changed. Its output is used only if every digit-bearing token (identifiers, numbers, dates) is unchanged and its length is within 30 % of the original; then the deciding stages receive it as a reading note appended to the system prompt, which says that the user's message itself is what they sent and the note is only for reading misspelled words. The request itself is never changed. Failure, timeout or an unusable output adds no note. Usage is reported. |
