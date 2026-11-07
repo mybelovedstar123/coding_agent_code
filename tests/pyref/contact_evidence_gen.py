@@ -14,3 +14,5 @@ import ce_records as R  # noqa: E402
 
 from harness import contact_evidence as ce  # noqa: E402
 from harness.store import fmt_ts, render_pair  # noqa: E402
+
+PREFIX = R.PREFIX
