@@ -191,3 +191,7 @@ def main():
     print(f"edge: {len(e['cases'])} cases, {len(e['ratios'])} ratios, {len(e['phrases'])} phrases", file=sys.stderr)
     path = R.write("current_statements", {"prefix": PREFIX, "datasets": datasets, "edge": e})
     print(f"wrote {path}: {totals}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
