@@ -87,3 +87,23 @@ def joint_requests(pairs, index, n):
         q = rng.choice(["What's the latest on {s}?", "{s} - where did that land?", "Remind me: {s}", "{s}"])
         out.append((q.format(s=span), pid))
     return out
+
+
+CRAFTED = [
+    ("a1", "2025-01-01T09:00:00Z", "Our grape track was the honeymoon trip to Porto that I planned with Sparky."),
+    ("a2", "2025-01-02T09:00:00Z", "The olive route is the Lisbon weekend I planned with Sparky and Mo."),
+    ("c1", "2025-02-01T09:00:00Z", "When Sparky and I first mapped that trip out, we had 8 days in Porto."),
+    ("c2", "2025-02-02T09:00:00Z", "Quick update on the trip Sparky and I planned: Porto hotel is booked."),
+    ("c3", "2025-02-03T09:00:00Z", "Sparky and I changed the trip: two more days in Porto and Braga."),
+    ("c4", "2025-02-04T09:00:00Z", "Sparky and I and Mo and I argued about the trip budget for Porto."),
+    ("c5", "2025-02-05T09:00:00Z", "Sparky and I moved the trip flights; Porto arrival is now Friday."),
+    ("c6", "2025-02-06T09:00:00Z", "Mo and I priced the Lisbon weekend trains."),
+    ("c7", "2025-02-07T09:00:00Z", "Sparky and I booked dinner (no place named), trip notes later."),
+    ("c8", "2025-02-08T09:00:00Z", "Sparky and Ivan and I drove to Porto for the trip."),
+    ("x1", "2025-03-01T09:00:00Z", "Sparky said the grape track budget is fine. Porto"),
+    ("x2", "2025-03-02T09:00:00Z", "Sparkys and I is not a joint mention; Porto trip."),
+    ("x3", "2025-03-03T09:00:00Z", "Porto and I start a record here: Sparky trip."),
+    ("a3", "2025-01-03T09:00:00Z", "The kiln plan with Sparky2 and Sparky_x and xSparky in Porto."),
+    ("a4", "2025-01-04T09:00:00Z", "The clay plan with (Sparky) in Porto, Braga."),
+    ("a5", "2025-01-05T09:00:00Z", "Sparky: the glaze plan in Porto."),
+]
