@@ -76,3 +76,14 @@ def load(path):
 
 def item(p):
     return {"pairID": p.pair_id, "timestamp": fmt_ts(p.ts), "text": render_pair(p)}
+
+
+def lexical_top(mem, question, k=8):
+    q = set(tokenize(question))
+    scored = []
+    for p in mem.pairs.values():
+        s = len(q & set(tokenize(p.text)))
+        if s:
+            scored.append((-s, content_key(p), p))
+    scored.sort(key=lambda t: (t[0], t[1]))
+    return [p for _, _, p in scored[:k]]
