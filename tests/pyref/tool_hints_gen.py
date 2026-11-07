@@ -243,3 +243,5 @@ catalogs.append(
         "tool_defs": [{"type": "function", "function": {"name": "gmail_send"}}],
     }
 )
+
+wants = []
