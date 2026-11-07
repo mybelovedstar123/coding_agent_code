@@ -59,3 +59,4 @@ for name, text, doc in TEXTS:
     lines.append("")
 out = Path(__file__).resolve().parents[2] / "src" / "prompts.rs"
 out.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+print("wrote", out, sum(len(t) for _, t, _ in TEXTS), "chars")
