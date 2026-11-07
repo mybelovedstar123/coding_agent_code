@@ -322,3 +322,12 @@ interface (a question, not a task to set, change or verify it), the system
 prompt gets one line saying the user's own stored preference for that setting
 is in their records and to write the value as the records spell it.
 
+Confirming an own setting (both paths): when the request asks to confirm that
+the user's own Ditto accent, colour, font, typeface or mode has a value they
+name ("make sure my Ditto accent is …"), and is not a request to change it,
+the system prompt gets one line: the stored preference is in their records;
+if the records give the same value, call no tool and say it is already set,
+citing the record; if they give a different value or none, set the named
+value with that setting's tool. The note is advisory and names no value; the
+model reads the records and makes every call.
+
