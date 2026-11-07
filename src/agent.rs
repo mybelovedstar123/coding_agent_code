@@ -192,3 +192,27 @@ pub fn request_idents(user_input: &str) -> Vec<String> {
     }
     out
 }
+
+/// The request's identifier that the records carry, chosen once per request (D12): of the identifiers that match
+/// any record, the one matching the fewest; equal counts go to the one the request names first, never to the one whose
+/// re-randomised spelling sorts first. Returns (identifier, its records oldest first), or ("", []).
+pub fn request_identifier(mem: &UserMemory, user_input: &str) -> (String, Vec<Pair>) {
+    let mut best: (String, Vec<&Pair>) = (String::new(), Vec::new());
+    for ident in request_idents(user_input) {
+        let found: Vec<&Pair> = mem
+            .pairs
+            .values()
+            .filter(|p| {
+                format!("{}\n{}", p.prompt, p.response)
+                    .to_lowercase()
+                    .contains(ident.as_str())
+            })
+            .collect();
+        if !found.is_empty() && (best.1.is_empty() || found.len() < best.1.len()) {
+            best = (ident, found);
+        }
+    }
+    let mut records = best.1;
+    records.sort_by(|a, b| cmp_content(a, b));
+    (best.0, records.into_iter().cloned().collect())
+}
