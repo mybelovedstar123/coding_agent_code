@@ -87,3 +87,6 @@ def lexical_top(mem, question, k=8):
             scored.append((-s, content_key(p), p))
     scored.sort(key=lambda t: (t[0], t[1]))
     return [p for _, _, p in scored[:k]]
+
+
+HIT_CHARS = 600
