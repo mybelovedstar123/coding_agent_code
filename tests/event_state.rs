@@ -70,3 +70,38 @@ fn table_readers_match() {
         texts.len()
     );
 }
+
+#[test]
+fn with_event_state_matches() {
+    let fx = fixture();
+    let calls = fx["calls"].as_array().unwrap();
+    let mut fired = 0;
+    for c in calls {
+        let texts = strings(&c["texts"]);
+        let ids = strings(&c["ids"]);
+        let user_input = s(&c["user_input"]);
+        let evs = es::events(&texts);
+        assert_eq!(evs_value(&evs), c["events"], "events for {user_input:?}");
+        if !evs.is_empty() {
+            let step = es::requested_step(user_input, &evs);
+            assert_eq!(step.to_string(), s(&c["requested_step"]), "{user_input:?}");
+            assert_eq!(
+                py::dumps(&es::state_at(&evs, &step), false),
+                s(&c["state_at"]),
+                "{user_input:?}"
+            );
+        }
+        let context = c["context"].as_str().map(String::from);
+        let got = es::with_event_state(context.clone(), MEMORY_CONTEXT_PREFIX, &ids, user_input, &texts);
+        assert_eq!(
+            got.as_deref(),
+            c["expected"].as_str(),
+            "with_event_state for {user_input:?} ({})",
+            c["source"]
+        );
+        if got != context {
+            fired += 1;
+        }
+    }
+    assert!(calls.len() > 200 && fired >= 50, "{} calls, {fired} fired", calls.len());
+}
