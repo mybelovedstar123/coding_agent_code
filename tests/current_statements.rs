@@ -109,3 +109,31 @@ fn datasets() {
     );
     assert!(n > 500 && firing >= 200, "coverage {n} / {firing}");
 }
+
+#[test]
+fn edge_cases() {
+    let fx = load("current_statements");
+    let e = &fx["edge"];
+    let mut failures = Vec::new();
+    for c in e["cases"].as_array().expect("cases") {
+        failures.extend(run_case(None, c));
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+    for t in e["statements"].as_array().expect("statements") {
+        assert_eq!(
+            cs::statement(s(&t["prompt"]), s(&t["ident"])),
+            s(&t["statement"]),
+            "{t}"
+        );
+    }
+    for l in e["lists"].as_array().expect("lists") {
+        assert_eq!(Value::from(cs::list_items(s(&l["earlier"]))), l["list_items"], "{l}");
+        assert_eq!(Value::from(cs::list_items(s(&l["change"]))), l["change_items"], "{l}");
+        let earlier = strings(&l["list_items"]);
+        assert_eq!(
+            Value::from(cs::current_list(&earlier, s(&l["change"]))),
+            l["current_list"],
+            "{l}"
+        );
+    }
+}
