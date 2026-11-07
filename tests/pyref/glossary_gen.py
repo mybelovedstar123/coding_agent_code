@@ -43,3 +43,7 @@ def outputs(items, ident, context, by_id=None):
         "with_glossary": R.changed(context, g.with_glossary(context, PREFIX, items, ident), full=True),
     }
     return out
+
+
+def fires(c):
+    return "digest" in c["with_glossary"]
