@@ -129,3 +129,35 @@ def rows_json(n, step_of=lambda i: i % 4, extra=""):
         )
         + "\n]"
     )
+
+
+json_quirks = [
+    '[{"Entity": "a", "Field": "f", "Value": 1.0, "Effective Step": 2, "Operation": "ASSIGN"}]',
+    '[{"entity": "a", "field": "f", "value": NaN, "effective_step": 1, "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": Infinity, "effective_step": -Infinity, "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": -Infinity, "effective_step": 2.9, "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": true, "effective_step": true, "operation": false}]',
+    '[{"entity": "a", "field": "f", "value": null, "effective_step": 1, "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": {"x": [1, 2.50, "q\'s"]}, "effective_step": 1, "operation": "x"}]',
+    '[{"entity": "a", "field": "f", "value": [true, null, 1e400], "effective_step": "  ３ ", "operation": "add"}]',
+    '[{"entity": "a", "field": "f", "value": "v", "effective_step": "1_000", "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": "v", "effective_step": "1__0", "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": "v", "effective_step": "+7", "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": "v", "effective_step": "3.0", "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": "v", "effective_step": 1e300, "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": "v", "effective_step": 123456789012345678901234567890, "operation": "a"}]',
+    '[{"entity": "a", "field": "f", "value": "v", "effective_step": -0, "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": "v", "effective_step": 01, "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": "v", "effective_step": 1, "operation": "assign",}]',
+    '[{"entity": "a", "entity": "b", "field": "f", "value": "<b>`v`</b>", "effective_step": 1, "operation": "add"}]',
+    '[{"entity": "\\u00e9\\ud83d\\ude00\\n", "field": "f\\"", "value": "\\/", "effective_step": 1, "operation": "a"}]',
+    '[{"entity": "a", "field": "f", "value": "tab\there", "effective_step": 1, "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": "v", "effective_step": 1, "operation": "assign"}, 5, "x", []]',
+    '[ {"entity": "a", "field": "f", "value": "}]", "effective_step": 1, "operation": "assign"} ]',
+    'text [{"a": 1}] more [ {"entity": "a", "field": "f", "value": "v", "effective_step": 0, "operation": "add"} ]',
+    '[{"entity": "a", "field": "f", "value": 1E5, "effective_step": 1, "operation": 5}]',
+    '[{"entity": "a", "field": "f", "value": 1e, "effective_step": 1, "operation": "assign"}]',
+    '[{"entity": "a", "field": "f", "value": -, "effective_step": 1, "operation": "assign"}]',
+    '[{"entity": 12, "field": 0.1, "value": -0.0, "effective_step": 1, "operation": "assign"}]',
+    '[\x1c{"entity": "a", "field": "f", "value": "v", "effective_step": 1, "operation": "assign"}]',
+]
