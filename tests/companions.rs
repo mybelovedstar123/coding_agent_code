@@ -11,3 +11,7 @@ use std::collections::{BTreeSet, HashSet};
 fn s(v: &Value) -> &str {
     v.as_str().unwrap_or_else(|| panic!("string expected, got {v}"))
 }
+
+fn strings(v: &Value) -> Vec<String> {
+    v.as_array().expect("array").iter().map(|x| s(x).to_string()).collect()
+}
