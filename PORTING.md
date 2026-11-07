@@ -45,3 +45,5 @@ call and an unmeasured behaviour change. The port is proven by replaying cached 
    - `df` (`mem._df`), and `idf()` as `idf_fn(mem._df, len(mem._tf))`;
    - `derived(key, make)` for the lazily built indexes (`mem.derived`).
 
+   Helpers: `store::render_pair`, `store::fmt_ts`, `store::content_key`/`cmp_content`, and
+   `config::MEMORY_CONTEXT_PREFIX`.
