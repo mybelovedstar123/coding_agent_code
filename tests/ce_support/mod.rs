@@ -109,3 +109,7 @@ pub fn check_step(before: Option<&str>, after: Option<&str>, want: &Value) -> Op
     }
     (digest(after) != want["digest"]).then(|| format!("digest differs: want {} got {after:?}", want["digest"]))
 }
+
+pub fn ids(pairs: &[Pair]) -> Vec<String> {
+    pairs.iter().map(|p| p.pair_id.clone()).collect()
+}
