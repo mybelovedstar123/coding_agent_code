@@ -112,3 +112,13 @@ refusal state appears.
 - Embeddings: batches of at most 32 texts / 100,000 characters, at most 4
   concurrent requests.
 
+## Tool execution (W11, W12)
+
+- Executor guard: only a tool offered in the current turn can run. Calls to
+  unknown or unoffered tools, calls with arguments that are not a JSON object,
+  and memory read calls with record ids that neither exist in this user's store
+  nor were named exactly by an id field (`id`, `pair_id`, `memory_id` and their
+  camel-case forms) of an earlier executed tool result of the same request
+  (error-only results do not count; empty ids never pass) are blocked before
+  execution: the model receives an error and nothing is sent. An accepted id the
+  store does not hold is simply not found.
