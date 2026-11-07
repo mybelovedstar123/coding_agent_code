@@ -6,6 +6,10 @@ description = "Ditto SN118 memory harness: GET /health, POST /seed, POST /run on
 license = "UNLICENSED"
 publish = false
 
+[[bin]]
+name = "ditto-agent"
+path = "src/main.rs"
+
 [dependencies]
 anyhow = "1"
 axum = "0.7"
