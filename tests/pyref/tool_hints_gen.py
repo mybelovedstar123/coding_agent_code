@@ -67,3 +67,6 @@ def add_request(text, source):
         return
     seen.add(text)
     requests.append({"text": text, "source": source})
+
+
+catalogs = []
