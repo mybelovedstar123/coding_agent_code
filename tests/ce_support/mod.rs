@@ -18,3 +18,7 @@ pub fn load(name: &str) -> Value {
 pub fn s(v: &Value) -> &str {
     v.as_str().unwrap_or_else(|| panic!("not a string: {v}"))
 }
+
+pub fn strings(v: &Value) -> Vec<String> {
+    v.as_array().expect("array").iter().map(|x| s(x).to_string()).collect()
+}
