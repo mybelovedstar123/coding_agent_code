@@ -363,3 +363,21 @@ async fn parse_tool_args(raw: Option<&Value>, name: &str) -> (Map<String, Value>
     }
     (args, bad)
 }
+
+/// A no-tool final stage offers no tools; any call it still emits is recorded as blocked before execution
+/// (advisory), never dropped silently.
+async fn record_unexecuted_calls(trace: &mut CaseTrace, reply: &Reply) {
+    let Some(Value::Array(raw)) = reply.tool_calls() else {
+        return;
+    };
+    for tc in raw {
+        let f = tc.get("function").filter(|f| truthy(f)).filter(|f| f.is_object());
+        let (args, _bad) = parse_tool_args(f.and_then(|f| f.get("arguments")), "").await;
+        let name = f
+            .and_then(|f| f.get("name"))
+            .filter(|n| truthy(n))
+            .map(py::str_value)
+            .unwrap_or_default();
+        trace.block(&name, &args, "blocked_before_execution");
+    }
+}
