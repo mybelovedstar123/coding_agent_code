@@ -95,3 +95,9 @@ refusal state appears.
 - Tool calls: no call starts with less than 15 s left in the request budget
   (the model is told the call was not executed and to answer now), and a tool
   endpoint wait never extends past the request budget.
+- Failures: a request never fails because a dependency did. Embedding calls are
+  bounded by the request budget. When retrieval fails, the context keeps the
+  identifier and handle-channel records, which need no embedding; when an
+  evidence add-on fails, the request is answered without the memory context; a
+  failed memory tool returns an error result to the model. A malformed request
+  body is answered with HTTP 400.
