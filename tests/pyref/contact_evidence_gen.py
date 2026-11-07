@@ -86,3 +86,14 @@ def case(mem, category, q, context, spec=None):
         "pipeline": R.changed(context, pipeline(mem, q, context), full=True),
     }
     return out
+
+
+def fires(c):
+    return bool(
+        c["channel_records"]
+        or c["has_removal_instruction"]
+        or c["email_records"] and c["asks_owner_contact"]
+        or c["possessive_nicknames"]
+        or c["removed_handle_note"]
+        or "digest" in c["pipeline"]
+    )
