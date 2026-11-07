@@ -204,3 +204,14 @@ request names first), so records that only share a broader identifier (the
 same entity in another case file) are not pre-loaded. Every note that works
 from the request's identifier uses that same identifier.
 
+Companion records (`src/companions.rs`): a plan's later notes often name
+only the person it was made with ("When Sparky and I first mapped that trip
+out …"), not the plan itself. An identifier record or retrieval hit that shares
+a rare phrase with the request (two adjacent content words found in at most 2
+of the user's records) is an anchor; for each person the anchor names who also
+appears in a first-person joint mention ("<Name> and I"), the records carrying
+that joint mention and sharing a content word with the request are added in
+full, at most 4 per request, with the other pre-loaded records (oldest first).
+The index is built from the records once per user and rebuilt after any
+record changes. It reads only the request and the user's records.
+
