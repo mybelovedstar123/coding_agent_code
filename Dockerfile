@@ -13,3 +13,5 @@ RUN mkdir src \
     && cargo build --locked --release \
     && rm -rf src
 COPY src ./src
+RUN touch src/main.rs src/lib.rs && cargo build --locked --release --bin ditto-agent
+
