@@ -37,3 +37,4 @@ WANTS = [
     "wants_send_on_record",
     "wants_exact_value",
 ]
+CATALOG_NOTES = ["research_send_note", "effort_note", "tool_hint_note", "send_on_record_note"]
