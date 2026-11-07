@@ -265,3 +265,23 @@ def compare(a_path: str, b_path: str) -> int:
             else:
                 print(f"\n## {c}: responses differ\n  py: {json.dumps(ra['response'], ensure_ascii=False)[:400]}\n  rs: {json.dumps(rb.get('response'), ensure_ascii=False)[:400]}")
     return 1 if differ else 0
+
+
+def main() -> None:
+    p = argparse.ArgumentParser()
+    sub = p.add_subparsers(dest="cmd", required=True)
+    c = sub.add_parser("capture")
+    c.add_argument("--agent", choices=["py", "rs"], required=True)
+    c.add_argument("--dataset", required=True)
+    c.add_argument("--out", required=True)
+    c.add_argument("--limit", type=int, default=0)
+    c.add_argument("--fake-port", type=int, default=18801)
+    c.add_argument("--agent-port", type=int, default=18802)
+    k = sub.add_parser("compare")
+    k.add_argument("a")
+    k.add_argument("b")
+    args = p.parse_args()
+    if args.cmd == "capture":
+        asyncio.run(capture(args.agent, args.dataset, args.out, args.limit, args.fake_port, args.agent_port))
+    else:
+        sys.exit(compare(args.a, args.b))
