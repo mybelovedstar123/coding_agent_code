@@ -237,3 +237,7 @@ def main():
     print(f"edge: {len(e['cases'])} cases, {e_fire} firing, {len(e['shapes'])} context shapes", file=sys.stderr)
     path = R.write("contact_evidence", {"prefix": PREFIX, "datasets": datasets, "edge": e})
     print(f"wrote {path}: {total} dataset cases ({firing} firing)", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
