@@ -109,3 +109,7 @@ pub fn call_key(name: &str, args: &serde_json::Map<String, Value>) -> String {
     }
     format!("{name}\u{0}{}", py::dumps(&sorted(&Value::Object(args.clone())), false))
 }
+
+fn secs(x: f64) -> Duration {
+    Duration::from_secs_f64(x.max(0.0))
+}
