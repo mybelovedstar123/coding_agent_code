@@ -435,3 +435,9 @@ fn reply_text(reply: &Reply) -> String {
         _ => String::new(),
     }
 }
+
+impl Agent {
+    pub fn new(store: Arc<Store>, chat: Arc<dyn ChatClient>, http: reqwest::Client) -> Self {
+        Agent { store, chat, http }
+    }
+}
