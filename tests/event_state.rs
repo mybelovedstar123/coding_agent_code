@@ -17,3 +17,11 @@ fn s(v: &Value) -> &str {
 fn strings(v: &Value) -> Vec<String> {
     v.as_array().expect("array").iter().map(|x| s(x).to_string()).collect()
 }
+
+fn evs_value(evs: &[Event]) -> Value {
+    Value::Array(
+        evs.iter()
+            .map(|(st, op, e, f, v)| serde_json::json!([st.to_string(), op, e, f, v]))
+            .collect(),
+    )
+}
