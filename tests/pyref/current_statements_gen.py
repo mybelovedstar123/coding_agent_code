@@ -116,3 +116,12 @@ LIST_CASES = [
     ("No list here", "added stuff"),
     ("Kit: a, b", "a and b are on it"),
 ]
+
+
+def lists():
+    out = []
+    for earlier, change in LIST_CASES:
+        items = cs.list_items(earlier)
+        out.append({"earlier": earlier, "change": change, "list_items": items, "change_items": cs.list_items(change),
+                    "current_list": cs.current_list(items, change)})
+    return out
