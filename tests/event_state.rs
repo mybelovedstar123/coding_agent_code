@@ -13,3 +13,7 @@ fn fixture() -> Value {
 fn s(v: &Value) -> &str {
     v.as_str().expect("string")
 }
+
+fn strings(v: &Value) -> Vec<String> {
+    v.as_array().expect("array").iter().map(|x| s(x).to_string()).collect()
+}
