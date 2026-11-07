@@ -84,3 +84,33 @@ def add_call(source, context, ids, user_input, texts):
             "expected": event_state.with_event_state(context, PREFIX, ids, user_input, texts),
         }
     )
+
+
+# ------------------------------------------------------------------------------------------------- real datasets
+for path in DATASETS:
+    d = json.load(open(path, encoding="utf-8"))
+    mem = Mem()
+    batches = [w.get("pairs") or [] for w in d["memory_waves"] if w.get("user_id") == "miner"]
+    batches += [c.get("prerequisite_pairs") or [] for c in d["tool_cases"]]
+    for batch in batches:
+        for p in batch:
+            pid = str(p.get("pair_id") or "")
+            mem.pairs[pid] = Pair(
+                pair_id=pid,
+                session_id=str(p.get("session_id") or ""),
+                ts=store.parse_ts(p.get("timestamp")),
+                prompt=str(p.get("prompt") or ""),
+                response=str(p.get("response") or ""),
+            )
+    requests = [c["question"] for c in d["memory_cases"]] + [c["prompt"] for c in d["tool_cases"]]
+    for q in requests:
+        ident, records = request_identifier(mem, q)
+        if not ident:
+            continue
+        add_call(
+            os.path.basename(path),
+            context_for(records),
+            [p.pair_id for p in records],
+            q,
+            [p.prompt for p in records],
+        )
