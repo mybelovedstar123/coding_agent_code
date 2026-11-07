@@ -57,3 +57,4 @@ for name, text, doc in TEXTS:
     lines.append(f"/// {doc}")
     lines.append(f"pub const {name}: &str = {lit(text)};")
     lines.append("")
+out = Path(__file__).resolve().parents[2] / "src" / "prompts.rs"
