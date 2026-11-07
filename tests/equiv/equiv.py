@@ -146,3 +146,14 @@ class Fakes:
         if n % 13 == 0:
             return web.Response(status=422, text="unmatched emission")
         return web.json_response({"result": {"ok": True, "name": body.get("name"), "value": n % 1000, "note": "résultat"}})
+
+
+async def start_fakes(fakes: Fakes, port: int) -> web.AppRunner:
+    app = web.Application(client_max_size=256 * 1024 * 1024)
+    app.router.add_post("/v1/chat/completions", fakes.chat)
+    app.router.add_post("/api/embed", fakes.embed)
+    app.router.add_post("/tool", fakes.tool)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    await web.TCPSite(runner, "127.0.0.1", port).start()
+    return runner
