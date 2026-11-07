@@ -165,3 +165,11 @@ refusal state appears.
   of the exchange; a longer side keeps its head and tail and is marked as
   shortened (its complete text is available to `run_python`). The harness adds its own memory
   tool definitions only when the request carries no catalog at all.
+- `run_python` (when the request's catalog does not offer a tool of that name;
+  otherwise the catalog's tool is used and sent to the endpoint) is a
+  harness-local, resource-bounded interpreter for
+  model-authored programs over this user's records (W6): separate process,
+  clean environment, CPU/memory/file/process limits, import allowlist; it is
+  local execution, never sent to the endpoint, and reported in order with the
+  other executed calls (it does not consume an endpoint hop position).
+
