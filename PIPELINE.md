@@ -136,3 +136,6 @@ refusal state appears.
 - `hop` is the call's position: it advances for every call that was reported
   or may have crossed the endpoint boundary (not for not-delivered or blocked
   calls), and is the value sent to the endpoint; reported hops are unique.
+- A turn that ended with provider `finish_reason: "error"` is discarded and asked
+  again only when none of its tool calls is well formed; well-formed calls are
+  executed.
