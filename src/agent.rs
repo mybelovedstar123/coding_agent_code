@@ -440,4 +440,48 @@ impl Agent {
     pub fn new(store: Arc<Store>, chat: Arc<dyn ChatClient>, http: reqwest::Client) -> Self {
         Agent { store, chat, http }
     }
+
+    /// The final check (declared stage 3b) with the given note.
+    #[allow(clippy::too_many_arguments)]
+    async fn final_check_with_note(
+        &self,
+        skip: bool,
+        context: Option<&str>,
+        messages: &[Value],
+        final_text: &str,
+        trace: &mut CaseTrace,
+        case_id: &str,
+        base_url: Option<&str>,
+        deadline: Instant,
+        user_id: &str,
+        note: &str,
+    ) -> String {
+        if skip || py::strip(final_text).is_empty() || Instant::now() >= deadline - secs(30.0) {
+            return final_text.to_string();
+        }
+        let evidence = {
+            let mem = self.store.user(user_id);
+            let mem = mem.read().await;
+            complete_records_message(&mem, context)
+        };
+        let mut msgs = messages.to_vec();
+        msgs.extend(evidence);
+        msgs.push(json!({"role": "assistant", "content": final_text}));
+        msgs.push(json!({"role": "user", "content": note}));
+        let fin = match self
+            .chat
+            .complete(msgs, None, case_id, base_url, deadline - secs(10.0), None)
+            .await
+        {
+            Err(_) => return final_text.to_string(),
+            Ok(f) => f,
+        };
+        record_unexecuted_calls(trace, &fin).await;
+        trace.add_usage(&fin.usage);
+        let text = reply_text(&fin);
+        if py::strip(&text).is_empty() || ARTIFACT_RE.is_match(&text) || py::str_value(&fin.finish_reason) == "error" {
+            return final_text.to_string();
+        }
+        text
+    }
 }
