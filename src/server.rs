@@ -30,4 +30,11 @@ impl App {
         let chat: Arc<dyn ChatClient> = Arc::new(HttpChat::new(http.clone()));
         Self::with(embedder, chat, http)
     }
+
+    /// Wiring with injected dependencies (tests and the equivalence harness use fakes).
+    pub fn with(embedder: Arc<dyn Embed>, chat: Arc<dyn ChatClient>, http: reqwest::Client) -> Self {
+        let store = Arc::new(Store::new(embedder));
+        let agent = Arc::new(Agent::new(store.clone(), chat, http));
+        App { store, agent }
+    }
 }
