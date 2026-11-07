@@ -107,3 +107,45 @@ fn constants_and_rules_match() {
         assert_eq!(*text, s(&extra[*tool]), "{tool}");
     }
 }
+
+#[test]
+fn triggers_match() {
+    let fx = fixture();
+    let reqs = fx["requests"].as_array().unwrap();
+    let mut differ = Vec::new();
+    for r in reqs {
+        let text = s(&r["text"]);
+        for (name, f) in WANTS {
+            if effort_widened(text, name) && f(text) && !r[*name].as_bool().unwrap() {
+                continue;
+            }
+            if f(text) != r[*name].as_bool().unwrap() {
+                differ.push(format!("{name}({text:?}) = {}", f(text)));
+            }
+        }
+        for (name, f) in PLAIN {
+            assert_eq!(f(text), s(&r[*name]), "{name}({text:?})");
+        }
+        let words: Vec<String> = r["words"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|w| s(w).to_string())
+            .collect();
+        assert_eq!(th::_words(text), words, "_words({text:?})");
+        let nums: Vec<String> = r["numbers"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|w| s(w).to_string())
+            .collect();
+        assert_eq!(th::NUMBER_RE.findall(text), nums, "NUMBER_RE({text:?})");
+    }
+    assert!(
+        differ.is_empty(),
+        "{} triggers differ:\n{}",
+        differ.len(),
+        differ.join("\n")
+    );
+    assert!(reqs.len() > 1000);
+}
