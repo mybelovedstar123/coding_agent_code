@@ -22,3 +22,26 @@ pub fn s(v: &Value) -> &str {
 pub fn strings(v: &Value) -> Vec<String> {
     v.as_array().expect("array").iter().map(|x| s(x).to_string()).collect()
 }
+
+/// A UserMemory holding the fixture records in upsert order (dummy vectors), with each timestamp checked against
+/// the Python `fmt_ts(parse_ts(...))`.
+pub fn memory(user_id: &str, records: &Value) -> UserMemory {
+    let mut mem = UserMemory::new(user_id);
+    let mut pairs = Vec::new();
+    for r in records.as_array().expect("records") {
+        let ts = parse_ts(r.get("timestamp"));
+        assert_eq!(fmt_ts(&ts), s(&r["fmt_ts"]), "timestamp {:?}", r["timestamp"]);
+        pairs.push(Pair {
+            pair_id: s(&r["pair_id"]).into(),
+            session_id: s(&r["session_id"]).into(),
+            ts,
+            prompt: s(&r["prompt"]).into(),
+            response: s(&r["response"]).into(),
+            source: "seed".into(),
+            subjects: BTreeSet::new(),
+        });
+    }
+    let vecs = vec![vec![0.0f32; 768]; pairs.len()];
+    mem.upsert_pairs(pairs, vecs);
+    mem
+}
