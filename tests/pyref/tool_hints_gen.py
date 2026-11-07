@@ -39,3 +39,21 @@ WANTS = [
 ]
 CATALOG_NOTES = ["research_send_note", "effort_note", "tool_hint_note", "send_on_record_note"]
 PLAIN_NOTES = ["exact_value_note", "preference_note"]
+
+
+def tool_defs_for(catalog):
+    wire = [t for t in catalog if isinstance(t, dict) and t.get("name")]
+    defs = [
+        {
+            "type": "function",
+            "function": {
+                "name": t["name"],
+                "description": t.get("description", ""),
+                "parameters": t.get("parameters") or {"type": "object", "properties": {}},
+            },
+        }
+        for t in wire
+    ]
+    if pytool.TOOL_NAME not in {t["name"] for t in wire}:
+        defs.append(pytool.DEFINITION)
+    return defs
