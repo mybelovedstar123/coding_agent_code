@@ -174,3 +174,9 @@ impl CaseTrace {
             .push(json!({"name": name, "args": Value::Object(args.clone()), "state": state}));
     }
 }
+
+pub struct Agent {
+    pub store: Arc<Store>,
+    pub chat: Arc<dyn ChatClient>,
+    pub http: reqwest::Client,
+}
