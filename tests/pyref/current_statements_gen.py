@@ -22,3 +22,4 @@ import ce_records as R  # noqa: E402
 from harness import current_statements as cs  # noqa: E402
 
 PREFIX = R.PREFIX
+SWEEP_MAX = 40
