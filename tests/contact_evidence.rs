@@ -46,3 +46,11 @@ fn pipeline(mem: &UserMemory, q: &str, mut context: Option<String>) -> Option<St
 fn sorted(set: BTreeSet<String>) -> Vec<String> {
     set.into_iter().collect()
 }
+
+fn named_map(v: &Value) -> IndexMap<String, String> {
+    v.as_array()
+        .expect("pairs")
+        .iter()
+        .map(|kv| (s(&kv[0]).to_string(), s(&kv[1]).to_string()))
+        .collect()
+}
