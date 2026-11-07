@@ -38,3 +38,9 @@ impl App {
         App { store, agent }
     }
 }
+
+impl Default for App {
+    fn default() -> Self {
+        Self::new()
+    }
+}
