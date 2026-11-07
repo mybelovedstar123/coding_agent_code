@@ -285,3 +285,7 @@ def main() -> None:
         asyncio.run(capture(args.agent, args.dataset, args.out, args.limit, args.fake_port, args.agent_port))
     else:
         sys.exit(compare(args.a, args.b))
+
+
+if __name__ == "__main__":
+    main()
