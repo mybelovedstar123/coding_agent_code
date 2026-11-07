@@ -420,3 +420,11 @@ fn complete_records_message(mem: &UserMemory, context: Option<&str>) -> Option<V
         json!({"role": "system", "content": format!("{}\n{}", config::MEMORY_CONTEXT_PREFIX, py::dumps(&body, false))}),
     )
 }
+
+/// `FINAL_CHECK_TWO_DRAFTS_NOTE.format(a=..., b=...)`: both fields filled in one pass, so braces inside a draft stay
+/// as written.
+fn fill_two_drafts(a: &str, b: &str) -> String {
+    let (head, rest) = FINAL_CHECK_TWO_DRAFTS_NOTE.split_once("{a}").expect("{a} in the note");
+    let (mid, tail) = rest.split_once("{b}").expect("{b} in the note");
+    format!("{head}{a}{mid}{b}{tail}")
+}
