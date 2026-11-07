@@ -94,3 +94,24 @@ fn sentence_split() {
     }
     report("sentences", total, &bad);
 }
+
+#[test]
+fn holder_questions() {
+    let cases = FIXTURE["holder_requests"].as_array().expect("cases");
+    let mut bad = Vec::new();
+    for c in cases {
+        let r = s(&c["request"]);
+        let got = json!({
+            "asks_holder": o::asks_holder(r),
+            "lower_grams": sorted(&o::lower_grams(r)),
+        });
+        let want = json!({
+            "asks_holder": c["asks_holder"],
+            "lower_grams": c["lower_grams"],
+        });
+        if got != want {
+            bad.push(format!("{r:?}: want {want} got {got}"));
+        }
+    }
+    report("holder_requests", cases.len(), &bad);
+}
