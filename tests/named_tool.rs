@@ -10,3 +10,14 @@ fn catalog(names: &[&str]) -> Vec<Value> {
         .map(|n| json!({"type": "function", "function": {"name": n, "description": "", "parameters": {}}}))
         .collect()
 }
+
+#[test]
+fn a_named_tool_gets_the_note() {
+    let tools = catalog(&["search_web", "lamuket_focus_timer", "set_theme"]);
+    let note = named_tool_note(
+        "Begin a Lamuket focus session for the Flybe lattice and report the exact value in the confirmation.",
+        &tools,
+    );
+    assert!(note.contains("lamuket_focus_timer"), "{note}");
+    assert!(note.contains("do not ask the user for them first"), "{note}");
+}
