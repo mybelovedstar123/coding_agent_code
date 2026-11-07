@@ -92,3 +92,6 @@ refusal state appears.
   retried (up to 8 attempts, with backoff) only on transport failures, HTTP
   408/409/425/429/5xx-gateway statuses, or an HTTP 200 body that carries an
   `error` field or no usable choice; it never retries a valid completion.
+- Tool calls: no call starts with less than 15 s left in the request budget
+  (the model is told the call was not executed and to answer now), and a tool
+  endpoint wait never extends past the request budget.
