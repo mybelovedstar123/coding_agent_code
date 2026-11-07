@@ -6,3 +6,9 @@
 FROM rust:1-trixie@sha256:1bcff4befb740599103a2c7cb51058e14479b2e35e3a34a3f0dc4ede09927488 AS builder
 WORKDIR /app
 COPY Cargo.toml Cargo.lock ./
+# Compile the locked dependency graph before copying the source, so a source change reuses this layer.
+RUN mkdir src \
+    && printf 'fn main() {}\n' > src/main.rs \
+    && printf '\n' > src/lib.rs \
+    && cargo build --locked --release \
+    && rm -rf src
