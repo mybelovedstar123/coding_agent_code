@@ -146,3 +146,22 @@ refusal state appears.
   every allowed call the model issues is executed.
 - Every executed call is reported in order with its model-authored name and
   arguments.
+- Memory read tools (as named in the request catalog) answer from this user's
+  seeded store held by the harness (local execution, always reported as
+  completed). Each call is also sent to the tool endpoint so the validator
+  observes the model's complete trajectory, including its memory reads; the
+  endpoint does not serve memory tools and answers with a "not available"
+  error (PROTOCOL.md), which is not shown to the model. The model receives only
+  the local store's result. `save_memory` is an endpoint-served action: it is
+  applied to the local store only when the endpoint returned a result (the
+  saved note's id derives from its content and it is filed one second after
+  the user's latest record, so no clock or random value reaches the model); it is
+  reported when the endpoint executed it (result or the tool's own error).
+  When the request supplies no tool endpoint, memory tools (including
+  `save_memory`) run only against the local store and are reported as
+  completed local executions; any other catalog call is blocked before
+  execution.
+  `fetch_memories` returns each record in full up to 60,000 characters per side
+  of the exchange; a longer side keeps its head and tail and is marked as
+  shortened (its complete text is available to `run_python`). The harness adds its own memory
+  tool definitions only when the request carries no catalog at all.
