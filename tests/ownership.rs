@@ -24,3 +24,11 @@ fn opt(v: &Value) -> Option<String> {
 fn strings(v: &Value) -> Vec<String> {
     v.as_array().expect("array").iter().map(|x| s(x).to_string()).collect()
 }
+
+fn chain_of(v: &Value) -> Vec<(String, String)> {
+    v.as_array()
+        .expect("chain")
+        .iter()
+        .map(|x| (s(&x[0]).to_string(), s(&x[1]).to_string()))
+        .collect()
+}
