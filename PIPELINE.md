@@ -291,3 +291,10 @@ line: after the lookup, apply the listed option closest to what they wrote
 (swapped, doubled or missing letters; a variant word belongs to the option),
 and do not stop because the exact spelling is not listed.
 
+Exact-value requests (tool path, in addition to the notes above): when the request asks for
+the exact or precise value, figure, number, reading, amount, result or code (a typo-tolerant
+word match on the request only), the system prompt gets one line: a tool's result can mention
+more than one item, each with its own value; report the value the result gives for the item the
+user named, copied exactly as written, and leave out the other items and their values. It names
+no item or value; the model reads the result and writes the reply.
+
