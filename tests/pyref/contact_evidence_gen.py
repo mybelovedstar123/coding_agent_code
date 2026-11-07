@@ -141,3 +141,23 @@ EDGE_QUESTIONS = [
     "The accountable person — what is their email?",
     "Whoever has it: send me the address.",
 ]
+EDGE_CONTEXTS = [
+    None,
+    "",
+    "no newline here",
+    PREFIX + "\n{not json",
+    PREFIX + "\n" + '{"note": "n", "memories": []}',
+    PREFIX + "\n" + '{"memories": [{"pairID": "e06", "timestamp": "2025-01-07T09:00:00Z", "text": "User: Bart is the owner."}]}',
+    PREFIX + "\n" + '{"note": null, "memories": null, "extra": [1, 2.50, 1e5, -0.0, 12345678901234567890, true]}',
+    PREFIX + "\n" + '{"note": 3, "memories": [{"pairID": "zz", "text": "Dana Whitfield holds it", "timestamp": 7}, {"text": "Ollie has it"}]}',
+    PREFIX + "\n" + '{"note": "  padded  ", "memories": [{"pairID": "e02", "timestamp": "2025-01-03T09:00:00Z", "text": "é — Liv owns it"}], "note2": "x"}',
+    PREFIX + "\n" + '{"memories": "abc"}',
+    PREFIX + "\n" + '{"memories": [1, {"pairID": "a"}]}',
+    PREFIX + "\n" + '{"memories": {"k": 1}}',
+    PREFIX + "\n" + '{"memories": 5}',
+    PREFIX + "\n" + '[1, 2]',
+    PREFIX + "\n" + '"just a string"',
+    PREFIX + "\n" + '{"note": "dup", "note": "dup2", "memories": [{"pairID": null, "timestamp": null, "text": ""}]}',
+    PREFIX + "\n" + '{"memories": [{"pairID": "b", "timestamp": "2025-01-02"}, {"pairID": "a", "timestamp": "2025-01-02"}]}',
+    "  \n" + '{"note": "x"}',
+]
