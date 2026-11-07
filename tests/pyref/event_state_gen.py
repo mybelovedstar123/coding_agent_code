@@ -65,3 +65,22 @@ def add_texts(texts):
             "from_markdown": evs_out(event_state.from_markdown(t)),
             "from_sentences": evs_out(event_state.from_sentences(t)),
         }
+
+
+def add_call(source, context, ids, user_input, texts):
+    add_texts(texts)
+    evs = event_state.events(texts)
+    step = event_state.requested_step(user_input, evs) if evs else None
+    calls.append(
+        {
+            "source": source,
+            "context": context,
+            "ids": ids,
+            "user_input": user_input,
+            "texts": texts,
+            "events": evs_out(evs),
+            "requested_step": None if step is None else str(step),
+            "state_at": None if step is None else json.dumps(event_state.state_at(evs, step), ensure_ascii=False),
+            "expected": event_state.with_event_state(context, PREFIX, ids, user_input, texts),
+        }
+    )
