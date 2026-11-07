@@ -44,3 +44,12 @@ def lit(s: str) -> str:
         else:
             out.append(ch)
     return '"' + "".join(out) + '"'
+
+
+lines = [
+    "//! Every prompt and note the agent sends, as literal constants (rule R8: one module, no assembly by replacement).",
+    "//!",
+    "//! Generated from the Python reference by `tests/pyref/gen_prompts.py`; regenerate rather than edit, so the texts",
+    "//! stay byte-identical to the reference.",
+    "",
+]
