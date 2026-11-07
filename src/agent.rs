@@ -484,4 +484,42 @@ impl Agent {
         }
         text
     }
+
+    /// An independent no-tool draft over the same transcript and evidence (it does not see the loop's reply). Empty on
+    /// failure or a transport artefact.
+    #[allow(clippy::too_many_arguments)]
+    async fn second_draft(
+        &self,
+        messages: &[Value],
+        context: Option<&str>,
+        user_id: &str,
+        trace: &mut CaseTrace,
+        case_id: &str,
+        base_url: Option<&str>,
+        deadline: Instant,
+    ) -> String {
+        let evidence = {
+            let mem = self.store.user(user_id);
+            let mem = mem.read().await;
+            complete_records_message(&mem, context)
+        };
+        let mut msgs = messages.to_vec();
+        msgs.extend(evidence);
+        msgs.push(json!({"role": "user", "content": SECOND_DRAFT_NOTE}));
+        let out = match self
+            .chat
+            .complete(msgs, None, case_id, base_url, deadline - secs(40.0), None)
+            .await
+        {
+            Err(_) => return String::new(),
+            Ok(o) => o,
+        };
+        record_unexecuted_calls(trace, &out).await;
+        trace.add_usage(&out.usage);
+        let text = reply_text(&out);
+        if py::strip(&text).is_empty() || ARTIFACT_RE.is_match(&text) || py::str_value(&out.finish_reason) == "error" {
+            return String::new();
+        }
+        text
+    }
 }
