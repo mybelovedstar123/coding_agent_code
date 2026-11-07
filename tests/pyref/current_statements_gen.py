@@ -105,3 +105,14 @@ def phrases(rng, statements):
         cue = rng.choice(cues)
         out.append({"low": low, "cue": cue, "value": cs.has_phrase(low, cue)})
     return out
+
+
+LIST_CASES = [
+    ("Shopping list: milk, eggs, bread and butter.", "Revised list — eggs is off it, cheese is on it."),
+    ("Packing needs: tent, stove, rope", "Update: added a lantern and the stove is gone"),
+    ("Guests — Ann, Bob, Cy, Di", "Changed my mind: plus some Eve. Bob no longer coming"),
+    ("Menu wants: soup, salad and pie.", "now serving the cake, salad dropped."),
+    ("Agenda: budget, hiring, roadmap.", "update — roadmap is on it, budget is on it"),
+    ("No list here", "added stuff"),
+    ("Kit: a, b", "a and b are on it"),
+]
