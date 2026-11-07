@@ -14,3 +14,14 @@ fn same_tool_and_arguments_is_the_same_call() {
     let b = call_key("set_theme", &args(json!({"scope": {"a": 2, "b": 1}, "theme": "dark"})));
     assert_eq!(a, b, "key order must not matter");
 }
+
+#[test]
+fn different_arguments_or_tool_are_different_calls() {
+    let base = call_key("search_web", &args(json!({"query": "ferry times"})));
+    assert_ne!(base, call_key("search_web", &args(json!({"query": "ferry prices"}))));
+    assert_ne!(base, call_key("search_news", &args(json!({"query": "ferry times"}))));
+    assert_ne!(
+        base,
+        call_key("search_web", &args(json!({"query": "ferry times", "limit": 5})))
+    );
+}
