@@ -58,3 +58,21 @@ def request_identifier(pairs, user_input):
         if found and (not best[1] or len(found) < len(best[1])):
             best = (ident, found)
     return best[0], sorted(best[1], key=store.content_key)
+
+
+def case(items, ident, table):
+    """One copies_note case; the items' records go into `table` (pairID -> [timestamp text, isoformat, prompt])."""
+    for pid, stamp, ts, prompt in items:
+        table[pid] = [stamp, ts.isoformat(), prompt]
+    tup = [(pid, stamp, ts, prompt) for pid, stamp, ts, prompt in items]
+    sets = ro.copy_sets(tup, ident)
+    re_sets = ro.reordered_sets(tup, ident)
+    return {
+        "ident": ident,
+        "items": [pid for pid, _, _, _ in items],
+        "statements": [ro.statement(prompt, ident) for _, _, _, prompt in items],
+        "words": [sorted(ro.words(ro.statement(prompt, ident))) for _, _, _, prompt in items],
+        "copy_sets": [[pid for pid, _, _ in s] for s in sets],
+        "reordered_sets": [[pid for pid, _, _ in s] for s in re_sets],
+        "note": ro.copies_note(tup, ident),
+    }
