@@ -406,3 +406,7 @@ note says that a table record has `rows` keyed by its own header (column order
 differs between records), that the full text is in `text` (the data is on the
 user's side, also `user`), and names `extract_json` and `grep_records`.
 
+The program tool's `records(ids)` returns, per record, `id`, `timestamp`,
+`user`, `ditto`, and also `pairID` and `text` exactly as the memory context
+shows the record.
+
