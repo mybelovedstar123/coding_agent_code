@@ -316,3 +316,9 @@ with their email from the records), do both, and state the figure sent and to
 whom. Questions about an address, and requests to send an update, do not trigger
 it. The note is advisory and names no value; the model makes every call.
 
+Own-appearance questions (both paths): when the request asks which accent,
+colour, font, typeface or mode is right for the user's own Ditto workspace or
+interface (a question, not a task to set, change or verify it), the system
+prompt gets one line saying the user's own stored preference for that setting
+is in their records and to write the value as the records spell it.
+
