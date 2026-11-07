@@ -126,3 +126,38 @@ HOLDER_TEMPLATES = [
     "Who is the internal owner of the {p}?",
     "Who is the intrnal lead on {p} now?",
 ]
+
+
+def synth_requests(pairs, n):
+    """Holder questions about lower-case phrases of the records' handover sentences."""
+    grams = []
+    for p in pairs.values():
+        for s in ownership.SENT.split(p.prompt):
+            if not (ownership.OWNERSHIP.search(s) and ownership.PERSON.search(s)):
+                continue
+            toks = ownership.tokens(s)
+            for m in (2, 3, 4):
+                for i in range(len(toks) - m + 1):
+                    g = toks[i : i + m]
+                    if g[0] in ownership.STOP or g[-1] in ownership.STOP:
+                        continue
+                    if sum(w not in ownership.STOP for w in g) < 2:
+                        continue
+                    grams.append(" ".join(g))
+    grams = sorted(set(grams))
+    rng.shuffle(grams)
+    out = []
+    for g in grams[:n]:
+        t = rng.choice(HOLDER_TEMPLATES)
+        h = rng.choice(["holding", "responsible", "running", "accountable", "owner"])
+        if rng.random() < 0.4:
+            h = typo(h)
+        w = rng.choice(["whose", "whos", "whoes", "who owns", "who holds", "who runs", "wose"])
+        p = g
+        if rng.random() < 0.25:
+            ws = g.split()
+            j = rng.randrange(len(ws))
+            ws[j] = typo(ws[j])
+            p = " ".join(ws)
+        out.append(t.format(p=p, h=h, w=w))
+    return out
