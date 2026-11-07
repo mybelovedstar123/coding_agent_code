@@ -19,3 +19,4 @@ sys.path.insert(0, "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-
 from harness import record_order as ro, store  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(HERE, "..", "fixtures", "record_order.json")
