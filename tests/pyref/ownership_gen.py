@@ -27,3 +27,4 @@ rng = random.Random(118)
 # the request has no identifier records), and best_chain over their long event-history records is slow in Python;
 # only a sample of them is run through best_chain.
 IDENT_RE = re.compile(r"\b(?=[A-Za-z0-9-]*\d)(?=[A-Za-z0-9-]*[A-Za-z])[A-Za-z0-9][A-Za-z0-9-]{7,}\b")
+IDENT_SAMPLE = 6
