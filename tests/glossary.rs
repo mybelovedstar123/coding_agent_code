@@ -24,3 +24,50 @@ fn items(mem: Option<&UserMemory>, v: &Value) -> Vec<(String, String)> {
         })
         .collect()
 }
+
+fn run_case(mem: Option<&UserMemory>, c: &Value) -> Vec<String> {
+    let ident = s(&c["ident"]);
+    let items = items(mem, &c["items"]);
+    let ctx = match mem {
+        Some(m) => context(m, c),
+        None => c["context"].as_str().map(String::from),
+    };
+    let mut bad = Vec::new();
+    let statements: Vec<String> = items.iter().map(|(_, p)| g::statement(p, ident)).collect();
+    if digest(Some(&statements.join("\0"))) != c["statements_digest"] {
+        bad.push(format!("statements digest: {statements:?}"));
+    }
+    let defs: Vec<Value> = statements
+        .iter()
+        .enumerate()
+        .filter_map(|(i, st)| {
+            let d = g::definitions(st);
+            (!d.is_empty()).then(|| json!([i, pairs_json(&d)]))
+        })
+        .collect();
+    if Value::from(defs.clone()) != c["definitions"] {
+        bad.push(format!(
+            "definitions: want {} got {}",
+            c["definitions"],
+            Value::from(defs)
+        ));
+    }
+    let terms = g::glossary(&items, ident);
+    if pairs_json(&terms) != c["glossary"] {
+        bad.push(format!("glossary: want {} got {}", c["glossary"], pairs_json(&terms)));
+    }
+    let glossed = Value::from(g::glossed_statements(&items, ident, &terms));
+    if glossed != c["glossed_statements"] {
+        bad.push(format!(
+            "glossed_statements: want {} got {glossed}",
+            c["glossed_statements"]
+        ));
+    }
+    let out = g::with_glossary(ctx.clone(), PREFIX, &items, ident);
+    if let Some(err) = check_step(ctx.as_deref(), out.as_deref(), &c["with_glossary"]) {
+        bad.push(format!("with_glossary: {err}"));
+    }
+    bad.into_iter()
+        .map(|b| format!("{ident} {:?}: {b}", c.get("question")))
+        .collect()
+}
