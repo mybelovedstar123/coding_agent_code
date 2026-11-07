@@ -45,3 +45,4 @@ static IDENT_RE: LazyLock<Re> =
 pub const PROGRAM_HISTORY_CHARS: usize = 15_000;
 pub const TOOL_ATTEMPTS: usize = 3;
 pub const NOT_DELIVERED: &str = "tool call not delivered (not executed)";
+pub const OUTCOME_UNKNOWN: &str = "outcome unknown";
