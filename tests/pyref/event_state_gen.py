@@ -255,3 +255,4 @@ contexts = [
 for c in contexts:
     add_call("edge-context", c, ids, "state at step 2", mixed)
 add_call("edge-few", base_ctx, ids, "state at step 2", [HEAD + "\n" + rows_json(9)])
+add_call("edge-ten", base_ctx, ["only"], "", [HEAD + "\n" + rows_json(10)])
