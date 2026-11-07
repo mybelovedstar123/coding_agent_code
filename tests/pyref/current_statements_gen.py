@@ -23,3 +23,4 @@ from harness import current_statements as cs  # noqa: E402
 
 PREFIX = R.PREFIX
 SWEEP_MAX = 40
+MINIMAL = PREFIX + "\n" + '{"note": "Stored records.", "memories": []}'
