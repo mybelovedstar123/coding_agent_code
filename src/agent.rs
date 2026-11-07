@@ -67,3 +67,6 @@ const COMPLETE_RECORDS_NOTE: &str =
 pub fn repeat_exempt(name: &str) -> bool {
     memtools::is_read_tool(name) || name.starts_with("read_") || name.starts_with("fetch_")
 }
+
+/// The user asks for something to be done again: identical calls are then allowed.
+static REPEAT_REQUEST_RE: LazyLock<Re> = LazyLock::new(|| Re::new(r"(?i)\b(again|another|once more|repeat\w*)\b"));
