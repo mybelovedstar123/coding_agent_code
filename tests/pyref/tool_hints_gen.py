@@ -38,3 +38,4 @@ WANTS = [
     "wants_exact_value",
 ]
 CATALOG_NOTES = ["research_send_note", "effort_note", "tool_hint_note", "send_on_record_note"]
+PLAIN_NOTES = ["exact_value_note", "preference_note"]
