@@ -270,3 +270,8 @@ words = sorted({w for r in requests for w in tool_hints._words(r["text"])})
 targets = ["exact", "precise", "value", "figure", "calendar", "workflow", "background", "recurring", "send", "reading"]
 ratio_pairs = [[w, t] for w in words for t in targets if len(w) >= 3 and w[0] == t[0]]
 alphabet = "abcde"
+for n in (5, 50, 199, 200, 201, 250, 400):
+    for _ in range(3):
+        a = "".join(rng.choice(alphabet) for _ in range(rng.randint(1, n)))
+        b = "".join(rng.choice(alphabet) for _ in range(n))
+        ratio_pairs.append([a, b])
