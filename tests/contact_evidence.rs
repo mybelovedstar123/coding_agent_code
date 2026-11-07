@@ -147,3 +147,19 @@ fn fires(c: &Value) -> bool {
         || c["removed_handle_note"] != ""
         || c["pipeline"].get("digest").is_some()
 }
+
+fn run_cases(mem: &UserMemory, cases: &[Value], label: &str) -> (usize, usize) {
+    let mut failures = Vec::new();
+    for c in cases {
+        for err in run_case(mem, c) {
+            failures.push(format!("[{label}] {:?}: {err}", c["question"]));
+        }
+    }
+    assert!(
+        failures.is_empty(),
+        "{} mismatches:\n{}",
+        failures.len(),
+        failures[..failures.len().min(20)].join("\n")
+    );
+    (cases.len(), cases.iter().filter(|c| fires(c)).count())
+}
