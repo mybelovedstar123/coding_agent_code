@@ -227,3 +227,49 @@ def sm_cases(pairs, requests):
     out += [("", ""), ("", "a"), ("a", ""), ("abc", "abc"), ("é—x", "e—x"), ("😀a", "a😀"), ("owner", "owners")]
     out += [(w, h) for w in HOLDERISH for h in ownership.HOLDER_WORDS + ("whose", "internal", "internally")]
     return [[a, b, difflib.SequenceMatcher(None, a, b).ratio()] for a, b in out]
+
+
+def holder_chains(pairs, idx):
+    """Synthetic chains from the records' handover sentences (1-4 sentences each), plus crafted takeover lines."""
+    sents = []
+    for p in pairs.values():
+        for s in ownership.SENT.split(p.prompt):
+            if ownership.OWNERSHIP.search(s) and ownership.PERSON.search(s):
+                sents.append(s.strip())
+    crafted = [
+        "Northwind Logistics took over the deliveries from Harbor Freight after the delay.",
+        "Maya Chen took over the bakery fit-out from Tom Reyes in March.",
+        "Tom Reyes handed the bakery fit-out to Maya Chen.",
+        "The fit-out passed quietly to Lena Ortiz, who now owns it.",
+        "Status: Lena Ortiz to Paul Gray for the fit-out.",
+        "It is Paul Gray's now, the fit-out.",
+        "With Anna Bell in charge of the fit-out, things moved.",
+        "The ball is with Anna Bell on the fit-out.",
+        "Bright Studios picked up the fit-out.",
+        "Paul Gray has taken over the fit-out from Bright Studios.",
+        "Mark O'Neil is the one accountable for the fit-out now.",
+        "Jean-Luc Picard now runs the fit-out; Anna Bell stepped back.",
+    ]
+    sents += crafted
+    out = []
+    for _ in range(600):
+        k = rng.randrange(1, 5)
+        chain = [["2025-01-0%dT00:00:00Z" % (i + 1), rng.choice(sents)] for i in range(k)]
+        out.append(chain)
+    for i in range(len(crafted)):
+        for j in range(len(crafted)):
+            out.append([["t1", crafted[i]], ["t2", crafted[j]]])
+    orgs_sets = [sorted(idx.orgs), ["Maya Chen", "Paul Gray"], []]
+    res = []
+    for ch in out:
+        orgs = rng.choice(orgs_sets)
+        tup = [(a, b) for a, b in ch]
+        res.append(
+            {
+                "chain": ch,
+                "orgs": orgs,
+                "holder_now": ownership.holder_now(tup, set(orgs)),
+                "first_named_holder": ownership.first_named_holder(tup),
+            }
+        )
+    return res
