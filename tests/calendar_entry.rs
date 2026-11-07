@@ -35,3 +35,10 @@ fn named_calendar_requests_fire() {
         assert_eq!(th::calendar_entry_note(text, &tools), th::CALENDAR_ENTRY_NOTE);
     }
 }
+
+#[test]
+fn other_requests_do_not_fire() {
+    for text in OTHER {
+        assert!(!th::wants_named_calendar_entry(text), "should not fire: {text}");
+    }
+}
