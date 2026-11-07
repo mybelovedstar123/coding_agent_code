@@ -48,3 +48,6 @@ def context_for(records, note=NOTE):
         "memories": [{"pairID": p.pair_id, "timestamp": fmt_ts(p.ts), "text": render_pair(p)} for p in records],
     }
     return PREFIX + "\n" + json.dumps(payload, ensure_ascii=False)
+
+
+texts_seen = {}
