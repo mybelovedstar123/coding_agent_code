@@ -34,3 +34,8 @@ from aiohttp import web, ClientSession, ClientTimeout
 PY_REF = "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent"
 RS_BIN = os.path.expanduser("~/.cache/ditto-agent-target/release/ditto-agent")
 DIM = 768
+
+
+def h(*parts) -> int:
+    d = hashlib.sha256(json.dumps(parts, sort_keys=True, ensure_ascii=False).encode()).digest()
+    return int.from_bytes(d[:8], "big")
