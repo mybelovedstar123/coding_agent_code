@@ -46,3 +46,10 @@ fn other_requests_do_not_fire() {
         assert!(!th::wants_agreed_start(text), "should not fire: {text}");
     }
 }
+
+#[test]
+fn needs_the_workflow_tools() {
+    let text = AGREED[0];
+    assert_eq!(th::agreed_start_note(text, &catalog(&["run_workflow"])), "");
+    assert_eq!(th::agreed_start_note(text, &catalog(&["list_workflows"])), "");
+}
