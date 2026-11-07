@@ -26,3 +26,5 @@ TEXTS = [
     ("PROGRAM_RECORDS_NOTE", agent.PROGRAM_RECORDS_NOTE, "Long identifier event histories: how to read them with run_python."),
     ("REPEAT_NOTE", agent.REPEAT_NOTE, "A repeated call to a tool that already returned a result ({name} is filled in)."),
 ]
+
+BACKSLASH = chr(92)
