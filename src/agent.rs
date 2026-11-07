@@ -123,3 +123,18 @@ struct Call {
     args: Map<String, Value>,
     hop: i64,
 }
+
+#[derive(Default)]
+struct CaseTrace {
+    calls: Vec<Call>,
+    /// Rendered results, for id validation of memory reads.
+    tool_results: Vec<String>,
+    prompt_tokens: i64,
+    output_tokens: i64,
+    /// Advisory record of model-selected calls that did not complete (protocol blocked_tool_calls).
+    blocked: Vec<Value>,
+    /// Position of the next call that may cross the endpoint boundary.
+    next_hop: i64,
+    /// Call key (tool name and sorted arguments, see `call_key`) -> calls that completed without an error.
+    completed: HashMap<String, i64>,
+}
