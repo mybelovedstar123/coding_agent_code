@@ -105,3 +105,33 @@ fn with_event_state_matches() {
     }
     assert!(calls.len() > 200 && fired >= 50, "{} calls, {fired} fired", calls.len());
 }
+
+#[test]
+fn py_int_orders_like_python() {
+    let mut v: Vec<PyInt> = [
+        "5",
+        "-3",
+        "0",
+        "123456789012345678901234567890",
+        "-123456789012345678901234567891",
+        "10",
+    ]
+    .iter()
+    .map(|x| PyInt::parse(x).unwrap())
+    .collect();
+    v.sort();
+    let got: Vec<String> = v.iter().map(|x| x.to_string()).collect();
+    assert_eq!(
+        got,
+        [
+            "-123456789012345678901234567891",
+            "-3",
+            "0",
+            "5",
+            "10",
+            "123456789012345678901234567890"
+        ]
+    );
+    assert_eq!(PyInt::parse(" \u{0663}_0 ").unwrap().to_string(), "30");
+    assert!(PyInt::parse("1__0").is_none() && PyInt::parse("_1").is_none() && PyInt::parse("").is_none());
+}
