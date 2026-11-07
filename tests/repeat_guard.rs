@@ -25,3 +25,23 @@ fn different_arguments_or_tool_are_different_calls() {
         call_key("search_web", &args(json!({"query": "ferry times", "limit": 5})))
     );
 }
+
+#[test]
+fn repeat_requests_are_recognised() {
+    for text in [
+        "Run it again please.",
+        "Generate another image of the harbour.",
+        "Send that once more.",
+        "Repeat the last search.",
+        "Could you repeating the export",
+    ] {
+        assert!(asks_to_repeat(text), "should ask to repeat: {text}");
+    }
+    for text in [
+        "Set my theme to dark.",
+        "What is the weather in Lisbon?",
+        "Remind me about Ana's agenda.",
+    ] {
+        assert!(!asks_to_repeat(text), "should not ask to repeat: {text}");
+    }
+}
