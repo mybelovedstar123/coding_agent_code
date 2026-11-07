@@ -94,3 +94,19 @@ async fn seed(State(app): State<App>, body: axum::body::Bytes) -> Response {
     }
     Json(json!({"pairs": py_len(&pairs), "subjects": py_len(&subjects), "links": py_len(&links)})).into_response()
 }
+
+async fn run(State(app): State<App>, body: axum::body::Bytes) -> Response {
+    let body = match object_body(&body) {
+        Ok(b) => b,
+        Err(resp) => return *resp,
+    };
+    let case_id = body.get("case_id").map(crate::py::str_value).unwrap_or_default();
+    // A failure inside the case is contained here: the case answers 500 with the reason, the server keeps serving.
+    match tokio::spawn(app.agent.clone().run(body)).await {
+        Ok(result) => Json(result).into_response(),
+        Err(err) => {
+            tracing::error!("run {case_id} failed: {err}");
+            error(StatusCode::INTERNAL_SERVER_ERROR, format!("run failed: {err}"))
+        }
+    }
+}
