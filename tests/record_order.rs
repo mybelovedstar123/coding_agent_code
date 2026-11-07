@@ -4,3 +4,7 @@
 use chrono::{DateTime, Utc};
 use ditto_agent::record_order as ro;
 use serde_json::{json, Value};
+
+fn s(v: &Value) -> &str {
+    v.as_str().unwrap_or_else(|| panic!("string expected, got {v}"))
+}
