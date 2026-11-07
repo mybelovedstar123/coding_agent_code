@@ -354,3 +354,23 @@ the user's own records, never from a reply, and no record text is changed):
   ("Lucky's colleague"): the records declaring who that person is are added in
   full.
 
+Request-class notes (advisory text appended to the context note and to the
+final check's note, stage 3b; the model writes every reply): for handle
+requests whose records hold a removal instruction, the product rule that a
+handle the user asked to remove is not handed out or repeated, and that a
+decline says who the person is in the records; for email/address requests via a
+nicknamed person, the grounded-decline form naming who that person is without
+quoting their own contact;
+when the request's identifier records are long event histories (over 15,000
+characters), the context note names the program tool's helpers for reading them
+inside a program (`records`, `parse_table`, `extract_json`, `grep_records`) instead of pasting
+record text; when the request's identifier records hold copies of the same note
+(statements with a near-identical copy in another record, word overlap of 70 %
+or more; `src/record_order.rs`) and the copies disagree on order (one copy
+of statement A filed before a copy of B, another copy of B before a copy of A),
+the context note states that these records are copies of one note filed more
+than once, that a record's timestamp is when that copy was filed, and lists
+which records (pairIDs, filing times) are copies of one note; it gives no
+reading instruction. The notes restate public answer forms and product rules; none
+names an answer.
+
