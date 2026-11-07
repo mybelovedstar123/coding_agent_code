@@ -2,3 +2,5 @@
 //! capability questions (28), software work to do (29), approximately spelled options (31).
 //! The agreed-start note needs a catalog that can list and run saved workflows; no trigger fires on look-alikes.
 
+use ditto_agent::tool_hints as th;
+use serde_json::{json, Value};
