@@ -331,3 +331,12 @@ citing the record; if they give a different value or none, set the named
 value with that setting's tool. The note is advisory and names no value; the
 model reads the records and makes every call.
 
+Project holders: when a request names no case identifier and asks who holds,
+owns or runs something now, the request's project name (a run of lower-case
+request words that recurs, typo-tolerant, in 2–25 of the user's records) is
+looked up in all of the user's records, and every sentence that names that
+project and says who holds, owns, took over or was handed it is added to the
+context as `ownership`, in time order. Requests about an internal role
+("internally") are left alone. The records stay unchanged; the model reads
+them and writes the reply.
+
