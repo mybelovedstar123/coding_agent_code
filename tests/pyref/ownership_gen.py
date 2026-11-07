@@ -161,3 +161,11 @@ def synth_requests(pairs, n):
             p = " ".join(ws)
         out.append(t.format(p=p, h=h, w=w))
     return out
+
+
+HOLDERISH = [
+    "owns", "owner", "holding", "accountable", "responsible", "running", "whose", "internal", "internally",
+    "owner's", "owns's", "holdings", "acountable", "responsable", "runing", "ownr", "hodling", "whos", "whoes",
+    "whose", "whole", "while", "whip", "wham", "whoze", "whosee", "intrnal", "internaly", "interal", "intern",
+    "interesting", "integral", "responsibly", "accountably", "Owner", "OWNS", "Running", "running's",
+]
