@@ -176,3 +176,60 @@ async def wait_health(session: ClientSession, url: str) -> None:
             pass
         await asyncio.sleep(0.1)
     raise RuntimeError("agent did not start")
+
+
+async def capture(kind: str, dataset: str, out: str, limit: int, fake_port: int, agent_port: int) -> None:
+    data = json.load(open(dataset, encoding="utf-8"))
+    fakes = Fakes()
+    runner = await start_fakes(fakes, fake_port)
+    env = dict(os.environ, OPENROUTER_BASE_URL=f"http://127.0.0.1:{fake_port}/v1", OPENROUTER_API_KEY="k",
+               OLLAMA_BASE_URL=f"http://127.0.0.1:{fake_port}", DITTOBENCH_PROVIDER="openrouter", PYTHONHASHSEED="0")
+    cmd, cwd = agent_cmd(kind, agent_port)
+    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    base = f"http://127.0.0.1:{agent_port}"
+    tool_url = f"http://127.0.0.1:{fake_port}/tool"
+    try:
+        async with ClientSession(timeout=ClientTimeout(total=600)) as s:
+            await wait_health(s, base)
+            primary = data["memory_waves"][0]["user_id"]
+            prereq = [p for c in data["tool_cases"] for p in (c.get("prerequisite_pairs") or [])]
+            if prereq:
+                await s.post(base + "/seed", json={"user_id": primary, "pairs": prereq})
+            cases = []
+            for c in data["tool_cases"]:
+                cases.append(("tool", c["id"], c["prompt"]))
+            mem = [("memory", c["id"], c["question"]) for c in data["memory_cases"]]
+            out_f = open(out, "w", encoding="utf-8")
+            n = 0
+
+            async def one(kind_, cid, text):
+                req = {"case_id": cid, "user_id": primary, "user_input": text, "tools": data["catalog"],
+                       "tool_endpoint": tool_url, "system_prompt": ""}
+                async with s.post(base + "/run", json=req) as r:
+                    status = r.status
+                    resp = await r.json(content_type=None)
+                if isinstance(resp, dict):
+                    resp.pop("latency_ms", None)
+                out_f.write(json.dumps({"case": cid, "kind": kind_, "status": status, "response": resp,
+                                        "requests": fakes.requests.get(cid, [])}, ensure_ascii=False, sort_keys=True) + "\n")
+
+            for kind_, cid, text in cases:
+                if limit and n >= limit:
+                    break
+                await one(kind_, cid, text)
+                n += 1
+            for wave in data["memory_waves"]:
+                if wave.get("pairs"):
+                    await s.post(base + "/seed", json={"user_id": wave["user_id"], "pairs": wave["pairs"],
+                                                         "subjects": wave.get("subjects") or [], "links": wave.get("links") or []})
+            for kind_, cid, text in mem:
+                if limit and n >= 2 * limit:
+                    break
+                await one(kind_, cid, text)
+                n += 1
+            out_f.close()
+    finally:
+        proc.terminate()
+        proc.wait(timeout=10)
+        await runner.cleanup()
+    print(f"captured {n} cases from the {kind} agent into {out}")
