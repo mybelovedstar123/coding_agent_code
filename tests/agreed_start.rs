@@ -91,3 +91,22 @@ fn chat_tool_preference_requests_fire() {
         assert!(!th::wants_chat_tool_prefs(text), "should not fire: {text}");
     }
 }
+
+#[test]
+fn capability_questions_fire() {
+    for text in [
+        "Is there a way to set up a recurring reminder?",
+        "Is thhere a way to turn on dark mode? Appreciate it.",
+        "Ok, so — where do I find the optjion for tool permissions?",
+        "When you get a sec, is thsre a way to set up a recurring remmimder? No rush.",
+    ] {
+        assert!(th::asks_capability(text), "should fire: {text}");
+    }
+    for text in [
+        "Switch my accent to the grey shade of slatd — check the configured appearance options first.",
+        "Set the chat font to Teo, or the configured option closest to that; look the list up first.",
+        "Turn on dark mode.",
+    ] {
+        assert!(!th::asks_capability(text), "should not fire: {text}");
+    }
+}
