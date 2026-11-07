@@ -28,3 +28,35 @@ NOTE = (
     "do not do it. Use the memory tools offered, if any, for more."
 )
 FIXTURES = "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent-rs/tests/fixtures"
+
+
+def build_mem(batches, user_id="miner"):
+    """(UserMemory, the records in upsert order as fixture dicts)."""
+    mem = UserMemory(user_id)
+    flat = []
+    for batch in batches:
+        objs = [
+            Pair(
+                pair_id=str(p.get("pair_id") or p.get("id") or ""),
+                session_id=str(p.get("session_id") or ""),
+                ts=store.parse_ts(p.get("timestamp")),
+                prompt=str(p.get("prompt") or ""),
+                response=str(p.get("response") or ""),
+            )
+            for p in store._last_per_id(batch, "pair_id", "id")
+        ]
+        if not objs:
+            continue
+        mem.upsert_pairs(objs, np.zeros((len(objs), 768), dtype=np.float32))
+        for o, raw in zip(objs, store._last_per_id(batch, "pair_id", "id")):
+            flat.append(
+                {
+                    "pair_id": o.pair_id,
+                    "session_id": o.session_id,
+                    "timestamp": raw.get("timestamp"),
+                    "fmt_ts": fmt_ts(o.ts),
+                    "prompt": o.prompt,
+                    "response": o.response,
+                }
+            )
+    return mem, flat
