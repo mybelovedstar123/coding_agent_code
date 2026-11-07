@@ -14,3 +14,7 @@ pub fn load(name: &str) -> Value {
     let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{path}: {e} (run tests/pyref/{name}_gen.py)"));
     serde_json::from_str(&text).expect("fixture json")
 }
+
+pub fn s(v: &Value) -> &str {
+    v.as_str().unwrap_or_else(|| panic!("not a string: {v}"))
+}
