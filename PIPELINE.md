@@ -221,3 +221,14 @@ by their text; never by an id (ids are opaque and differ between runs), by the
 order records arrived in, or by set iteration. A record without a usable
 timestamp sorts as the oldest.
 
+Event histories: when the request's identifier records hold an event history
+(at least 10 events, given as JSON/CSV/markdown tables with entity, field,
+value, effective step and operation, or as sentences quoting the entity, field
+and value with the step), the context also carries `event_state`: a host-side reading of the state the
+history describes at the step the request names (the last step when it names
+none), replayed under the rules the records themselves state (by effective step,
+not document order; an assignment replaces the value; add/remove change one set
+member; state persists until changed). It is labelled as an unverified
+candidate, not an answer, that can be wrong; the records decide. The records
+stay in the context unchanged; the model reads both and writes the reply.
+
