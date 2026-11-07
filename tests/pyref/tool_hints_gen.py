@@ -254,3 +254,5 @@ for r in requests:
     row["words"] = tool_hints._words(r["text"])
     row["numbers"] = tool_hints.NUMBER_RE.findall(r["text"])
     wants.append(row)
+
+notes = []
