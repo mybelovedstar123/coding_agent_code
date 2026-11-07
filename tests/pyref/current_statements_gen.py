@@ -89,3 +89,19 @@ def ratios(statements, rng):
     out += [("", ""), ("", "a"), ("a", ""), ("abc", "abc"), ("é—x", "e—x"), ("a" * 250, "a" * 249 + "b"),
             (" ".join(["aa bb"] * 60), " ".join(["aa bc"] * 60)), ("x" * 199 + "y", "x" * 200)]
     return [{"a": a, "b": b, "ratio": difflib.SequenceMatcher(None, a, b).ratio()} for a, b in out]
+
+
+def phrases(rng, statements):
+    cues = [c for c in cs.CHANGE_CUES] + ["separately", "unrelated"]
+    out = []
+    for cue in cues:
+        variants = [cue, typo(rng, cue), typo(rng, typo(rng, cue)), cue.upper(), cue[1:]]
+        for v in variants:
+            for ctx in (f"so {v} now", f"{v}", f"x{v}", f"{v}s here", "nothing"):
+                low = ctx.lower()
+                out.append({"low": low, "cue": cue, "value": cs.has_phrase(low, cue)})
+    for t in rng.sample(statements, min(200, len(statements))):
+        low = t.lower()
+        cue = rng.choice(cues)
+        out.append({"low": low, "cue": cue, "value": cs.has_phrase(low, cue)})
+    return out
