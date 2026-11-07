@@ -42,3 +42,7 @@ fn pipeline(mem: &UserMemory, q: &str, mut context: Option<String>) -> Option<St
     }
     context
 }
+
+fn sorted(set: BTreeSet<String>) -> Vec<String> {
+    set.into_iter().collect()
+}
