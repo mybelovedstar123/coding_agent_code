@@ -3,3 +3,7 @@
 
 use ditto_agent::agent::{asks_to_repeat, call_key, repeat_exempt};
 use serde_json::{json, Map, Value};
+
+fn args(v: Value) -> Map<String, Value> {
+    v.as_object().expect("object").clone()
+}
