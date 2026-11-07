@@ -247,3 +247,22 @@ fn transcript_chars(messages: &[Value]) -> usize {
         })
         .sum()
 }
+
+/// W12 state of an endpoint call from its result, and whether it is self-reported (only calls the endpoint executed:
+/// a result, or the tool's own error).
+fn remote_state(result: &Value) -> (&'static str, bool) {
+    let err = result.get("error").map(py::str_value).unwrap_or_default();
+    if err.starts_with(NOT_DELIVERED) {
+        return ("not_delivered", false);
+    }
+    if err.starts_with(OUTCOME_UNKNOWN) {
+        return ("delivery_unknown", false);
+    }
+    if err.starts_with(REFUSED) {
+        return ("delivered_failed", false);
+    }
+    if result.get("error").is_some() {
+        return ("delivered_failed", true);
+    }
+    ("completed", true)
+}
