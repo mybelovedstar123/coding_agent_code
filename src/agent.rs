@@ -381,3 +381,42 @@ async fn record_unexecuted_calls(trace: &mut CaseTrace, reply: &Reply) {
         trace.block(&name, &args, "blocked_before_execution");
     }
 }
+
+/// System message with the complete text of every context record that was shown as an excerpt (oldest first; no size
+/// cap), or None when none were cut.
+fn complete_records_message(mem: &UserMemory, context: Option<&str>) -> Option<Value> {
+    let (_, json_text) = context?.split_once('\n')?;
+    let payload: Value = serde_json::from_str(json_text).ok()?;
+    let mut records = Vec::new();
+    for item in payload
+        .get("memories")
+        .and_then(Value::as_array)
+        .map(|a| a.as_slice())
+        .unwrap_or(&[])
+    {
+        let Some(item) = item.as_object() else { continue };
+        let pid = item
+            .get("pairID")
+            .filter(|v| truthy(v))
+            .map(py::str_value)
+            .unwrap_or_default();
+        let Some(pair) = mem.pairs.get(&pid) else { continue };
+        let full = render_pair(pair);
+        let shown = item
+            .get("text")
+            .filter(|v| truthy(v))
+            .map(py::str_value)
+            .unwrap_or_default();
+        if py::len(&shown) >= py::len(&full) {
+            continue;
+        }
+        records.push(json!({"pairID": pair.pair_id, "timestamp": fmt_ts(&pair.ts), "text": full}));
+    }
+    if records.is_empty() {
+        return None;
+    }
+    let body = json!({"note": COMPLETE_RECORDS_NOTE, "memories": records});
+    Some(
+        json!({"role": "system", "content": format!("{}\n{}", config::MEMORY_CONTEXT_PREFIX, py::dumps(&body, false))}),
+    )
+}
