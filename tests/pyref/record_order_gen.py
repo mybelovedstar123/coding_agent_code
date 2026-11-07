@@ -15,3 +15,5 @@ from datetime import datetime, timedelta, timezone
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent")
+
+from harness import record_order as ro, store  # noqa: E402
