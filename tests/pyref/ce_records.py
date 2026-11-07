@@ -139,3 +139,10 @@ def changed(before, after, full=False):
 
 def ids(records):
     return [p.pair_id for p in records]
+
+
+def write(name, data):
+    path = f"{FIXTURES}/{name}.json"
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=None, separators=(",", ":"))
+    return path
