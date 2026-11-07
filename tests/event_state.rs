@@ -4,3 +4,8 @@ use ditto_agent::config::MEMORY_CONTEXT_PREFIX;
 use ditto_agent::event_state::{self as es, Event, PyInt};
 use ditto_agent::py;
 use serde_json::Value;
+
+fn fixture() -> Value {
+    let path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/event_state.json");
+    serde_json::from_str(&std::fs::read_to_string(path).expect("fixture")).expect("fixture json")
+}
