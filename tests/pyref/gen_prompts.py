@@ -53,3 +53,7 @@ lines = [
     "//! stay byte-identical to the reference.",
     "",
 ]
+for name, text, doc in TEXTS:
+    lines.append(f"/// {doc}")
+    lines.append(f"pub const {name}: &str = {lit(text)};")
+    lines.append("")
