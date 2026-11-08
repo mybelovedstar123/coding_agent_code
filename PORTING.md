@@ -54,10 +54,10 @@ call and an unmeasured behaviour change. The port is proven by replaying cached 
 6. **Differential tests are required.** For every public function, generate fixtures from the Python reference and
    assert equality in Rust:
    - **Generator:** `tests/pyref/<module>_gen.py` imports the reference
-     (`sys.path.insert(0, "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent")`). It runs
+     (`sys.path.insert(0, f"{SUBMIT}/build-agent")`, where `SUBMIT` is `$DITTO_SUBMIT_DIR`). It runs
      the Python functions over realistic inputs and writes `tests/fixtures/<module>.json` (inputs and expected
      outputs).
-   - **Inputs.** Take them from the real datasets in `/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/case/datasets/v13-full-*.json`:
+   - **Inputs.** Take them from the real datasets in `$DITTO_SUBMIT_DIR/case/datasets/v13-full-*.json`:
      - `memory_cases[].question` and `tool_cases[].prompt` (requests);
      - `memory_waves[].pairs` plus every `tool_cases[].prerequisite_pairs` (records);
      - `catalog` (tool definitions).
@@ -67,10 +67,8 @@ call and an unmeasured behaviour change. The port is proven by replaying cached 
    - **Test:** `tests/<module>.rs` reads the fixture, builds what the function needs (for a `UserMemory`:
      `UserMemory::new` plus `upsert_pairs` with dummy 768-dim vectors), and asserts equality.
    - **Running them:**
-     - the generator runs with `python3` in WSL (it needs only the stdlib and numpy, which are installed);
-     - cargo runs through
-       `wsl -d Ubuntu -- bash /mnt/c/Users/alchemist/AppData/Local/Temp/claude/c--alchemist-bittensor-sn-118/1cba4adf-c6cb-4d73-a102-5f35c587b82b/scratchpad/cargo.sh <args>`
-       (the target directory is on the WSL filesystem), with `MSYS_NO_PATHCONV=1` set when calling from Git Bash.
+     - the generator runs with `python3` and `DITTO_SUBMIT_DIR` set (it needs only the stdlib and numpy);
+     - the tests run with `cargo test --locked --release`.
 7. **Scope.**
    - Edit only your own modules' files under `src/`, your `tests/<module>.rs`, your fixtures and generators.
    - Do not edit `lib.rs`, `py.rs`, `pyre.rs`, `store.rs` or other modules. If you need a helper there, put a
