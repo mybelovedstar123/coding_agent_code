@@ -1,0 +1,25 @@
+name: Bug report
+description: The agent behaved incorrectly or a check failed.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Report security problems privately through the Security tab instead.
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: request
+    attributes:
+      label: Request that reproduces it
+      description: The endpoint and body. Remove API keys and personal records.
+      render: json
+  - type: input
+    id: commit
+    attributes:
+      label: Commit
+    validations:
+      required: true
