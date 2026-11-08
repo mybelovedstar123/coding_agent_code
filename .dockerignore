@@ -4,3 +4,4 @@ PORTING.md
 PIPELINE.md
 .git/
 *.md
+.env
