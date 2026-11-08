@@ -14,13 +14,14 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 sys.dont_write_bytecode = True
-sys.path.insert(0, "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent")
+SUBMIT = os.environ["DITTO_SUBMIT_DIR"]  # The directory holding build-agent/ and case/datasets/.
+sys.path.insert(0, f"{SUBMIT}/build-agent")
 
 from harness import record_order as ro, store  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "fixtures", "record_order.json")
-DATASETS = sorted(glob.glob("/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/case/datasets/v13-full-*.json"))
+DATASETS = sorted(glob.glob(f"{SUBMIT}/case/datasets/v13-full-*.json"))
 # agent.py
 rng = random.Random(118)
 IDENT_RE = re.compile(r"\b(?=[A-Za-z0-9-]*\d)(?=[A-Za-z0-9-]*[A-Za-z])[A-Za-z0-9][A-Za-z0-9-]{7,}\b")
