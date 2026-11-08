@@ -2,10 +2,12 @@
 
 Run from WSL: python3 tests/pyref/gen_prompts.py (reads submit/build-agent/harness)."""
 
+import os
 import sys
 from pathlib import Path
 
-REF = "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent"
+SUBMIT = os.environ["DITTO_SUBMIT_DIR"]  # The directory holding build-agent/ and case/datasets/.
+REF = f"{SUBMIT}/build-agent"
 sys.path.insert(0, REF)
 from harness import agent, policy, router  # noqa: E402
 

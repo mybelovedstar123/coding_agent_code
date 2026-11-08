@@ -12,14 +12,15 @@ import random
 import sys
 
 sys.dont_write_bytecode = True
-sys.path.insert(0, "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent")
+SUBMIT = os.environ["DITTO_SUBMIT_DIR"]  # The directory holding build-agent/ and case/datasets/.
+sys.path.insert(0, f"{SUBMIT}/build-agent")
 
 from harness import companions, store  # noqa: E402
 from harness.text import tokenize  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "fixtures", "companions.json")
-DATASETS = sorted(glob.glob("/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/case/datasets/v13-full-*.json"))
+DATASETS = sorted(glob.glob(f"{SUBMIT}/case/datasets/v13-full-*.json"))
 rng = random.Random(118)
 
 
