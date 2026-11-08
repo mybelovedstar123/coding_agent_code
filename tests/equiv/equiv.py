@@ -31,8 +31,8 @@ from collections import defaultdict
 
 from aiohttp import web, ClientSession, ClientTimeout
 
-PY_REF = "/mnt/c/alchemist/bittensor/sn-118/ditto-subnet/submit/build-agent"
-RS_BIN = os.path.expanduser("~/.cache/ditto-agent-target/release/ditto-agent")
+PY_REF = f"{os.environ['DITTO_SUBMIT_DIR']}/build-agent"
+RS_BIN = os.environ.get("DITTO_AGENT_BIN", os.path.expanduser("~/.cache/ditto-agent-target/release/ditto-agent"))
 DIM = 768
 
 
