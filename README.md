@@ -134,7 +134,9 @@ Python reference and stored in `tests/fixtures/`, so they need nothing beyond th
 fixtures are large, and the `glossary` suite alone takes minutes in release mode and far longer in a debug build.
 
 The Python reference and its datasets are **not** in this repository. To regenerate fixtures with `tests/pyref/` or run
-`tests/equiv/equiv.py`, you need your own copy of the reference and must change the absolute paths in those scripts.
+`tests/equiv/equiv.py`, you need your own copy of the reference, with `DITTO_SUBMIT_DIR` set to the directory holding
+its `build-agent/` and `case/datasets/`. `equiv.py` also reads the agent binary's path from `DITTO_AGENT_BIN`. Since
+v17 `src/prompts.rs` has been edited directly, so `tests/pyref/gen_prompts.py` no longer reproduces it.
 The records in the fixtures are benchmark data, not information about real people.
 
 ## Further reading
