@@ -1,5 +1,6 @@
 # Ditto memory agent (Rust)
 
+[![CI](https://github.com/mybelovedstar123/coding_agent_code/actions/workflows/ci.yml/badge.svg)](https://github.com/mybelovedstar123/coding_agent_code/actions/workflows/ci.yml)
 ![Rust 2021](https://img.shields.io/badge/Rust-2021_edition-orange?logo=rust)
 ![Axum](https://img.shields.io/badge/HTTP-axum_0.7-blue)
 ![Tokio](https://img.shields.io/badge/runtime-tokio-463aa1)
