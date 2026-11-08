@@ -37,3 +37,13 @@ jobs:
       - name: Run the test suites
         # Release mode: the fixtures are large and the glossary suite is far slower in a debug build.
         run: cargo test --locked --release
+
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check formatting
+        run: cargo fmt --check
+      - name: Run clippy
+        run: cargo clippy --locked --all-targets -- -D warnings
